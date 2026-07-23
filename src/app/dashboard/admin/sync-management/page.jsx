@@ -218,7 +218,6 @@ export default function SyncManagementPage() {
             <thead className="bg-gray-50 border-b border-gray-100">
               <tr>
                 <th className="px-5 py-3 text-left font-semibold text-gray-700">Officer</th>
-                <th className="px-5 py-3 text-left font-semibold text-gray-700">Action</th>
                 <th className="px-5 py-3 text-left font-semibold text-gray-700">Record Type</th>
                 <th className="px-5 py-3 text-left font-semibold text-gray-700">Records</th>
                 <th className="px-5 py-3 text-left font-semibold text-gray-700">Device</th>
@@ -230,7 +229,6 @@ export default function SyncManagementPage() {
               {mockSyncHistory.map((record, idx) => (
                 <tr key={record.id} className={`border-b border-gray-100 hover:bg-gray-50 transition-colors ${idx === mockSyncHistory.length - 1 ? "border-b-0" : ""}`}>
                   <td className="px-5 py-3 font-semibold text-gray-900">{record.officerName}</td>
-                  <td className="px-5 py-3 text-gray-600">{record.action.replace(/_/g, " ")}</td>
                   <td className="px-5 py-3 text-gray-600">{record.recordType}</td>
                   <td className="px-5 py-3 font-semibold text-gray-900">{record.recordsCount}</td>
                   <td className="px-5 py-3 text-gray-600 text-xs">{record.device}</td>
