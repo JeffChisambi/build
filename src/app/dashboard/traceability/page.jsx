@@ -154,10 +154,10 @@ export default function TraceabilityPage() {
             <table className="w-full text-sm text-left">
               <thead>
                 <tr className="bg-gray-50 border-b border-gray-100">
-                  <th className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider px-4 py-3">Farmer Source</th>
-                  <th className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider px-4 py-3">Commodity</th>
-                  <th className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider px-4 py-3">Quantity</th>
-                  <th className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider px-4 py-3">Warehouse Depot</th>
+                  <th className="text-[11px] font-semibold text-gray-900 uppercase tracking-wider px-4 py-3">Farmer Source</th>
+                  <th className="text-[11px] font-semibold text-gray-900 uppercase tracking-wider px-4 py-3">Commodity</th>
+                  <th className="text-[11px] font-semibold text-gray-900 uppercase tracking-wider px-4 py-3">Quantity</th>
+                  <th className="text-[11px] font-semibold text-gray-900 uppercase tracking-wider px-4 py-3">Warehouse Depot</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">
@@ -171,15 +171,15 @@ export default function TraceabilityPage() {
                   filteredBatches.map(b => (
                     <tr key={b.id} className="hover:bg-gray-50/60 transition-colors">
                       <td className="px-4 py-3">
-                        <p className="text-xs font-semibold text-gray-900">{b.farmerName}</p>
+                        <p className="text-xs font-medium text-gray-500">{b.farmerName}</p>
                       </td>
                       <td className="px-4 py-3">
-                        <p className="text-xs font-semibold text-gray-900">{b.commodity}</p>
+                        <p className="text-xs font-medium text-gray-500">{b.commodity}</p>
                       </td>
                       <td className="px-4 py-3">
-                        <p className="text-xs font-semibold text-gray-900">{b.bags} Bags</p>
+                        <p className="text-xs font-medium text-gray-500">{b.bags} Bags</p>
                       </td>
-                      <td className="px-4 py-3 text-xs text-gray-700 font-medium">
+                      <td className="px-4 py-3 text-xs text-gray-500 font-medium">
                         {b.warehouseName}
                       </td>
                     </tr>
