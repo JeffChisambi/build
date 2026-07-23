@@ -190,13 +190,6 @@ export default function IPCManagerDashboard({ firstName }) {
             <BarChart data={p.data} height="h-56" />
           </div>
 
-          {/* Commodity Performance */}
-          <div className="bg-white rounded-xl border border-gray-200 p-5">
-            <h3 className="text-sm font-semibold text-gray-700 mb-1">Commodity Performance</h3>
-            <p className="text-xs text-gray-400 mb-5">Total IPC stock by commodity type</p>
-            <HorizontalBarChart data={commodityDistributionData} />
-          </div>
-
         </div>
       </div>
 
