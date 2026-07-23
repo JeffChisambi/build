@@ -164,6 +164,177 @@ function ModuleCard({ icon, title, description, onClick }) {
   );
 }
 
+// ── Purchasing Revenue Chart (admin-style SVG bar chart) ──────
+const ALL_YEARLY_DATA = {
+  "2024": [
+    { month: "Jan", value: 4200000 }, { month: "Feb", value: 2800000 },
+    { month: "Mar", value: 5600000 }, { month: "Apr", value: 3900000 },
+    { month: "May", value: 7200000 }, { month: "Jun", value: 6100000 },
+    { month: "Jul", value: 8400000 }, { month: "Aug", value: 7800000 },
+    { month: "Sep", value: 5300000 }, { month: "Oct", value: 6700000 },
+    { month: "Nov", value: 9100000 }, { month: "Dec", value: 8600000 },
+  ],
+  "2023": [
+    { month: "Jan", value: 1800000 }, { month: "Feb", value: 3500000 },
+    { month: "Mar", value: 2900000 }, { month: "Apr", value: 6200000 },
+    { month: "May", value: 5100000 }, { month: "Jun", value: 7800000 },
+    { month: "Jul", value: 4600000 }, { month: "Aug", value: 6900000 },
+    { month: "Sep", value: 8200000 }, { month: "Oct", value: 5700000 },
+    { month: "Nov", value: 7100000 }, { month: "Dec", value: 6400000 },
+  ],
+  "2022": [
+    { month: "Jan", value: 3100000 }, { month: "Feb", value: 4700000 },
+    { month: "Mar", value: 2200000 }, { month: "Apr", value: 5800000 },
+    { month: "May", value: 3400000 }, { month: "Jun", value: 4900000 },
+    { month: "Jul", value: 6600000 }, { month: "Aug", value: 3800000 },
+    { month: "Sep", value: 7400000 }, { month: "Oct", value: 5200000 },
+    { month: "Nov", value: 4100000 }, { month: "Dec", value: 5900000 },
+  ],
+  "2021": [
+    { month: "Jan", value: 2600000 }, { month: "Feb", value: 1900000 },
+    { month: "Mar", value: 4300000 }, { month: "Apr", value: 2100000 },
+    { month: "May", value: 5500000 }, { month: "Jun", value: 3200000 },
+    { month: "Jul", value: 4800000 }, { month: "Aug", value: 2700000 },
+    { month: "Sep", value: 6100000 }, { month: "Oct", value: 3900000 },
+    { month: "Nov", value: 5300000 }, { month: "Dec", value: 4400000 },
+  ],
+};
+
+function formatMWK(val) {
+  if (val >= 1000000) return `MWK ${(val / 1000000).toFixed(1)}M`;
+  if (val >= 1000)    return `MWK ${(val / 1000).toFixed(0)}K`;
+  return `MWK ${val}`;
+}
+
+function PurchasingRevenueChart() {
+  const [hoveredIdx, setHoveredIdx] = React.useState(null);
+  const [period, setPeriod]         = React.useState("2024");
+  const [dropdownOpen, setDropdownOpen] = React.useState(false);
+  const [animatedValues, setAnimatedValues] = React.useState(
+    ALL_YEARLY_DATA["2024"].map(d => d.value)
+  );
+  const animRef      = React.useRef(null);
+  const periodOptions = ["2024", "2023", "2022", "2021"];
+
+  React.useEffect(() => {
+    const targets = ALL_YEARLY_DATA[period].map(d => d.value);
+    if (animRef.current) cancelAnimationFrame(animRef.current);
+    setAnimatedValues(new Array(12).fill(0));
+    const duration  = 550;
+    const startTime = performance.now();
+    function step(now) {
+      const t     = Math.min((now - startTime) / duration, 1);
+      const eased = 1 - Math.pow(1 - t, 3);
+      setAnimatedValues(targets.map(v => v * eased));
+      if (t < 1) animRef.current = requestAnimationFrame(step);
+    }
+    animRef.current = requestAnimationFrame(step);
+    return () => { if (animRef.current) cancelAnimationFrame(animRef.current); };
+  }, [period]);
+
+  const targetData = ALL_YEARLY_DATA[period];
+  const maxVal     = Math.max(...targetData.map(d => d.value));
+  const chartH     = 200;
+  const barW       = 36;
+  const gap        = 18;
+  const paddingL   = 64;
+  const paddingB   = 36;
+  const paddingT   = 20;
+  const totalW     = paddingL + targetData.length * (barW + gap) - gap + 20;
+  const yLabels    = [0, 25, 50, 75, 100];
+
+  return (
+    <div className="bg-white rounded-xl border border-gray-200 p-5">
+      <div className="flex items-center justify-between mb-4">
+        <div>
+          <h3 className="text-sm font-semibold text-gray-700">Monthly Purchasing Revenue</h3>
+          <p className="text-xs text-gray-400 mt-0.5">Total grain purchase spend per month</p>
+        </div>
+        <div className="relative">
+          <button
+            onClick={() => setDropdownOpen(!dropdownOpen)}
+            className="flex items-center gap-2 text-sm font-medium text-gray-600 border border-gray-200 rounded-lg px-3 py-1.5 bg-white hover:bg-gray-50 focus:outline-none transition-colors"
+          >
+            {period}
+            <svg className={`w-4 h-4 transition-transform duration-200 ${dropdownOpen ? "rotate-180" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+          <div className={`absolute right-0 mt-1 w-24 bg-white rounded-lg shadow-lg border border-gray-100 overflow-hidden transition-all duration-200 origin-top z-10 ${dropdownOpen ? "opacity-100 scale-100" : "opacity-0 scale-95 pointer-events-none"}`}>
+            {periodOptions.map(opt => (
+              <button
+                key={opt}
+                onClick={() => { setPeriod(opt); setDropdownOpen(false); }}
+                className={`w-full text-left px-4 py-2 text-sm transition-colors ${period === opt ? "bg-green-50 text-green-700 font-semibold" : "text-gray-600 hover:bg-gray-50"}`}
+              >
+                {opt}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="w-full">
+        <svg width="100%" viewBox={`0 0 ${totalW - 20} ${chartH + paddingB + paddingT}`} className="block">
+          {yLabels.map((pct) => {
+            const y = paddingT + chartH - (pct / 100) * chartH;
+            return (
+              <g key={pct}>
+                <line x1={paddingL} x2={totalW - 10} y1={y} y2={y} stroke="#f0f0f0" strokeWidth="1" />
+                <text x={paddingL - 8} y={y + 4} textAnchor="end" fontSize="11" fill="#9ca3af">{pct}%</text>
+              </g>
+            );
+          })}
+
+          {targetData.map((d, i) => {
+            const animVal  = animatedValues[i] ?? 0;
+            const barH     = Math.max((animVal / maxVal) * chartH, 0);
+            const x        = paddingL + i * (barW + gap);
+            const y        = paddingT + chartH - barH;
+            const isHovered  = hoveredIdx === i;
+            const isHighest  = d.value === maxVal;
+            const patternId  = `diag-${period}-${i}`;
+
+            return (
+              <g key={d.month} onMouseEnter={() => setHoveredIdx(i)} onMouseLeave={() => setHoveredIdx(null)} style={{ cursor: "pointer" }}>
+                <defs>
+                  <pattern id={patternId} patternUnits="userSpaceOnUse" width="8" height="8" patternTransform="rotate(45)">
+                    <rect width="8" height="8" fill="#1a5c2a" />
+                    <line x1="0" y1="0" x2="0" y2="8" stroke="#134520" strokeWidth="3" />
+                  </pattern>
+                </defs>
+
+                <rect
+                  x={x} y={y} width={barW} height={barH}
+                  rx="6" ry="6"
+                  fill={isHovered || isHighest ? `url(#${patternId})` : "#e8f5e9"}
+                />
+
+                {isHovered && (
+                  <g>
+                    <rect x={x + barW / 2 - 52} y={y - 38} width={104} height={26} rx="6" fill="white" stroke="#e5e7eb" strokeWidth="1" filter="drop-shadow(0 2px 4px rgba(0,0,0,0.08))" />
+                    <text x={x + barW / 2} y={y - 20} textAnchor="middle" fontSize="11" fontWeight="600" fill="#111827">{formatMWK(d.value)}</text>
+                    <circle cx={x + barW / 2} cy={y} r={4} fill="white" stroke="#1a5c2a" strokeWidth="2" />
+                  </g>
+                )}
+
+                <text
+                  x={x + barW / 2} y={paddingT + chartH + paddingB - 12}
+                  textAnchor="middle" fontSize="12"
+                  fontWeight={isHovered || isHighest ? "700" : "400"}
+                  fill={isHovered || isHighest ? "#1a5c2a" : "#9ca3af"}
+                >
+                  {d.month}
+                </text>
+              </g>
+            );
+          })}
+        </svg>
+      </div>
+    </div>
+  );
+}
+
 // ── Main Component ────────────────────────────────────────────
 export default function HeadOfficeDashboard({ firstName }) {
   const router = useRouter();
@@ -238,21 +409,9 @@ export default function HeadOfficeDashboard({ firstName }) {
       {/* ── National Procurement Chart (2/3) + Activity Feed (1/3) ── */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
 
-        {/* Procurement trend chart — spans 2 columns */}
-        <div className="lg:col-span-2 bg-white rounded-xl border border-gray-200 p-5">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h3 className="text-sm font-semibold text-gray-700">National Procurement Trend</h3>
-              <p className="text-xs text-gray-400 mt-0.5">
-                Total commodity purchases —{" "}
-                <span className="font-medium text-gray-600">{d.label}</span>
-              </p>
-            </div>
-            <PeriodPicker value={period} onChange={setPeriod} options={PERIOD_OPTIONS} />
-          </div>
-          <div key={period} style={{ animation: "chartFadeIn 0.35s ease-out" }}>
-            <BarChart data={d.purchases} height="h-52" />
-          </div>
+        {/* Purchasing Revenue chart — spans 2 columns */}
+        <div className="lg:col-span-2">
+          <PurchasingRevenueChart />
         </div>
 
         {/* National Activity feed — spans 1 column */}
