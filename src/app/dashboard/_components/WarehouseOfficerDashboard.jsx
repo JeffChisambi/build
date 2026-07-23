@@ -11,7 +11,6 @@ export default function WarehouseOfficerDashboard({ firstName }) {
   const kpis = [
     { title: "Current Stock", value: "3,450 t", trend: "+120t", trendUp: true, subtext: "Total inventory", icon: Icons.warehouse },
     { title: "Available Capacity", value: "1,550 t", trend: "-120t", trendUp: false, subtext: "Remaining space", icon: Icons.data },
-    { title: "Pending Receipts", value: "4", trend: null, subtext: "Trucks en route", icon: Icons.truck },
     { title: "Pending Dispatches", value: "2", trend: null, subtext: "Scheduled for today", icon: Icons.activity },
   ];
 
