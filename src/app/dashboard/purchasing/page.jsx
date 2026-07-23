@@ -101,7 +101,7 @@ export default function PurchasingPage() {
     <div className="space-y-6">
 
       {/* ── Metric Cards (matches admin overview top cards) ── */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <MetricWidget
           label="Total Purchases"
           value={totalPurchases}
