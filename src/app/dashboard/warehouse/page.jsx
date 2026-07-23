@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import Link from "next/link";
 import WorkspaceLayout from "@/components/WorkspaceLayout";
 import { SEED_PURCHASES } from "@/lib/mockPurchases";
 
@@ -31,20 +30,6 @@ function StatCard({ title, value, icon, trend, trendUp = true }) {
       </div>
       <p className="text-xl font-bold text-gray-900">{value}</p>
     </div>
-  );
-}
-
-// ── GRN Status Badge ────────────────────────────────────────
-function GrnBadge({ status }) {
-  const colors = {
-    "Verified":     "bg-green-50 text-green-700 border border-green-100",
-    "Pending":      "bg-amber-50 text-amber-700 border border-amber-100",
-    "Rejected":     "bg-red-50 text-red-700 border border-red-100",
-  };
-  return (
-    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold ${colors[status] || "bg-gray-50 text-gray-500"}`}>
-      {status}
-    </span>
   );
 }
 
@@ -234,37 +219,32 @@ export default function WarehousePage() {
             <table className="w-full text-sm text-left">
               <thead>
                 <tr className="border-b border-gray-100">
-                  <th className="text-xs font-semibold text-gray-700 px-4 py-3">GRN No. / Date</th>
-                  <th className="text-xs font-semibold text-gray-700 px-4 py-3">Warehouse / Location</th>
+                  <th className="text-xs font-semibold text-gray-700 px-4 py-3">Date</th>
+                  <th className="text-xs font-semibold text-gray-700 px-4 py-3">Warehouse</th>
                   <th className="text-xs font-semibold text-gray-700 px-4 py-3">Bin / Stack / Shelf</th>
                   <th className="text-xs font-semibold text-gray-700 px-4 py-3">Commodity</th>
                   <th className="text-xs font-semibold text-gray-700 px-4 py-3">Accepted (kg)</th>
-                  <th className="text-xs font-semibold text-gray-700 px-4 py-3">Receiving Officer</th>
-                  <th className="text-xs font-semibold text-gray-700 px-4 py-3">GRN Status</th>
                   <th className="text-xs font-semibold text-gray-700 px-4 py-3">Stock Status</th>
-                  <th className="text-xs font-semibold text-gray-700 px-4 py-3 text-right">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {filteredRecords.length === 0 ? (
                   <tr>
-                    <td colSpan={9} className="px-4 py-12 text-center text-sm text-gray-400">
+                    <td colSpan={6} className="px-4 py-12 text-center text-sm text-gray-400">
                       No GRN records found matching your filters.
                     </td>
                   </tr>
                 ) : (
                   filteredRecords.map(r => (
                     <tr key={r.id} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
-                      {/* GRN Number / Date */}
+                      {/* Date */}
                       <td className="px-4 py-3.5">
                         <p className="text-xs font-mono font-semibold text-[#1a5c2a]">{r.grnNumber}</p>
                         <p className="text-[11px] text-gray-400">{r.receivingDate}</p>
                       </td>
-                      {/* Warehouse / Location */}
+                      {/* Warehouse */}
                       <td className="px-4 py-3.5">
                         <p className="text-xs font-semibold text-gray-900">{r.warehouseName}</p>
-                        <p className="text-[11px] text-gray-400">{r.location}</p>
-                        <p className="text-[11px] text-gray-400 font-mono">{r.warehouseCode}</p>
                       </td>
                       {/* Bin / Stack / Shelf */}
                       <td className="px-4 py-3.5">
@@ -275,7 +255,6 @@ export default function WarehousePage() {
                       {/* Commodity */}
                       <td className="px-4 py-3.5">
                         <p className="text-xs font-semibold text-gray-900">{r.commodity}</p>
-                        <p className="text-[11px] text-gray-400">{r.grade} · {r.bags} bags</p>
                       </td>
                       {/* Accepted Qty */}
                       <td className="px-4 py-3.5">
@@ -284,26 +263,9 @@ export default function WarehousePage() {
                           <p className="text-[11px] text-red-500">{r.rejectedQty} kg rejected</p>
                         )}
                       </td>
-                      {/* Receiving Officer */}
-                      <td className="px-4 py-3.5">
-                        <p className="text-xs text-gray-700">{r.receivingOfficer}</p>
-                      </td>
-                      {/* GRN Status */}
-                      <td className="px-4 py-3.5">
-                        <GrnBadge status={r.grnStatus} />
-                      </td>
                       {/* Stock Status */}
                       <td className="px-4 py-3.5">
                         <StockBadge status={r.stockStatus} />
-                      </td>
-                      {/* Actions */}
-                      <td className="px-4 py-3.5 text-right">
-                        <Link
-                          href={`/dashboard/warehouse/${r.id}`}
-                          className="text-xs font-semibold text-[#1a5c2a] hover:underline"
-                        >
-                          View
-                        </Link>
                       </td>
                     </tr>
                   ))
