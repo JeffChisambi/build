@@ -14,11 +14,15 @@ const ICON = (
 // ── Stat Card ────────────────────────────────────────
 function StatCard({ title, value, sub, icon }) {
   return (
-    <div className="bg-white rounded-md border border-gray-200 p-5 transition-shadow">
-      {icon && <div className="text-gray-600 mb-4">{icon}</div>}
-      <h3 className="text-2xl font-bold text-gray-900">{value}</h3>
-      <p className="text-sm font-semibold text-gray-700 mt-1">{title}</p>
-      {sub && <p className="text-xs text-gray-500 mt-1">{sub}</p>}
+    <div className="bg-white rounded-xl border border-gray-200 p-5 flex flex-col gap-3">
+      <div className="flex items-center gap-2 text-gray-500">
+        {icon}
+        <p className="text-sm font-semibold text-gray-700">{title}</p>
+      </div>
+      <div>
+        <p className="text-xl font-bold text-gray-900">{value}</p>
+        {sub && <p className="text-xs text-gray-400 mt-0.5">{sub}</p>}
+      </div>
     </div>
   );
 }
