@@ -119,35 +119,24 @@ export function ProgressChart({ label, value, max, color = "bg-[#1a5c2e]" }) {
 }
 
 // ── Stat Card ────────────────────────────────────────────────
-export function StatCard({ title, value, trend, subtext, icon, trendUp }) {
+export function StatCard({ title, value, trend, icon, trendUp = true }) {
   return (
-    <div className="bg-white rounded-xl p-5 shadow-[0_2px_10px_rgba(0,0,0,0.04)] transition-all duration-300 hover:-translate-y-1 hover:shadow-md flex flex-col h-full border border-gray-50/50">
-      <div className="flex items-start justify-between mb-4">
-        <h3 className="text-xs font-semibold text-gray-500 tracking-wider uppercase">{title}</h3>
-        <div className="w-8 h-8 rounded-md bg-[#1a5c2e]/10 flex items-center justify-center text-[#1a5c2e] flex-shrink-0">
+    <div className="bg-white rounded-xl border border-gray-200 p-5 flex flex-col gap-3">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2 text-gray-500">
           {icon}
+          <p className="text-sm font-semibold text-gray-700">{title}</p>
         </div>
-      </div>
-      <div className="mb-1">
-        <p className="text-3xl font-extrabold text-gray-900 tracking-tight leading-none">{value}</p>
-      </div>
-      <div className="flex items-center gap-2 mt-auto pt-3 border-t border-gray-50">
         {trend && (
-          <div className={`flex items-center text-xs font-bold px-2.5 py-1 rounded-md ${trendUp ? "bg-[#1a5c2e]/10 text-[#1a5c2e]" : "bg-red-50 text-red-700"}`}>
-            {trendUp ? (
-              <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M5 15l7-7 7 7" />
-              </svg>
-            ) : (
-              <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-              </svg>
-            )}
-            <span className="ml-1">{trend}</span>
+          <div className="flex items-center gap-1">
+            <svg className={`w-3.5 h-3.5 ${trendUp ? "text-[#1a5c2a]" : "text-red-500"}`} fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d={trendUp ? "M7 17L17 7M17 7H7M17 7v10" : "M7 7l10 10M17 17H7M17 17V7"} />
+            </svg>
+            <span className={`text-xs font-semibold ${trendUp ? "text-[#1a5c2a]" : "text-red-600"}`}>{trend}</span>
           </div>
         )}
-        <p className="text-xs text-gray-400 font-medium">{subtext}</p>
       </div>
+      <p className="text-xl font-bold text-gray-900">{value}</p>
     </div>
   );
 }
