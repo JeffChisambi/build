@@ -535,6 +535,14 @@ export default function Sidebar() {
     ? user.name.split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase()
     : "SA";
 
+  const ROLE_LABELS = {
+    "role-sysadmin": "Admin",
+    "role-warehouse-officer": "Warehouse",
+    "role-ipc-manager": "IPC Manager",
+    "role-head-office": "Head",
+  };
+  const roleLabel = ROLE_LABELS[user?.roleId] ?? "Admin";
+
   const sidebarWidth = collapsed ? "w-[60px]" : "w-56";
 
   return (
@@ -569,7 +577,7 @@ export default function Sidebar() {
           <>
             <div className="flex items-center gap-3 min-w-0 overflow-hidden">
               <img src="/branding/nlogo.svg" alt="NASFAM Logo" className="h-6 w-auto flex-shrink-0" />
-              <p className="text-sm font-semibold text-gray-800 truncate whitespace-nowrap">Admin</p>
+              <p className="text-sm font-semibold text-gray-800 truncate whitespace-nowrap">{roleLabel}</p>
             </div>
             <button
               onClick={toggleCollapsed}
