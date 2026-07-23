@@ -78,46 +78,27 @@ function MetricCard({ label, value, icon, trend, trendUp = true }) {
 // Device Status Card
 function DeviceCard({ device }) {
   return (
-    <div className="bg-white rounded-xl border border-gray-200 p-5">
-      <div className="flex items-start justify-between mb-4">
-        <div>
-          <p className="text-sm font-bold text-gray-900">{device.officerName}</p>
-          <p className="text-xs text-gray-500 mt-1">{device.deviceModel}</p>
-        </div>
+    <div className="bg-white rounded-xl border border-gray-200 p-4">
+      <div className="flex items-center justify-between mb-3">
+        <p className="text-sm font-bold text-gray-900">{device.officerName}</p>
         <SyncStatusBadge status={device.syncStatus} />
       </div>
 
-      <div className="space-y-2.5 text-xs">
+      <div className="space-y-2 text-xs">
         <div className="flex justify-between">
-          <span className="text-gray-600">Last Sync:</span>
+          <span className="text-gray-500">Last Sync</span>
           <span className="font-semibold text-gray-900">{new Date(device.lastSync).toLocaleTimeString()}</span>
         </div>
         <div className="flex justify-between">
-          <span className="text-gray-600">Records Uploaded:</span>
-          <span className="font-semibold text-gray-700">{device.recordsUploaded}</span>
-        </div>
-        <div className="flex justify-between">
-          <span className="text-gray-600">Pending:</span>
-          <span className={`font-semibold ${device.pendingRecords > 0 ? "text-amber-600" : "text-gray-600"}`}>
+          <span className="text-gray-500">Pending</span>
+          <span className={`font-semibold ${device.pendingRecords > 0 ? "text-amber-600" : "text-gray-500"}`}>
             {device.pendingRecords}
           </span>
         </div>
         <div className="flex justify-between">
-          <span className="text-gray-600">Failed:</span>
-          <span className={`font-semibold ${device.failedRecords > 0 ? "text-red-600" : "text-gray-600"}`}>
+          <span className="text-gray-500">Failed</span>
+          <span className={`font-semibold ${device.failedRecords > 0 ? "text-red-600" : "text-gray-500"}`}>
             {device.failedRecords}
-          </span>
-        </div>
-        <div className="flex justify-between pt-2 border-t border-gray-100">
-          <span className="text-gray-600">Battery:</span>
-          <span className={`font-semibold ${device.batteryLevel < 20 ? "text-red-600" : "text-gray-900"}`}>
-            {device.batteryLevel}%
-          </span>
-        </div>
-        <div className="flex justify-between">
-          <span className="text-gray-600">Connection:</span>
-          <span className={`font-semibold ${device.connectivity === "No Connection" ? "text-red-600" : "text-gray-700"}`}>
-            {device.connectivity}
           </span>
         </div>
       </div>
