@@ -27,7 +27,8 @@ export default function WarehouseOfficerDashboard({ firstName }) {
   ];
 
   return (
-    <div className="p-6 space-y-8 max-w-[1400px] mx-auto">
+    <div className="p-6">
+    <div className="space-y-8 max-w-[1400px] mx-auto p-6">
 
       {/* ── KPI Grid ── */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -78,6 +79,7 @@ export default function WarehouseOfficerDashboard({ firstName }) {
               </table>
             </div>
           </div>
+    </div>
     </div>
   );
 }
