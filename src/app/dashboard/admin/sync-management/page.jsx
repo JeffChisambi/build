@@ -91,13 +91,11 @@ function DeviceCard({ device }) {
         </div>
         <div className="flex justify-between">
           <span className="text-gray-500">Pending</span>
-          <span className={`font-semibold ${device.pendingRecords > 0 ? "text-amber-600" : "text-gray-500"}`}>
-            {device.pendingRecords}
-          </span>
+          <span className="font-semibold text-gray-900">{device.pendingRecords}</span>
         </div>
         <div className="flex justify-between">
           <span className="text-gray-500">Failed</span>
-          <span className={`font-semibold ${device.failedRecords > 0 ? "text-red-600" : "text-gray-500"}`}>
+          <span className={`font-semibold ${device.failedRecords > 0 ? "text-red-600" : "text-gray-900"}`}>
             {device.failedRecords}
           </span>
         </div>
