@@ -33,21 +33,6 @@ function StatCard({ title, value, icon, trend, trendUp = true }) {
   );
 }
 
-// ── Stock Status Badge ────────────────────────────────────────
-function StockBadge({ status }) {
-  const colors = {
-    "Stored":            "bg-gray-50 text-gray-700 border border-gray-200",
-    "In Transit":        "bg-indigo-50 text-indigo-700 border border-indigo-100",
-    "Dispatched":        "bg-amber-50 text-amber-700 border border-amber-100",
-    "Not Yet Received":  "bg-gray-100 text-gray-500 border border-gray-200",
-    "Not Received":      "bg-red-50 text-red-600 border border-red-100",
-  };
-  return (
-    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold ${colors[status] || "bg-gray-50 text-gray-500"}`}>
-      {status}
-    </span>
-  );
-}
 
 export default function WarehousePage() {
   const [warehouseFilter, setWarehouseFilter] = useState("All");
@@ -128,7 +113,7 @@ export default function WarehousePage() {
         {/* KPI Cards — warehouse manager view */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <StatCard
-            title="Total Accepted Weight"
+            title="Total Weight"
             value={`${totalWeight} kg`}
             trend="6.34%"
             trendUp={true}
@@ -211,14 +196,13 @@ export default function WarehousePage() {
                   <th className="text-xs font-semibold text-gray-700 px-4 py-3">Date</th>
                   <th className="text-xs font-semibold text-gray-700 px-4 py-3">Warehouse</th>
                   <th className="text-xs font-semibold text-gray-700 px-4 py-3">Commodity</th>
-                  <th className="text-xs font-semibold text-gray-700 px-4 py-3">Accepted (kg)</th>
-                  <th className="text-xs font-semibold text-gray-700 px-4 py-3">Stock Status</th>
+                  <th className="text-xs font-semibold text-gray-700 px-4 py-3">Weight (kg)</th>
                 </tr>
               </thead>
               <tbody>
                 {filteredRecords.length === 0 ? (
                   <tr>
-                    <td colSpan={5} className="px-4 py-12 text-center text-sm text-gray-400">
+                    <td colSpan={4} className="px-4 py-12 text-center text-sm text-gray-400">
                       No GRN records found matching your filters.
                     </td>
                   </tr>
@@ -238,16 +222,9 @@ export default function WarehousePage() {
                       <td className="px-4 py-3.5">
                         <p className="text-xs font-semibold text-gray-900">{r.commodity}</p>
                       </td>
-                      {/* Accepted Qty */}
+                      {/* Weight */}
                       <td className="px-4 py-3.5">
                         <p className="text-xs font-semibold text-gray-900">{r.acceptedQty.toLocaleString()} kg</p>
-                        {r.rejectedQty > 0 && (
-                          <p className="text-[11px] text-red-500">{r.rejectedQty} kg rejected</p>
-                        )}
-                      </td>
-                      {/* Stock Status */}
-                      <td className="px-4 py-3.5">
-                        <StockBadge status={r.stockStatus} />
                       </td>
                     </tr>
                   ))
