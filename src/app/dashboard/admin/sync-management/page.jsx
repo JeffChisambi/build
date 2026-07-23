@@ -148,12 +148,6 @@ export default function SyncManagementPage() {
           sub="Successfully synchronized"
         />
         <MetricCard 
-          label="Pending Sync" 
-          value={mockSyncMetrics.pendingSynchronizations} 
-          icon={Icons.clock}
-          sub="Awaiting synchronization"
-        />
-        <MetricCard 
           label="Failed Syncs" 
           value={mockSyncMetrics.failedSynchronizations} 
           icon={Icons.alertCircle}
