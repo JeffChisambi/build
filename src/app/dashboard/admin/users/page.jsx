@@ -10,7 +10,7 @@ export default function UsersPage() {
     <div className="space-y-6 relative">
 
       {/* Farmer Table */}
-      <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
+      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
         {/* Card header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
           <h2 className="text-sm font-bold text-gray-900">Farmers</h2>
