@@ -45,7 +45,7 @@ export default function NotificationsPage() {
         </div>
 
         {/* Table card */}
-        <div className="bg-white rounded-md border border-gray-200 overflow-hidden">
+        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
           <div className="flex items-center justify-between px-5 py-3.5 border-b border-gray-100">
             <p className="text-sm font-bold text-gray-900">All Notifications</p>
             <p className="text-xs text-gray-400">{filtered.length} result{filtered.length !== 1 ? "s" : ""}</p>

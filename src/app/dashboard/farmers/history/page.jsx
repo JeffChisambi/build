@@ -97,7 +97,7 @@ export default function FarmerHistoryPage() {
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         {/* Sidebar Filters */}
         <div className="lg:col-span-1 space-y-4">
-          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
+          <div className="bg-white rounded-xl border border-gray-200 p-4">
             <h2 className="text-sm font-bold text-gray-900 mb-4 border-b border-gray-100 pb-2">Filter Activity</h2>
             
             <div className="space-y-4">
@@ -163,7 +163,7 @@ export default function FarmerHistoryPage() {
 
         {/* Chronological Feed */}
         <div className="lg:col-span-3">
-          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6 min-h-[500px]">
+          <div className="bg-white rounded-xl border border-gray-200 p-6 min-h-[500px]">
             {filteredHistory.length === 0 ? (
                <div className="flex flex-col items-center justify-center h-full py-16">
                  <div className="w-16 h-16 rounded-full bg-gray-50 flex items-center justify-center mb-4">

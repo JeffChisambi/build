@@ -1,0 +1,1 @@
+- [NASFAM GTMS Design System](design-system.md) — enforced card/button/color/spacing tokens for all dashboard UI; reference before any UI work.

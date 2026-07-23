@@ -151,7 +151,7 @@ export default function FarmerGroupsPage() {
       </div>
 
       {/* Main Content */}
-      <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
         {/* Toolbar */}
         <div className="p-4 border-b border-gray-100 flex justify-between items-center bg-white">
           <div className="relative w-full sm:w-96">

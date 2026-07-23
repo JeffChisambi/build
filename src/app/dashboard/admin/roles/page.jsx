@@ -171,7 +171,7 @@ export default function RolesPermissionsPage() {
           <p className="text-sm text-gray-500 mt-0.5">View and manage system roles and their access permissions.</p>
         </div>
         <button onClick={() => setShowCreate(true)}
-          className="flex items-center gap-2 px-4 py-2 bg-gray-900 text-white text-sm font-semibold rounded-md hover:bg-gray-700 transition-colors">
+          className="flex items-center gap-2 px-4 py-2 bg-[#1a5c2a] text-white text-sm font-semibold rounded-lg hover:bg-[#134520] transition-colors">
           <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
           </svg>
@@ -181,7 +181,7 @@ export default function RolesPermissionsPage() {
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-5">
         {/* ── Role List ── */}
-        <div className="xl:col-span-1 bg-white rounded-md border border-gray-200 overflow-hidden">
+        <div className="xl:col-span-1 bg-white rounded-xl border border-gray-200 overflow-hidden">
           <div className="p-4 border-b border-gray-100 space-y-3">
             <div className="relative">
               <svg className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -194,7 +194,7 @@ export default function RolesPermissionsPage() {
               {["All", "System", "Custom"].map((f) => (
                 <button key={f} onClick={() => setFilterType(f)}
                   className={`px-3 py-1 rounded-full text-xs font-semibold transition-colors ${
-                    filterType === f ? "bg-gray-900 text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                    filterType === f ? "bg-[#1a5c2a] text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                   }`}>
                   {f}
                 </button>
@@ -238,7 +238,7 @@ export default function RolesPermissionsPage() {
         {selected ? (
           <div className="xl:col-span-2 space-y-5">
             {/* Role Info Card */}
-            <div className="bg-white rounded-md border border-gray-200 p-6">
+            <div className="bg-white rounded-xl border border-gray-200 p-6">
               <div className="flex items-start justify-between mb-4">
                 <div>
                   <h2 className="text-base font-bold text-gray-900">{selected.name}</h2>
@@ -315,7 +315,7 @@ export default function RolesPermissionsPage() {
             </div>
           </div>
         ) : (
-          <div className="xl:col-span-2 flex items-center justify-center bg-white rounded-md border border-gray-200 min-h-[300px]">
+          <div className="xl:col-span-2 flex items-center justify-center bg-white rounded-xl border border-gray-200 min-h-[300px]">
             <p className="text-sm text-gray-400">Select a role to view its details.</p>
           </div>
         )}

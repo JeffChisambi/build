@@ -14,7 +14,7 @@ const ICON = (
 
 function SectionCard({ title, children, action }) {
   return (
-    <div className="bg-white rounded-md border border-gray-200 overflow-hidden mb-6">
+    <div className="bg-white rounded-xl border border-gray-200 overflow-hidden mb-6">
       <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
         <h2 className="text-sm font-bold text-gray-900 uppercase tracking-wide">{title}</h2>
         {action && <div>{action}</div>}
@@ -116,7 +116,7 @@ export default function WarehouseDetailPage() {
         </div>
 
         {/* PROFILE/HEADER CARD */}
-        <div className="bg-white rounded-md border border-gray-200 overflow-hidden flex flex-col md:flex-row relative">
+        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden flex flex-col md:flex-row relative">
           <div className="p-8 flex flex-col md:flex-row items-center md:items-start gap-6 flex-1 bg-gradient-to-br from-white to-gray-50/50">
             <div className="w-16 h-16 rounded-full bg-gray-100 border border-gray-200 shadow-sm flex flex-shrink-0 items-center justify-center text-gray-600">
               {ICON}

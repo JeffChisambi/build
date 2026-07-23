@@ -66,13 +66,13 @@ html.dark {
   color-scheme: dark;
 
   /* ── Surfaces ── */
-  --surface-page:    #222222;   /* main background */
-  --surface-card:    transparent;   /* cards & panels */
-  --surface-subtle:  #000000;
-  --surface-input:   #222222;   /* input / select bg */
+  --surface-page:    #1a1a1a;   /* main background */
+  --surface-card:    #252525;   /* cards & panels */
+  --surface-subtle:  #1e1e1e;
+  --surface-input:   #252525;   /* input / select bg */
   --surface-hover:   #2e2e2e;   /* hover state */
-  --surface-header:  #222222;   /* topbar */
-  --surface-overlay: #000000;   /* dropdowns / modals */
+  --surface-header:  #1a1a1a;   /* topbar */
+  --surface-overlay: #252525;   /* dropdowns / modals */
 
   /* ── Borders ── */
   --border-default:  #333333;
@@ -176,6 +176,7 @@ html.dark main {
 
 html.dark .bg-white {
   background-color: var(--surface-card) !important;
+  border-color: #333333 !important;
 }
 
 html.dark .bg-gray-50,

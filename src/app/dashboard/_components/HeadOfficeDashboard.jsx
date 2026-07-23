@@ -106,7 +106,7 @@ function PurchasingRevenueChart() {
               <button
                 key={opt}
                 onClick={() => { setPeriod(opt); setDropdownOpen(false); }}
-                className={`w-full text-left px-4 py-2 text-sm transition-colors ${period === opt ? "bg-green-50 text-green-700 font-semibold" : "text-gray-600 hover:bg-gray-50"}`}
+                className={`w-full text-left px-4 py-2 text-sm transition-colors ${period === opt ? "bg-[#e8f1ea] text-[#1a5c2a] font-semibold" : "text-gray-600 hover:bg-gray-50"}`}
               >
                 {opt}
               </button>
@@ -249,7 +249,7 @@ export default function HeadOfficeDashboard({ firstName }) {
             <h3 className="text-sm font-semibold text-gray-700">National Activity</h3>
             <button
               onClick={() => router.push("/dashboard/reports")}
-              className="text-xs text-[#1a5c2e] font-semibold hover:underline"
+              className="text-xs text-[#1a5c2a] font-semibold hover:underline"
             >
               View All
             </button>
@@ -263,9 +263,9 @@ export default function HeadOfficeDashboard({ firstName }) {
                 <div className="mt-1.5 w-2 h-2 rounded-full flex-shrink-0 bg-gray-300" />
                 <div className="flex-1 min-w-0">
                   <p className="text-xs font-semibold text-gray-800">{activity.action}</p>
-                  <p className="text-[10px] text-gray-500 mt-0.5 leading-relaxed">{activity.detail}</p>
+                  <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">{activity.detail}</p>
                 </div>
-                <span className="text-[10px] text-gray-400 font-medium whitespace-nowrap">{activity.time}</span>
+                <span className="text-xs text-gray-400 font-medium whitespace-nowrap">{activity.time}</span>
               </div>
             ))}
           </div>

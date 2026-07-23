@@ -179,35 +179,35 @@ export default function ReportShell({
   const allFilters = [...DATE_FILTERS, ...filters];
 
   return (
-    <div className="p-6 space-y-6 max-w-[1400px] mx-auto">
-      <div className="rounded-md border border-gray-200 bg-white p-6">
+    <div className="p-6 space-y-4 max-w-[1400px] mx-auto">
+      <div className="rounded-xl border border-gray-200 bg-white p-5">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <p className="text-xs font-semibold text-gray-500 uppercase tracking-[0.2em]">{title}</p>
-            <h1 className="text-2xl font-bold text-gray-900 mt-2">{title}</h1>
-            {description && <p className="mt-2 text-sm text-gray-600 max-w-2xl">{description}</p>}
+            <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest">{title}</p>
+            <h1 className="text-xl font-bold text-gray-900 mt-1">{title}</h1>
+            {description && <p className="mt-1.5 text-sm text-gray-500 max-w-2xl">{description}</p>}
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <button onClick={generate} disabled={loading} className="bg-gray-900 text-white px-3 py-1.5 rounded-md text-sm font-medium hover:bg-gray-700 transition-colors disabled:opacity-50">
+            <button onClick={generate} disabled={loading} className="bg-[#1a5c2a] text-white px-3 py-1.5 rounded-lg text-sm font-semibold hover:bg-[#134520] transition-colors disabled:opacity-50">
               {loading ? "Generating…" : "Generate Report"}
             </button>
-            <button onClick={exportExcel} disabled={!rows.length} className="bg-white border border-gray-300 text-gray-700 px-3 py-1.5 rounded-md text-sm font-medium hover:bg-gray-50 transition-colors disabled:opacity-40">
+            <button onClick={exportExcel} disabled={!rows.length} className="bg-white border border-gray-200 text-gray-700 px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors disabled:opacity-40">
               Export Excel
             </button>
-            <button onClick={printReport} disabled={!rows.length} className="bg-white border border-gray-300 text-gray-700 px-3 py-1.5 rounded-md text-sm font-medium hover:bg-gray-50 transition-colors disabled:opacity-40">
+            <button onClick={printReport} disabled={!rows.length} className="bg-white border border-gray-200 text-gray-700 px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors disabled:opacity-40">
               Print Report
             </button>
           </div>
         </div>
       </div>
 
-      <div className="rounded-md border border-gray-200 bg-white p-4 space-y-3">
+      <div className="rounded-xl border border-gray-200 bg-white p-5 space-y-3">
         <div className="grid gap-3 md:grid-cols-3">
           {allFilters.map((f) => (
             <div key={f.key} className="flex flex-col">
-              <label className="text-xs font-semibold text-gray-700 mb-1">{f.label}</label>
+              <label className="text-xs font-semibold text-gray-700 mb-1.5">{f.label}</label>
               {f.type === "select" ? (
-                <select value={filterValues[f.key]} onChange={(e) => update(f.key, e.target.value)} className="px-3 py-2 border border-gray-200 rounded-md text-sm text-gray-700 focus:outline-none">
+                <select value={filterValues[f.key]} onChange={(e) => update(f.key, e.target.value)} className="px-3 py-2 border border-gray-200 rounded-lg text-sm text-gray-700 focus:outline-none bg-white">
                   <option value="">All</option>
                   {f.options?.map((o) => (
                     <option key={o.value} value={o.value}>{o.label}</option>
@@ -219,7 +219,7 @@ export default function ReportShell({
                   value={filterValues[f.key]}
                   onChange={(e) => update(f.key, e.target.value)}
                   placeholder={f.placeholder || ""}
-                  className="px-3 py-2 border border-gray-200 rounded-md text-sm text-gray-700 focus:outline-none"
+                  className="px-3 py-2 border border-gray-200 rounded-lg text-sm text-gray-700 focus:outline-none bg-white"
                 />
               )}
             </div>
@@ -228,7 +228,7 @@ export default function ReportShell({
         {dateError && <p className="text-sm text-red-600">{dateError}</p>}
       </div>
 
-      <div className="rounded-md border border-gray-200 bg-white p-4">
+      <div className="rounded-xl border border-gray-200 bg-white p-5">
         {rows.length === 0 ? (
           <p className="text-sm text-gray-500">No results. Use the filters and click "Generate Report".</p>
         ) : (

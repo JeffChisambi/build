@@ -84,7 +84,7 @@ export default function FarmerRegistrationPage() {
       )}
 
       {/* Progress Indicator */}
-      <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm mb-6">
+      <div className="bg-white p-6 rounded-xl border border-gray-200 mb-6">
         <div className="flex items-center justify-between relative">
           <div className="absolute left-0 top-1/2 -translate-y-1/2 w-full h-0.5 bg-gray-100 z-0"></div>
           <div 
@@ -119,7 +119,7 @@ export default function FarmerRegistrationPage() {
       </div>
 
       {/* Form Container */}
-      <form onSubmit={handleSubmit} className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden mt-10">
+      <form onSubmit={handleSubmit} className="bg-white rounded-xl border border-gray-200 overflow-hidden mt-10">
         
         {/* Step 1: Personal Details */}
         {currentStep === 1 && (

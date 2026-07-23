@@ -64,9 +64,9 @@ function ToggleSwitch({ label, description, checked, onChange }) {
         aria-checked={checked}
         role="switch"
         className={[
-          "relative inline-flex h-5 w-9 flex-shrink-0 items-center rounded-full transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1a5c2e] focus-visible:ring-offset-2",
+          "relative inline-flex h-5 w-9 flex-shrink-0 items-center rounded-full transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1a5c2a] focus-visible:ring-offset-2",
           checked
-            ? "bg-[#1a5c2e]"
+            ? "bg-[#1a5c2a]"
             : "bg-[#d1d5db] dark:bg-[#4b5563]",
         ].join(" ")}
       >
@@ -89,7 +89,7 @@ function SelectInput({ label, value, options, onChange }) {
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full px-3 py-1.5 border border-gray-200 rounded-lg text-xs text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#1a5c2e] bg-white"
+        className="w-full px-3 py-1.5 border border-gray-200 rounded-lg text-xs text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#1a5c2a] bg-white"
       >
         {options.map(option => (
           <option key={option.value} value={option.value}>
@@ -111,7 +111,7 @@ function TextInput({ label, value, onChange, placeholder }) {
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="w-full px-3 py-1.5 border border-gray-200 rounded-lg text-xs text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#1a5c2e] bg-white"
+        className="w-full px-3 py-1.5 border border-gray-200 rounded-lg text-xs text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#1a5c2a] bg-white"
       />
     </div>
   );
@@ -215,7 +215,7 @@ export default function SettingsPage() {
       <div className="flex items-center gap-2.5 pt-2">
         <button
           onClick={handleSave}
-          className="flex items-center gap-1.5 bg-[#1a5c2e] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#134520] transition-colors"
+          className="flex items-center gap-1.5 bg-[#1a5c2a] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#134520] transition-colors"
         >
           {Icons.save}
           Save Settings

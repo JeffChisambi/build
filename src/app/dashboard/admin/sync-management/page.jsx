@@ -82,7 +82,7 @@ function MetricCard({ label, value, icon, trend, trendUp = true }) {
 // Device Status Card
 function DeviceCard({ device }) {
   return (
-    <div className="bg-white rounded-md border border-gray-200 p-5 transition-shadow">
+    <div className="bg-white rounded-xl border border-gray-200 p-5 transition-shadow">
       <div className="flex items-start justify-between mb-4">
         <div>
           <p className="text-sm font-bold text-gray-900">{device.officerName}</p>

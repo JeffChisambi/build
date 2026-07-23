@@ -55,7 +55,7 @@ function ModuleCard({ icon, title, description, stats, onClick }) {
   return (
     <button
       onClick={onClick}
-      className="bg-white rounded-md border border-gray-200 p-6 transition-all text-left group"
+      className="bg-white rounded-xl border border-gray-200 p-5 transition-all text-left group hover:-translate-y-0.5 hover:shadow-sm"
     >
       <div className="flex items-start gap-4">
         <div className="text-gray-500 group-hover:text-gray-700 transition-colors mt-0.5">
@@ -234,7 +234,7 @@ function PurchasingRevenueChart() {
               <button
                 key={opt}
                 onClick={() => { setPeriod(opt); setDropdownOpen(false); }}
-                className={`w-full text-left px-4 py-2 text-sm transition-colors ${period === opt ? 'bg-green-50 text-green-700 font-semibold' : 'text-gray-600 hover:bg-gray-50'}`}
+                className={`w-full text-left px-4 py-2 text-sm transition-colors ${period === opt ? 'bg-[#e8f1ea] text-[#1a5c2a] font-semibold' : 'text-gray-600 hover:bg-gray-50'}`}
               >
                 {opt}
               </button>
@@ -427,9 +427,9 @@ export default function AdminDashboardPage() {
                   <div className={`mt-1.5 w-2 h-2 rounded-full flex-shrink-0 ${log.color}`}></div>
                   <div className="flex-1">
                     <p className="text-xs font-semibold text-gray-800">{log.action.replace(/_/g, ' ')}</p>
-                    <p className="text-[10px] text-gray-500 mt-0.5">{log.user}</p>
+                    <p className="text-xs text-gray-500 mt-0.5">{log.user}</p>
                   </div>
-                  <span className="text-[10px] text-gray-400 font-medium whitespace-nowrap">{log.time}</span>
+                  <span className="text-xs text-gray-400 font-medium whitespace-nowrap">{log.time}</span>
                 </div>
               ))}
             </div>
