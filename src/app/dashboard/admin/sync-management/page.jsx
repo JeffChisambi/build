@@ -170,7 +170,10 @@ export default function SyncManagementPage() {
             <p className="text-sm font-semibold text-gray-700">Last Synchronization</p>
           </div>
           <p className="text-xl font-bold text-gray-900">
-            {new Date(mockSyncMetrics.lastSynchronizationTime).toLocaleString()}
+            {new Date(mockSyncMetrics.lastSynchronizationTime).toLocaleString("en-GB", {
+              day: "numeric", month: "short", year: "numeric",
+              hour: "2-digit", minute: "2-digit"
+            })}
           </p>
         </div>
         <div className="bg-white rounded-xl border border-gray-200 p-5 flex flex-col gap-3 flex-1 min-w-[200px]">
