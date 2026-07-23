@@ -40,7 +40,7 @@ function ActionDropdown({ value, options, onChange }) {
               onClick={() => { onChange(opt); setOpen(false); }}
               className={`w-full text-left px-4 py-2.5 text-sm transition-colors ${
                 value === opt
-                  ? "bg-[#1a5c2a]/8 text-[#1a5c2a] font-semibold"
+                  ? "bg-gray-100 text-gray-900 font-semibold"
                   : "text-gray-700 hover:bg-gray-50"
               }`}
             >
@@ -82,10 +82,10 @@ const mockAuditLogs = [
 
 function SeverityBadge({ severity }) {
   const styles = {
-    Info: "bg-blue-100 text-blue-700",
-    Success: "bg-green-100 text-green-700",
-    Warning: "bg-amber-100 text-amber-700",
-    Error: "bg-red-100 text-red-700",
+    Info: "bg-gray-100 text-gray-600",
+    Success: "bg-gray-100 text-gray-600",
+    Warning: "bg-gray-100 text-gray-600",
+    Error: "bg-gray-100 text-gray-600",
   };
 
   return (
