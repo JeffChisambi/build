@@ -188,21 +188,6 @@ export default function HeadOfficeDashboard({ firstName }) {
   return (
     <div className="p-6 space-y-8 max-w-[1400px] mx-auto">
 
-      {/* ── Page Header ── */}
-      <div className="flex items-center justify-between bg-white rounded-xl border border-gray-200 p-8">
-        <div>
-          <p className="text-xs font-semibold text-[#1a5c2e] uppercase tracking-[0.2em] mb-2">NASFAM GTMS</p>
-          <h1 className="text-2xl font-extrabold text-gray-900 tracking-tight">National Overview</h1>
-          <p className="text-sm text-gray-500 mt-1.5">
-            {new Date().toLocaleDateString("en-GB", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}
-          </p>
-        </div>
-        <div className="text-right hidden sm:block">
-          <p className="text-base font-bold text-gray-900">{firstName}</p>
-          <p className="text-sm text-gray-500 mt-0.5">Head Office Manager</p>
-        </div>
-      </div>
-
       {/* ── KPI Metric Cards ── */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
         {kpis.map((kpi, idx) => (
