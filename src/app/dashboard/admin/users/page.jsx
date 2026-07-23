@@ -127,7 +127,6 @@ export default function UsersPage() {
               <thead>
                 <tr className="border-b border-gray-100">
                   <th className="px-4 py-3 text-xs font-medium text-gray-400">Name</th>
-                  <th className="px-4 py-3 text-xs font-medium text-gray-400">Email</th>
                   <th className="px-4 py-3 text-xs font-medium text-gray-400">Role</th>
                   <th className="px-4 py-3 text-xs font-medium text-gray-400">Assigned IPC</th>
                   <th className="px-4 py-3 text-xs font-medium text-gray-400">Status</th>
@@ -147,9 +146,6 @@ export default function UsersPage() {
                           {u.name.length > 14 ? u.name.slice(0, 13) + "…" : u.name}
                         </span>
                       </div>
-                    </td>
-                    <td className="px-4 py-3.5 text-xs text-gray-500 max-w-[160px] truncate" title={u.email}>
-                      {u.email}
                     </td>
                     <td className="px-4 py-3.5 text-xs text-gray-500">{u.role}</td>
                     <td className="px-4 py-3.5 text-xs text-gray-500">
