@@ -94,11 +94,23 @@ html.dark {
 }
 
 /* ─────────────────────────────────────────────
-   Chart section fade-in animation
+   Chart animations
    ───────────────────────────────────────────── */
 @keyframes chartFadeIn {
   from { opacity: 0; transform: translateY(6px); }
   to   { opacity: 1; transform: translateY(0);   }
+}
+
+/* Vertical bar: grows from the bottom baseline upward */
+@keyframes barGrowUp {
+  from { transform: scaleY(0); }
+  to   { transform: scaleY(1); }
+}
+
+/* Horizontal bar: extends from the left edge */
+@keyframes barSlideIn {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
 }
 
 /* ─────────────────────────────────────────────
