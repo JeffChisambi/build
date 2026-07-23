@@ -230,64 +230,119 @@ export default function UsersPage() {
       </div>
 
       {/* User Table */}
-      <div className="bg-white rounded-md border border-gray-200 overflow-hidden">
+      <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+        {/* Card header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
           <h2 className="text-sm font-bold text-gray-900">System Users</h2>
-          <div className="relative">
-            <svg className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-            <input type="text" placeholder="Search users..." value={search} onChange={(e) => setSearch(e.target.value)}
-              className="pl-9 pr-4 py-2 text-sm border border-gray-200 rounded-lg outline-none focus:border-gray-400 w-56 bg-white" />
+          <div className="flex items-center gap-3">
+            <div className="relative">
+              <svg className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+              <input type="text" placeholder="Search users..." value={search} onChange={(e) => setSearch(e.target.value)}
+                className="pl-9 pr-4 py-2 text-sm border border-gray-200 rounded-lg outline-none focus:border-gray-400 w-52 bg-white" />
+            </div>
+            {/* Three-dot menu */}
+            <button className="p-1.5 text-gray-400 hover:text-gray-600 transition-colors rounded-md hover:bg-gray-50">
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                <circle cx="12" cy="5" r="1.5" /><circle cx="12" cy="12" r="1.5" /><circle cx="12" cy="19" r="1.5" />
+              </svg>
+            </button>
           </div>
         </div>
 
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
-            <thead className="bg-gray-50 border-b border-gray-100">
-              <tr>
-                {["Name", "Email", "Phone", "Assigned IPC", "Role", "Status", "Created", "Actions"].map((h) => (
-                  <th key={h} className="px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider whitespace-nowrap">{h}</th>
-                ))}
+            <thead>
+              <tr className="border-b border-gray-100">
+                <th className="px-5 py-3 text-xs font-medium text-gray-400 w-12">Sl</th>
+                <th className="px-4 py-3 text-xs font-medium text-gray-400">Name</th>
+                <th className="px-4 py-3 text-xs font-medium text-gray-400">Email</th>
+                <th className="px-4 py-3 text-xs font-medium text-gray-400">Assigned IPC</th>
+                <th className="px-4 py-3 text-xs font-medium text-gray-400">Role</th>
+                <th className="px-4 py-3 text-xs font-medium text-gray-400">Status</th>
+                <th className="px-4 py-3 text-xs font-medium text-gray-400">Created</th>
+                <th className="px-4 py-3 text-xs font-medium text-gray-400">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-50">
+            <tbody>
               {filtered.length === 0 ? (
                 <tr>
                   <td colSpan={8} className="px-5 py-12 text-center text-sm text-gray-400">No users found.</td>
                 </tr>
-              ) : filtered.map((u) => (
-                <tr key={u.id} className="hover:bg-gray-50/50 transition-colors">
-                  <td className="px-5 py-3.5">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0 border border-gray-200">
-                        <span className="text-xs font-bold text-gray-600">
-                          {u.name.split(" ").map((n) => n[0]).slice(0, 2).join("")}
+              ) : filtered.map((u, idx) => {
+                const isLast = idx === filtered.length - 1;
+                return (
+                  <tr
+                    key={u.id}
+                    className="border-b border-gray-50 transition-colors"
+                    style={isLast ? { backgroundColor: "#eef9f1" } : undefined}
+                    onMouseEnter={(e) => { if (!isLast) e.currentTarget.style.backgroundColor = "#f9fafb"; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = isLast ? "#eef9f1" : ""; }}
+                  >
+                    {/* SI */}
+                    <td className="px-5 py-3.5 text-xs font-medium text-gray-500">
+                      {String(idx + 1).padStart(2, "0")}
+                    </td>
+
+                    {/* Name + avatar */}
+                    <td className="px-4 py-3.5">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-8 h-8 rounded-full bg-[#1a5c2a]/10 flex items-center justify-center flex-shrink-0 border border-[#1a5c2a]/20">
+                          <span className="text-xs font-bold text-[#1a5c2a]">
+                            {u.name.split(" ").map((n) => n[0]).slice(0, 2).join("")}
+                          </span>
+                        </div>
+                        <span className="text-sm font-medium text-gray-800 max-w-[110px] truncate" title={u.name}>
+                          {u.name.length > 12 ? u.name.slice(0, 11) + "…" : u.name}
                         </span>
                       </div>
-                      <span className="font-semibold text-gray-900">{u.name}</span>
-                    </div>
-                  </td>
-                  <td className="px-5 py-3.5 text-gray-600">{u.email}</td>
-                  <td className="px-5 py-3.5 text-gray-500">{u.phone || <span className="text-gray-300">—</span>}</td>
-                  <td className="px-5 py-3.5 text-gray-500 text-xs">{u.assignedIPC || <span className="text-gray-300">—</span>}</td>
-                  <td className="px-5 py-3.5">
-                    <span className="text-xs font-semibold text-gray-700 bg-gray-100 px-2 py-0.5 rounded-full">{u.role}</span>
-                  </td>
-                  <td className="px-5 py-3.5"><StatusBadge status={u.status} /></td>
-                  <td className="px-5 py-3.5 text-gray-400 text-xs">{u.createdAt}</td>
-                  <td className="px-5 py-3.5">
-                    <div className="flex items-center gap-3">
-                      <button onClick={() => setModal({ mode: "edit", user: u })}
-                        className="text-xs font-semibold text-gray-700 hover:underline">Edit</button>
-                      <button onClick={() => toggleStatus(u.id)}
-                        className={`text-xs font-semibold hover:underline ${u.status === "Active" ? "text-gray-500" : "text-gray-900"}`}>
-                        {u.status === "Active" ? "Deactivate" : "Activate"}
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
+                    </td>
+
+                    {/* Email */}
+                    <td className="px-4 py-3.5 text-gray-500 text-xs max-w-[140px] truncate" title={u.email}>
+                      {u.email}
+                    </td>
+
+                    {/* IPC */}
+                    <td className="px-4 py-3.5 text-gray-500 text-xs max-w-[120px] truncate" title={u.assignedIPC || ""}>
+                      {u.assignedIPC
+                        ? (u.assignedIPC.length > 13 ? u.assignedIPC.slice(0, 12) + "…" : u.assignedIPC)
+                        : <span className="text-gray-300">—</span>}
+                    </td>
+
+                    {/* Role */}
+                    <td className="px-4 py-3.5">
+                      <span className="text-xs font-semibold text-[#1a5c2a] bg-[#1a5c2a]/10 px-2 py-0.5 rounded-full whitespace-nowrap">
+                        {u.role}
+                      </span>
+                    </td>
+
+                    {/* Status */}
+                    <td className="px-4 py-3.5">
+                      <span className={`inline-flex items-center gap-1.5 text-xs font-semibold ${u.status === "Active" ? "text-emerald-600" : "text-gray-400"}`}>
+                        <span className={`w-1.5 h-1.5 rounded-full ${u.status === "Active" ? "bg-emerald-500" : "bg-gray-300"}`} />
+                        {u.status}
+                      </span>
+                    </td>
+
+                    {/* Created */}
+                    <td className="px-4 py-3.5 text-gray-400 text-xs whitespace-nowrap">{u.createdAt}</td>
+
+                    {/* Actions */}
+                    <td className="px-4 py-3.5">
+                      <div className="flex items-center gap-3">
+                        <button onClick={() => setModal({ mode: "edit", user: u })}
+                          className="text-xs font-semibold text-gray-700 hover:text-gray-900 hover:underline">Edit</button>
+                        <button onClick={() => toggleStatus(u.id)}
+                          className={`text-xs font-semibold hover:underline ${u.status === "Active" ? "text-gray-400 hover:text-gray-600" : "text-[#1a5c2a] hover:text-[#134520]"}`}>
+                          {u.status === "Active" ? "Deactivate" : "Activate"}
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
