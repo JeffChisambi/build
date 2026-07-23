@@ -1,15 +1,10 @@
 "use client";
 
-import { useState } from "react";
 import { SEED_FARMERS } from "@/lib/mockFarmers";
 
 // ── Main Page ─────────────────────────────────────────────────
 export default function UsersPage() {
-  const [search, setSearch] = useState("");
-
-  const filtered = SEED_FARMERS.filter((f) =>
-    `${f.fullName} ${f.district} ${f.association}`.toLowerCase().includes(search.toLowerCase())
-  );
+  const filtered = SEED_FARMERS;
 
   return (
     <div className="space-y-6 relative">
@@ -20,18 +15,12 @@ export default function UsersPage() {
         <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
           <h2 className="text-sm font-bold text-gray-900">Farmers</h2>
           <div className="flex items-center gap-3">
-            <div className="relative">
-              <svg className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            <button className="flex items-center gap-2 px-4 py-2 bg-gray-900 text-white text-sm font-semibold rounded-md hover:bg-gray-700 transition-colors">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
               </svg>
-              <input
-                type="text"
-                placeholder="Search farmers..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="pl-9 pr-4 py-2 text-sm border border-gray-200 rounded-lg outline-none focus:border-gray-400 w-52 bg-white"
-              />
-            </div>
+              Add Farmer
+            </button>
             <button className="p-1.5 text-gray-400 hover:text-gray-600 transition-colors rounded-md hover:bg-gray-50">
               <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                 <circle cx="12" cy="5" r="1.5" /><circle cx="12" cy="12" r="1.5" /><circle cx="12" cy="19" r="1.5" />
@@ -63,10 +52,7 @@ export default function UsersPage() {
                 return (
                   <tr
                     key={f.id}
-                    className="border-b border-gray-50 transition-colors"
-                    style={isLast ? { backgroundColor: "#eef9f1" } : undefined}
-                    onMouseEnter={(e) => { if (!isLast) e.currentTarget.style.backgroundColor = "#f9fafb"; }}
-                    onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = isLast ? "#eef9f1" : ""; }}
+                    className="border-b border-gray-50 hover:bg-gray-50 transition-colors"
                   >
                     {/* SI */}
                     <td className="px-5 py-3.5 text-xs font-medium text-gray-500">
@@ -76,8 +62,8 @@ export default function UsersPage() {
                     {/* Name + avatar */}
                     <td className="px-4 py-3.5">
                       <div className="flex items-center gap-2.5">
-                        <div className="w-8 h-8 rounded-full bg-[#1a5c2a]/10 flex items-center justify-center flex-shrink-0 border border-[#1a5c2a]/20">
-                          <span className="text-xs font-bold text-[#1a5c2a]">
+                        <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0 border border-gray-200">
+                          <span className="text-xs font-bold text-gray-600">
                             {f.fullName.split(" ").map((n) => n[0]).slice(0, 2).join("")}
                           </span>
                         </div>
@@ -100,8 +86,8 @@ export default function UsersPage() {
 
                     {/* Status */}
                     <td className="px-4 py-3.5">
-                      <span className={`inline-flex items-center gap-1.5 text-xs font-semibold ${f.status === "Active" ? "text-emerald-600" : "text-amber-500"}`}>
-                        <span className={`w-1.5 h-1.5 rounded-full ${f.status === "Active" ? "bg-emerald-500" : "bg-amber-400"}`} />
+                      <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-gray-600">
+                        <span className="w-1.5 h-1.5 rounded-full bg-gray-400" />
                         {f.status}
                       </span>
                     </td>
