@@ -1,0 +1,10 @@
+{
+  "/dashboard/admin/ipc-management/page": "app/dashboard/admin/ipc-management/page.js",
+  "/dashboard/admin/page": "app/dashboard/admin/page.js",
+  "/dashboard/admin/settings/page": "app/dashboard/admin/settings/page.js",
+  "/dashboard/admin/users/page": "app/dashboard/admin/users/page.js",
+  "/dashboard/admin/warehouse-management/page": "app/dashboard/admin/warehouse-management/page.js",
+  "/dashboard/page": "app/dashboard/page.js",
+  "/login/page": "app/login/page.js",
+  "/page": "app/page.js"
+}
