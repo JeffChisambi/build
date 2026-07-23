@@ -30,7 +30,7 @@ export default function WarehouseOfficerDashboard({ firstName }) {
     <div className="p-6 space-y-8 max-w-[1400px] mx-auto">
 
       {/* ── KPI Grid ── */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {kpis.map((kpi, idx) => (
           <StatCard key={idx} {...kpi} />
         ))}
