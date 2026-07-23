@@ -206,7 +206,6 @@ export default function FarmerProfilesPage() {
                 <th className="px-6 py-3 text-xs font-semibold text-gray-500">Name</th>
                 <th className="px-6 py-3 text-xs font-semibold text-gray-500">District</th>
                 <th className="px-6 py-3 text-xs font-semibold text-gray-500">Association</th>
-                <th className="px-6 py-3 text-xs font-semibold text-gray-500">Status</th>
                 <th className="px-6 py-3" />
               </tr>
             </thead>
@@ -231,10 +230,6 @@ export default function FarmerProfilesPage() {
                   {/* Association */}
                   <td className="px-6 py-3.5 text-gray-600 max-w-[180px]">
                     <span className="block truncate">{f.association}</span>
-                  </td>
-                  {/* Status */}
-                  <td className="px-6 py-3.5">
-                    <StatusDot status={f.status} />
                   </td>
                   {/* Menu */}
                   <td className="px-6 py-3.5 text-right">
