@@ -57,6 +57,7 @@ function TypeDropdown({ value, onChange }) {
 // ── Main Page ─────────────────────────────────────────────────
 export default function UsersPage() {
   const [view, setView] = useState("Farmers");
+  const [openMenu, setOpenMenu] = useState(null);
 
   const isFarmers = view === "Farmers";
 
@@ -86,6 +87,7 @@ export default function UsersPage() {
                   <th className="px-4 py-3 text-xs font-semibold text-gray-700 w-1/4">District</th>
                   <th className="px-4 py-3 text-xs font-semibold text-gray-700">Association</th>
                   <th className="px-4 py-3 text-xs font-semibold text-gray-700">Status</th>
+                  <th className="px-4 py-3 text-xs font-semibold text-gray-700"></th>
                 </tr>
               </thead>
               <tbody>
@@ -113,6 +115,22 @@ export default function UsersPage() {
                         {f.status}
                       </span>
                     </td>
+                    <td className="px-4 py-3.5 relative">
+                      <button
+                        onClick={() => setOpenMenu(openMenu === `f-${f.id}` ? null : `f-${f.id}`)}
+                        className="p-1 rounded hover:bg-gray-100 text-gray-500 transition-colors"
+                      >
+                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                          <circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/>
+                        </svg>
+                      </button>
+                      {openMenu === `f-${f.id}` && (
+                        <div className="absolute right-4 top-10 z-20 bg-white border border-gray-100 rounded-lg shadow-lg w-36 overflow-hidden">
+                          <button className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">Edit</button>
+                          <button className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">Deactivate</button>
+                        </div>
+                      )}
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -125,6 +143,7 @@ export default function UsersPage() {
                   <th className="px-4 py-3 text-xs font-semibold text-gray-700 w-1/4">Role</th>
                   <th className="px-4 py-3 text-xs font-semibold text-gray-700">Assigned IPC</th>
                   <th className="px-4 py-3 text-xs font-semibold text-gray-700">Status</th>
+                  <th className="px-4 py-3 text-xs font-semibold text-gray-700"></th>
                 </tr>
               </thead>
               <tbody>
@@ -151,6 +170,22 @@ export default function UsersPage() {
                         <span className="w-1.5 h-1.5 rounded-full bg-gray-300" />
                         {u.status}
                       </span>
+                    </td>
+                    <td className="px-4 py-3.5 relative">
+                      <button
+                        onClick={() => setOpenMenu(openMenu === `u-${u.id}` ? null : `u-${u.id}`)}
+                        className="p-1 rounded hover:bg-gray-100 text-gray-500 transition-colors"
+                      >
+                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                          <circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/>
+                        </svg>
+                      </button>
+                      {openMenu === `u-${u.id}` && (
+                        <div className="absolute right-4 top-10 z-20 bg-white border border-gray-100 rounded-lg shadow-lg w-36 overflow-hidden">
+                          <button className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">Edit</button>
+                          <button className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">Deactivate</button>
+                        </div>
+                      )}
                     </td>
                   </tr>
                 ))}
