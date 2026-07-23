@@ -140,21 +140,6 @@ export default function WarehouseManagementPage() {
         </div>
       )}
 
-      {/* Summary Stats */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        {[
-          { label: "Total Warehouses", value: warehouses.length },
-          { label: "Active", value: warehouses.filter((w) => w.status === "Active").length },
-          { label: "Inactive", value: warehouses.filter((w) => w.status === "Inactive").length },
-          { label: "Total Capacity", value: "29,000 bags" },
-        ].map((s) => (
-          <div key={s.label} className="bg-white rounded-xl border border-gray-200 p-5 flex flex-col gap-3">
-            <p className="text-sm font-semibold text-gray-700">{s.label}</p>
-            <p className="text-xl font-bold text-gray-900">{s.value}</p>
-          </div>
-        ))}
-      </div>
-
       {/* Table */}
       <div className="bg-white rounded-md border border-gray-200 overflow-hidden">
         <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
