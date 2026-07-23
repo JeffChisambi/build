@@ -115,7 +115,7 @@ export default function TraceabilityPage() {
       <div className="space-y-6 p-6 max-w-7xl mx-auto">
 
         {/* KPI Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <StatCard
             title="Tracked Weight"
             value="5,420 kg"
@@ -132,12 +132,6 @@ export default function TraceabilityPage() {
             value="108 bags"
             sub="QR tag scanned"
             icon={<svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M7 7h10M7 12h10m-8 5h6" /></svg>}
-          />
-          <StatCard
-            title="Traceability Gaps"
-            value="0"
-            sub="All links verified"
-            icon={<svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m2 8H7a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v12a2 2 0 01-2 2z" /></svg>}
           />
         </div>
 
