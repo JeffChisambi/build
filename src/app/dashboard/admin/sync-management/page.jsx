@@ -139,12 +139,6 @@ export default function SyncManagementPage() {
 
   return (
     <div className="p-6 space-y-8 max-w-[1400px] mx-auto">
-      {/* ── Page Header ── */}
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900">Synchronization Management</h1>
-        <p className="text-sm text-gray-600 mt-1">Monitor mobile device synchronization status and sync queue health</p>
-      </div>
-
       {/* ── Key Metrics ── */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <MetricCard 
