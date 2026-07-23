@@ -196,8 +196,10 @@ function ProfileMenu({ user, theme, onOpenProfile, onSignOut }) {
             onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = theme === "dark" ? "rgba(153, 27, 27, 0.3)" : "#fef2f2")}
             onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
           >
-            <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+            <svg className="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+              {/* Boxicons v3.0.8 https://boxicons.com | License https://docs.boxicons.com/free */}
+              <path d="m14.29 6.71 4.3 4.29H9v2h9.59l-4.3 4.29 1.42 1.42 6.7-6.71-6.7-6.71z"></path>
+              <path d="M11 5V3c-4.96 0-9 4.04-9 9s4.04 9 9 9v-2c-3.86 0-7-3.14-7-7s3.14-7 7-7"></path>
             </svg>
             Sign Out
           </button>
