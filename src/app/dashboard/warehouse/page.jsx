@@ -200,8 +200,7 @@ export default function WarehousePage() {
                     <tr key={r.id} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
                       {/* Date */}
                       <td className="px-4 py-3.5">
-                        <p className="text-xs font-mono font-semibold text-gray-900">{r.grnNumber}</p>
-                        <p className="text-[11px] text-gray-400">{r.receivingDate}</p>
+                        <p className="text-xs text-gray-900">{r.receivingDate}</p>
                       </td>
                       {/* Warehouse */}
                       <td className="px-4 py-3.5">
