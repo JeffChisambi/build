@@ -36,7 +36,7 @@ function StatCard({ title, value, icon, trend, trendUp = true }) {
 // ── Stock Status Badge ────────────────────────────────────────
 function StockBadge({ status }) {
   const colors = {
-    "Stored":            "bg-green-50 text-green-700 border border-green-100",
+    "Stored":            "bg-gray-50 text-gray-700 border border-gray-200",
     "In Transit":        "bg-indigo-50 text-indigo-700 border border-indigo-100",
     "Dispatched":        "bg-amber-50 text-amber-700 border border-amber-100",
     "Not Yet Received":  "bg-gray-100 text-gray-500 border border-gray-200",
@@ -174,7 +174,7 @@ export default function WarehousePage() {
               <select
                 value={warehouseFilter}
                 onChange={e => setWarehouseFilter(e.target.value)}
-                className="px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-md text-xs font-medium text-gray-700 focus:ring-2 focus:ring-green-100 focus:border-[#1a5c2a] outline-none"
+                className="px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-md text-xs font-medium text-gray-700 focus:ring-2 focus:ring-gray-100 focus:border-gray-400 outline-none"
               >
                 {warehouses.map(w => (
                   <option key={w} value={w}>{w === "All" ? "All Warehouses" : w}</option>
@@ -185,7 +185,7 @@ export default function WarehousePage() {
               <select
                 value={grnStatusFilter}
                 onChange={e => setGrnStatusFilter(e.target.value)}
-                className="px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-md text-xs font-medium text-gray-700 focus:ring-2 focus:ring-green-100 focus:border-[#1a5c2a] outline-none"
+                className="px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-md text-xs font-medium text-gray-700 focus:ring-2 focus:ring-gray-100 focus:border-gray-400 outline-none"
               >
                 {grnStatuses.map(s => (
                   <option key={s} value={s}>{s === "All" ? "All GRN Statuses" : s}</option>
@@ -195,7 +195,7 @@ export default function WarehousePage() {
               <button className="flex items-center gap-1.5 text-sm font-semibold text-gray-500 hover:text-gray-700 px-4 py-2 rounded-md hover:bg-gray-50 transition-colors border border-gray-200">
                 Export CSV
               </button>
-              <button className="flex items-center gap-2 px-4 py-2 bg-[#1a5c2a] text-white text-sm font-semibold rounded-md hover:bg-[#134520] transition-colors flex-shrink-0">
+              <button className="flex items-center gap-2 px-4 py-2 bg-gray-900 text-white text-sm font-semibold rounded-md hover:bg-gray-700 transition-colors flex-shrink-0">
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
                 </svg>
@@ -227,7 +227,7 @@ export default function WarehousePage() {
                     <tr key={r.id} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
                       {/* Date */}
                       <td className="px-4 py-3.5">
-                        <p className="text-xs font-mono font-semibold text-[#1a5c2a]">{r.grnNumber}</p>
+                        <p className="text-xs font-mono font-semibold text-gray-900">{r.grnNumber}</p>
                         <p className="text-[11px] text-gray-400">{r.receivingDate}</p>
                       </td>
                       {/* Warehouse */}
