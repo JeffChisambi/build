@@ -87,10 +87,10 @@ export default function UsersPage() {
             <table className="w-full text-left text-sm">
               <thead>
                 <tr className="border-b border-gray-100">
-                  <th className="px-4 py-3 text-xs font-medium text-gray-400">Name</th>
-                  <th className="px-4 py-3 text-xs font-medium text-gray-400">District</th>
-                  <th className="px-4 py-3 text-xs font-medium text-gray-400">Association</th>
-                  <th className="px-4 py-3 text-xs font-medium text-gray-400">Status</th>
+                  <th className="px-4 py-3 text-xs font-semibold text-gray-700">Name</th>
+                  <th className="px-4 py-3 text-xs font-semibold text-gray-700">District</th>
+                  <th className="px-4 py-3 text-xs font-semibold text-gray-700">Association</th>
+                  <th className="px-4 py-3 text-xs font-semibold text-gray-700">Status</th>
                 </tr>
               </thead>
               <tbody>
@@ -99,22 +99,22 @@ export default function UsersPage() {
                     <td className="px-4 py-3.5">
                       <div className="flex items-center gap-2.5">
                         <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0 border border-gray-200">
-                          <span className="text-xs font-bold text-gray-600">
+                          <span className="text-xs font-bold text-gray-400">
                             {f.fullName.split(" ").map((n) => n[0]).slice(0, 2).join("")}
                           </span>
                         </div>
-                        <span className="text-sm font-medium text-gray-800 max-w-[120px] truncate" title={f.fullName}>
+                        <span className="text-sm font-medium text-gray-400 max-w-[120px] truncate" title={f.fullName}>
                           {f.fullName.length > 13 ? f.fullName.slice(0, 12) + "…" : f.fullName}
                         </span>
                       </div>
                     </td>
-                    <td className="px-4 py-3.5 text-xs text-gray-500">{f.district}</td>
-                    <td className="px-4 py-3.5 text-xs text-gray-500 max-w-[150px] truncate" title={f.association}>
+                    <td className="px-4 py-3.5 text-xs text-gray-400">{f.district}</td>
+                    <td className="px-4 py-3.5 text-xs text-gray-400 max-w-[150px] truncate" title={f.association}>
                       {f.association.length > 18 ? f.association.slice(0, 17) + "…" : f.association}
                     </td>
                     <td className="px-4 py-3.5">
-                      <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-gray-600">
-                        <span className="w-1.5 h-1.5 rounded-full bg-gray-400" />
+                      <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-gray-400">
+                        <span className="w-1.5 h-1.5 rounded-full bg-gray-300" />
                         {f.status}
                       </span>
                     </td>
@@ -126,10 +126,10 @@ export default function UsersPage() {
             <table className="w-full text-left text-sm">
               <thead>
                 <tr className="border-b border-gray-100">
-                  <th className="px-4 py-3 text-xs font-medium text-gray-400">Name</th>
-                  <th className="px-4 py-3 text-xs font-medium text-gray-400">Role</th>
-                  <th className="px-4 py-3 text-xs font-medium text-gray-400">Assigned IPC</th>
-                  <th className="px-4 py-3 text-xs font-medium text-gray-400">Status</th>
+                  <th className="px-4 py-3 text-xs font-semibold text-gray-700">Name</th>
+                  <th className="px-4 py-3 text-xs font-semibold text-gray-700">Role</th>
+                  <th className="px-4 py-3 text-xs font-semibold text-gray-700">Assigned IPC</th>
+                  <th className="px-4 py-3 text-xs font-semibold text-gray-700">Status</th>
                 </tr>
               </thead>
               <tbody>
