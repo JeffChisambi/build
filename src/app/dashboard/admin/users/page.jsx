@@ -138,22 +138,22 @@ export default function UsersPage() {
                     <td className="px-4 py-3.5">
                       <div className="flex items-center gap-2.5">
                         <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0 border border-gray-200">
-                          <span className="text-xs font-bold text-gray-600">
+                          <span className="text-xs font-bold text-gray-400">
                             {u.name.split(" ").map((n) => n[0]).slice(0, 2).join("")}
                           </span>
                         </div>
-                        <span className="text-sm font-medium text-gray-800 max-w-[130px] truncate" title={u.name}>
+                        <span className="text-sm font-medium text-gray-400 max-w-[130px] truncate" title={u.name}>
                           {u.name.length > 14 ? u.name.slice(0, 13) + "…" : u.name}
                         </span>
                       </div>
                     </td>
-                    <td className="px-4 py-3.5 text-xs text-gray-500">{u.role}</td>
-                    <td className="px-4 py-3.5 text-xs text-gray-500">
+                    <td className="px-4 py-3.5 text-xs text-gray-400">{u.role}</td>
+                    <td className="px-4 py-3.5 text-xs text-gray-400">
                       {u.assignedIPC || <span className="text-gray-300">—</span>}
                     </td>
                     <td className="px-4 py-3.5">
-                      <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-gray-600">
-                        <span className="w-1.5 h-1.5 rounded-full bg-gray-400" />
+                      <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-gray-400">
+                        <span className="w-1.5 h-1.5 rounded-full bg-gray-300" />
                         {u.status}
                       </span>
                     </td>
