@@ -131,7 +131,7 @@ export default function TraceabilityPage() {
         </div>
 
         {/* ── Table Card ── */}
-        <div className="bg-white rounded-md border border-gray-200 overflow-hidden">
+        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
           <div className="flex items-center justify-between px-5 py-4 border-b border-gray-50">
             <div>
               <p className="text-xs text-gray-400">{filteredBatches.length} traceable batches found</p>
