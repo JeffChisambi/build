@@ -126,7 +126,7 @@ export default function WarehousePage() {
 
 
         {/* KPI Cards — warehouse manager view */}
-        <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <StatCard
             title="Total Accepted Weight"
             value={`${totalWeight} kg`}
