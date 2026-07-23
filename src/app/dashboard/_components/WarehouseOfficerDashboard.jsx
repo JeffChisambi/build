@@ -1,8 +1,7 @@
 "use client";
 
 import React from "react";
-import { HorizontalBarChart, ProgressChart, StatCard } from "./Charts";
-import { Icons } from "./Icons";
+import { StatCard } from "./Charts";
 import { useRouter } from "next/navigation";
 
 export default function WarehouseOfficerDashboard({ firstName }) {
@@ -48,17 +47,7 @@ export default function WarehouseOfficerDashboard({ firstName }) {
         ))}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left Column */}
-        <div className="col-span-1 lg:col-span-2 space-y-6">
-          
-          <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
-            <h2 className="text-lg font-bold text-gray-900 mb-2">Inventory by Commodity</h2>
-            <p className="text-sm text-gray-500 mb-6">Current stock breakdown</p>
-            <HorizontalBarChart data={stockByCommodity} />
-          </div>
-
-          <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+      <div className="bg-white rounded-xl border border-gray-200 p-6">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-lg font-bold text-gray-900">Recent Deliveries</h2>
               <button onClick={() => router.push("/dashboard/warehouse")} className="text-sm font-semibold text-nasfam-green hover:underline">
@@ -100,36 +89,6 @@ export default function WarehouseOfficerDashboard({ firstName }) {
               </table>
             </div>
           </div>
-
-        </div>
-
-        {/* Right Column */}
-        <div className="space-y-6">
-          
-          <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
-            <h2 className="text-lg font-bold text-gray-900 mb-4">Capacity Utilization</h2>
-            <div className="space-y-6">
-              <ProgressChart label="Silo A (Maize)" value={2100} max={2500} color="bg-yellow-500" />
-              <ProgressChart label="Warehouse 1 (Bags)" value={1350} max={1500} color="bg-nasfam-green" />
-              <ProgressChart label="Cold Storage" value={0} max={500} color="bg-blue-400" />
-            </div>
-          </div>
-
-          <div className="bg-red-50 rounded-xl border border-red-200 p-5">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="text-red-500">{Icons.alertTriangle}</div>
-              <h3 className="font-bold text-red-900">Capacity Warning</h3>
-            </div>
-            <p className="text-sm text-red-800 mb-4">
-              Warehouse 1 is at 90% capacity. Approaching maximum limits for bagged commodities. Please prepare for dispatch.
-            </p>
-            <button className="text-xs font-bold bg-red-100 text-red-900 px-3 py-1.5 rounded hover:bg-red-200 transition-colors">
-              Schedule Dispatch
-            </button>
-          </div>
-
-        </div>
-      </div>
     </div>
   );
 }
