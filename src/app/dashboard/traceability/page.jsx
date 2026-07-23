@@ -133,21 +133,16 @@ export default function TraceabilityPage() {
         {/* ── Table Card ── */}
         <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
           <div className="flex items-center justify-between px-5 py-4 border-b border-gray-50">
-            <div>
-              <p className="text-xs text-gray-400">{filteredBatches.length} traceable batches found</p>
-            </div>
-            <div className="flex items-center gap-2">
-              <select
-                value={commodityFilter}
-                onChange={e => setCommodityFilter(e.target.value)}
-                className="px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-xs font-medium text-gray-700 focus:ring-2 focus:ring-gray-100 focus:border-black outline-none"
-              >
-                {commodities.map(c => <option key={c} value={c}>{c === "All" ? "All Commodities" : c}</option>)}
-              </select>
-              <button className="flex items-center gap-1.5 text-xs font-semibold text-gray-500 hover:text-gray-700 px-3 py-1.5 rounded-lg hover:bg-gray-50 transition-colors border border-gray-200">
-                Export CSV
-              </button>
-            </div>
+            <select
+              value={commodityFilter}
+              onChange={e => setCommodityFilter(e.target.value)}
+              className="px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-xs font-medium text-gray-700 focus:ring-2 focus:ring-gray-100 focus:border-black outline-none"
+            >
+              {commodities.map(c => <option key={c} value={c}>{c === "All" ? "All Commodities" : c}</option>)}
+            </select>
+            <button className="flex items-center gap-1.5 text-xs font-semibold text-gray-500 hover:text-gray-700 px-3 py-1.5 rounded-lg hover:bg-gray-50 transition-colors border border-gray-200">
+              Export CSV
+            </button>
           </div>
 
           <div className="overflow-x-auto">
