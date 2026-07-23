@@ -209,10 +209,7 @@ const NAV_GROUPS = [
   {
     section: "Farmers",
     items: [
-      { name: "Farmer Profiles", href: "/dashboard/farmers/profiles", matchPrefix: "/dashboard/farmers/profiles", icon: ALL_NAV_ITEMS.find(i => i.name === 'Farmers')?.icon },
-      { name: "Farmer Groups", href: "/dashboard/farmers/groups", matchPrefix: "/dashboard/farmers/groups" },
-      { name: "Farmer History", href: "/dashboard/farmers/history", matchPrefix: "/dashboard/farmers/history" },
-      { name: "Farmer Registration", href: "/dashboard/farmers/registration", matchPrefix: "/dashboard/farmers/registration" },
+      { name: "Farmers", href: "/dashboard/farmers/profiles", matchPrefix: "/dashboard/farmers", icon: ALL_NAV_ITEMS.find(i => i.name === 'Farmers')?.icon },
     ],
   },
   {

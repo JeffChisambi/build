@@ -1,6 +1,6 @@
 "use client";
 
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import WorkspaceLayout from "@/components/WorkspaceLayout";
 
 const FARMERS_ICON = (
@@ -9,24 +9,28 @@ const FARMERS_ICON = (
   </svg>
 );
 
-const TABS = [
-  { label: "Farmer Profiles", href: "/dashboard/farmers/profiles" },
-  { label: "Farmer Registration", href: "/dashboard/farmers/registration" },
-  { label: "Farmer Groups", href: "/dashboard/farmers/groups" },
-  { label: "Farmer History", href: "/dashboard/farmers/history" },
+const SECTIONS = [
+  { label: "Farmer Profiles",      href: "/dashboard/farmers/profiles" },
+  { label: "Farmer Registration",  href: "/dashboard/farmers/registration" },
+  { label: "Farmer Groups",        href: "/dashboard/farmers/groups" },
+  { label: "Farmer History",       href: "/dashboard/farmers/history" },
 ];
 
 export default function FarmersLayout({ children }) {
   const pathname = usePathname();
+  const router = useRouter();
 
-  // On the Master Record detail page, don't show the tab bar header —
-  // the page itself manages its own breadcrumb and back navigation.
-  const isDetailPage = pathname.startsWith("/dashboard/farmers/profiles/") &&
+  const isDetailPage =
+    pathname.startsWith("/dashboard/farmers/profiles/") &&
     pathname !== "/dashboard/farmers/profiles";
 
   if (isDetailPage) {
     return <div className="p-6">{children}</div>;
   }
+
+  const currentHref =
+    SECTIONS.find(s => pathname.startsWith(s.href))?.href ||
+    SECTIONS[0].href;
 
   return (
     <WorkspaceLayout
@@ -35,10 +39,23 @@ export default function FarmersLayout({ children }) {
       moduleHref="/dashboard/farmers/profiles"
       title="Farmers"
       description="Manage farmer profiles, registrations, groups, and activity history."
-      tabs={TABS}
+      tabs={[]}
       hideTitleBlock={true}
       hideHeader={true}
     >
+      {/* Section selector */}
+      <div className="border-b border-gray-200 bg-white px-6 py-3 flex items-center gap-3">
+        <select
+          value={currentHref}
+          onChange={e => router.push(e.target.value)}
+          className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-md text-sm font-medium text-gray-700 focus:ring-2 focus:ring-gray-100 focus:border-gray-400 outline-none"
+        >
+          {SECTIONS.map(s => (
+            <option key={s.href} value={s.href}>{s.label}</option>
+          ))}
+        </select>
+      </div>
+
       {children}
     </WorkspaceLayout>
   );
