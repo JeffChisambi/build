@@ -1,10 +1,9 @@
 "use client";
 
-import React, { useState } from "react";
-import { BarChart, StatCard, PeriodPicker } from "./Charts";
+import React, { useState, useEffect, useRef } from "react";
+import { StatCard, PeriodPicker } from "./Charts";
 import { Icons } from "./Icons";
 import { useRouter } from "next/navigation";
-import TodayWorkflow from "./TodayWorkflow";
 
 // ── Period data sets ─────────────────────────────────────────
 const PURCHASE_DATA = {
@@ -80,6 +79,25 @@ export default function IPCManagerDashboard({ firstName }) {
   const router = useRouter();
   const [period, setPeriod] = useState("7D");
   const p = PURCHASE_DATA[period];
+  const [hoveredBar, setHoveredBar] = useState(null);
+  const [animatedValues, setAnimatedValues] = useState(PURCHASE_DATA["7D"].data.map(d => d.value));
+  const animRef = useRef(null);
+
+  useEffect(() => {
+    const targets = PURCHASE_DATA[period].data.map(d => d.value);
+    if (animRef.current) cancelAnimationFrame(animRef.current);
+    setAnimatedValues(new Array(targets.length).fill(0));
+    const duration = 550;
+    const startTime = performance.now();
+    function step(now) {
+      const t = Math.min((now - startTime) / duration, 1);
+      const eased = 1 - Math.pow(1 - t, 3);
+      setAnimatedValues(targets.map(v => v * eased));
+      if (t < 1) animRef.current = requestAnimationFrame(step);
+    }
+    animRef.current = requestAnimationFrame(step);
+    return () => { if (animRef.current) cancelAnimationFrame(animRef.current); };
+  }, [period]);
 
   const kpis = [
     {
@@ -165,7 +183,65 @@ export default function IPCManagerDashboard({ firstName }) {
             <p className="text-xs text-gray-400 mb-5">
               Procurement volume — <span className="font-medium text-gray-600">{p.label}</span>
             </p>
-            <BarChart data={p.data} height="h-56" />
+            {(() => {
+              const chartH = 200, barW = 36, gap = 18, paddingL = 64, paddingB = 36, paddingT = 20;
+              const targetData = p.data;
+              const maxVal = Math.max(...targetData.map(d => d.value));
+              const totalW = paddingL + targetData.length * (barW + gap) - gap + 20;
+              const yLabels = [0, 25, 50, 75, 100];
+              return (
+                <div className="w-full">
+                  <svg width="100%" viewBox={`0 0 ${totalW - 20} ${chartH + paddingB + paddingT}`} className="block">
+                    {yLabels.map((pct) => {
+                      const y = paddingT + chartH - (pct / 100) * chartH;
+                      return (
+                        <g key={pct}>
+                          <line x1={paddingL} x2={totalW - 10} y1={y} y2={y} stroke="#f0f0f0" strokeWidth="1" />
+                          <text x={paddingL - 8} y={y + 4} textAnchor="end" fontSize="11" fill="#9ca3af">{pct}%</text>
+                        </g>
+                      );
+                    })}
+                    {targetData.map((d, i) => {
+                      const animVal = animatedValues[i] ?? 0;
+                      const barH = Math.max((animVal / maxVal) * chartH, 0);
+                      const x = paddingL + i * (barW + gap);
+                      const y = paddingT + chartH - barH;
+                      const isHovered = hoveredBar === i;
+                      const isHighest = d.value === maxVal;
+                      const patternId = `diag-ipc-${period}-${i}`;
+                      return (
+                        <g key={d.label} onMouseEnter={() => setHoveredBar(i)} onMouseLeave={() => setHoveredBar(null)} style={{ cursor: "pointer" }}>
+                          <defs>
+                            <pattern id={patternId} patternUnits="userSpaceOnUse" width="8" height="8" patternTransform="rotate(45)">
+                              <rect width="8" height="8" fill="#1a5c2a" />
+                              <line x1="0" y1="0" x2="0" y2="8" stroke="#134520" strokeWidth="3" />
+                            </pattern>
+                          </defs>
+                          <rect x={x} y={y} width={barW} height={barH} rx="6" ry="6"
+                            fill={isHovered || isHighest ? `url(#${patternId})` : "#e8f5e9"} />
+                          {isHovered && (
+                            <g>
+                              <rect x={x + barW / 2 - 22} y={y - 38} width={44} height={26} rx="6"
+                                fill="white" stroke="#e5e7eb" strokeWidth="1"
+                                filter="drop-shadow(0 2px 4px rgba(0,0,0,0.08))" />
+                              <text x={x + barW / 2} y={y - 20} textAnchor="middle" fontSize="11" fontWeight="600" fill="#111827">
+                                {d.value}
+                              </text>
+                              <circle cx={x + barW / 2} cy={y} r={4} fill="white" stroke="#1a5c2a" strokeWidth="2" />
+                            </g>
+                          )}
+                          <text x={x + barW / 2} y={paddingT + chartH + paddingB - 12} textAnchor="middle" fontSize="12"
+                            fontWeight={isHovered || isHighest ? "700" : "400"}
+                            fill={isHovered || isHighest ? "#1a5c2a" : "#9ca3af"}>
+                            {d.label}
+                          </text>
+                        </g>
+                      );
+                    })}
+                  </svg>
+                </div>
+              );
+            })()}
           </div>
 
           {/* Latest IPC Operations */}
