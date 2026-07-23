@@ -1,9 +1,42 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 
+// ── Period Picker ────────────────────────────────────────────
+export function PeriodPicker({ value, onChange, options }) {
+  return (
+    <div className="flex items-center gap-0.5 bg-gray-100 rounded-lg p-1">
+      {options.map((opt) => (
+        <button
+          key={opt.value}
+          onClick={() => onChange(opt.value)}
+          className={[
+            "px-3 py-1.5 text-xs font-semibold rounded-md transition-all duration-200",
+            value === opt.value
+              ? "bg-white text-gray-900 shadow-sm"
+              : "text-gray-500 hover:text-gray-700",
+          ].join(" ")}
+        >
+          {opt.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+// ── Bar Chart ────────────────────────────────────────────────
 export function BarChart({ data, height = "h-56" }) {
   const max = Math.max(...data.map((d) => d.value), 1);
+  const [ready, setReady] = useState(false);
+
+  // Double-RAF: first frame renders bars at 0%, second frame triggers CSS transition up
+  useEffect(() => {
+    setReady(false);
+    const id = requestAnimationFrame(() =>
+      requestAnimationFrame(() => setReady(true))
+    );
+    return () => cancelAnimationFrame(id);
+  }, []);
 
   return (
     <div className={`flex items-end gap-2 sm:gap-4 ${height} w-full pt-6`}>
@@ -13,10 +46,12 @@ export function BarChart({ data, height = "h-56" }) {
           <div key={i} className="flex flex-col items-center flex-1 group h-full justify-end">
             <div className="relative w-full flex justify-center items-end h-full">
               <div
-                className={`w-full max-w-[48px] rounded-t-sm transition-all duration-500 ${
-                  item.color || "bg-[#1a5c2e]"
-                } group-hover:opacity-80 relative`}
-                style={{ height: `${percentage}%`, minHeight: "4px" }}
+                className={`w-full max-w-[48px] rounded-t-sm ${item.color || "bg-[#1a5c2e]"} group-hover:opacity-80 relative`}
+                style={{
+                  height: ready ? `${percentage}%` : "0%",
+                  minHeight: ready ? "4px" : "0px",
+                  transition: `height 0.65s cubic-bezier(0.4, 0, 0.2, 1) ${i * 45}ms, min-height 0.65s cubic-bezier(0.4, 0, 0.2, 1) ${i * 45}ms`,
+                }}
               >
                 <div className="opacity-0 group-hover:opacity-100 absolute -top-8 left-1/2 -translate-x-1/2 bg-white border border-gray-100/50 text-gray-900 text-xs px-2 py-1 rounded shadow-sm pointer-events-none transition-opacity whitespace-nowrap z-10">
                   {item.tooltip || item.value}
@@ -33,8 +68,18 @@ export function BarChart({ data, height = "h-56" }) {
   );
 }
 
+// ── Horizontal Bar Chart ─────────────────────────────────────
 export function HorizontalBarChart({ data }) {
   const max = Math.max(...data.map((d) => d.value), 1);
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    setReady(false);
+    const id = requestAnimationFrame(() =>
+      requestAnimationFrame(() => setReady(true))
+    );
+    return () => cancelAnimationFrame(id);
+  }, []);
 
   return (
     <div className="space-y-4">
@@ -43,17 +88,18 @@ export function HorizontalBarChart({ data }) {
         return (
           <div key={i} className="group">
             <div className="flex justify-between items-end mb-1">
-              <span className="text-sm font-medium text-gray-700">
-                {item.label}
-              </span>
+              <span className="text-sm font-medium text-gray-700">{item.label}</span>
               <span className="text-sm font-bold text-gray-900">
                 {item.displayValue || item.value}
               </span>
             </div>
             <div className="w-full bg-gray-100 rounded-sm h-2.5 overflow-hidden">
               <div
-                className={`${item.color || "bg-[#1a5c2e]"} h-full transition-all duration-500`}
-                style={{ width: `${percentage}%` }}
+                className={`${item.color || "bg-[#1a5c2e]"} h-full`}
+                style={{
+                  width: ready ? `${percentage}%` : "0%",
+                  transition: `width 0.65s cubic-bezier(0.4, 0, 0.2, 1) ${i * 80}ms`,
+                }}
               />
             </div>
           </div>
@@ -63,8 +109,19 @@ export function HorizontalBarChart({ data }) {
   );
 }
 
+// ── Progress Chart ───────────────────────────────────────────
 export function ProgressChart({ label, value, max, color = "bg-[#1a5c2e]" }) {
+  const [ready, setReady] = useState(false);
   const percentage = max > 0 ? Math.min((value / max) * 100, 100) : 0;
+
+  useEffect(() => {
+    setReady(false);
+    const id = requestAnimationFrame(() =>
+      requestAnimationFrame(() => setReady(true))
+    );
+    return () => cancelAnimationFrame(id);
+  }, []);
+
   return (
     <div className="mb-5">
       <div className="flex justify-between items-end mb-1.5">
@@ -75,14 +132,18 @@ export function ProgressChart({ label, value, max, color = "bg-[#1a5c2e]" }) {
       </div>
       <div className="w-full bg-gray-100 rounded-sm h-2 overflow-hidden">
         <div
-          className={`${color} h-full transition-all duration-500`}
-          style={{ width: `${percentage}%` }}
+          className={`${color} h-full`}
+          style={{
+            width: ready ? `${percentage}%` : "0%",
+            transition: "width 0.65s cubic-bezier(0.4, 0, 0.2, 1)",
+          }}
         />
       </div>
     </div>
   );
 }
 
+// ── Stat Card ────────────────────────────────────────────────
 export function StatCard({ title, value, trend, subtext, icon, trendUp }) {
   return (
     <div className="bg-white rounded-xl p-5 shadow-[0_2px_10px_rgba(0,0,0,0.04)] transition-all duration-300 hover:-translate-y-1 hover:shadow-md flex flex-col h-full border border-gray-50/50">
@@ -116,6 +177,7 @@ export function StatCard({ title, value, trend, subtext, icon, trendUp }) {
   );
 }
 
+// ── Module Action Card ───────────────────────────────────────
 export function ModuleActionCard({ icon, title, description, onClick }) {
   return (
     <button
