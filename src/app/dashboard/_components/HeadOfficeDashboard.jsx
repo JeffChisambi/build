@@ -2,33 +2,8 @@
 
 import React, { useState } from "react";
 import { StatCard } from "./Charts";
-import { Icons } from "./Icons";
 import { useRouter } from "next/navigation";
 
-// ── Local ModuleCard — matches admin dashboard style ──────────
-function ModuleCard({ icon, title, description, onClick }) {
-  return (
-    <button
-      onClick={onClick}
-      className="bg-white rounded-md border border-gray-200 p-6 transition-all text-left group"
-    >
-      <div className="flex items-start gap-4">
-        <div className="text-gray-500 group-hover:text-gray-700 transition-colors mt-0.5">
-          {icon}
-        </div>
-        <div className="flex-1">
-          <h3 className="font-bold text-gray-900 text-lg">{title}</h3>
-          <p className="text-sm text-gray-600 mt-1">{description}</p>
-        </div>
-        <div className="text-gray-400 group-hover:text-gray-600 transition-colors mt-1">
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-          </svg>
-        </div>
-      </div>
-    </button>
-  );
-}
 
 // ── Purchasing Revenue Chart (admin-style SVG bar chart) ──────
 const ALL_YEARLY_DATA = {
@@ -305,34 +280,6 @@ export default function HeadOfficeDashboard({ firstName }) {
             ))}
           </div>
         </div>
-      </div>
-
-      {/* ── Quick Actions — admin ModuleCard style ── */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <ModuleCard
-          icon={Icons.document}
-          title="National Reports"
-          description="View and generate comprehensive national procurement and traceability reports."
-          onClick={() => router.push("/dashboard/reports")}
-        />
-        <ModuleCard
-          icon={Icons.clipboard}
-          title="Traceability Overview"
-          description="Trace batches from origin IPC to current warehouse destination."
-          onClick={() => router.push("/dashboard/traceability")}
-        />
-        <ModuleCard
-          icon={Icons.data}
-          title="Advanced Analytics"
-          description="Dive deep into performance metrics, yield estimates, and forecasts."
-          onClick={() => router.push("/dashboard/reports/national")}
-        />
-        <ModuleCard
-          icon={Icons.warehouse}
-          title="Warehouse Summary"
-          description="Check live stock levels and capacity across all national warehouses."
-          onClick={() => router.push("/dashboard/reports/warehouse-statistics")}
-        />
       </div>
 
     </div>
