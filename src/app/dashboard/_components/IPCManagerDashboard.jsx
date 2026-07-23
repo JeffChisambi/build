@@ -174,7 +174,7 @@ export default function IPCManagerDashboard({ firstName }) {
           <PeriodPicker value={period} onChange={setPeriod} options={PERIOD_OPTIONS} />
         </div>
 
-        {/* Chart grid — key={period} remounts charts for fresh animation */}
+        {/* Chart + Latest IPC Operations side by side */}
         <div key={period} className="grid grid-cols-1 lg:grid-cols-2 gap-4" style={{ animation: "chartFadeIn 0.35s ease-out" }}>
 
           {/* Purchase Trend */}
@@ -186,35 +186,32 @@ export default function IPCManagerDashboard({ firstName }) {
             <BarChart data={p.data} height="h-56" />
           </div>
 
-        </div>
-      </div>
+          {/* Latest IPC Operations */}
+          <div className="bg-white rounded-xl border border-gray-200 p-5">
+            <div className="flex items-center justify-between mb-5">
+              <h3 className="text-sm font-semibold text-gray-700">Latest IPC Operations</h3>
+              <button onClick={() => router.push("/dashboard/purchasing")} className="text-xs font-semibold text-[#1a5c2a] hover:underline">
+                View Full Logs →
+              </button>
+            </div>
+            <div className="space-y-4">
+              {recentPurchases.map((purchase, i) => (
+                <div key={i} className="flex gap-4 items-start border-b border-gray-50 pb-4 last:border-0 last:pb-0">
+                  <div className="w-9 h-9 rounded-lg bg-[#e8f1ea] flex items-center justify-center text-[#1a5c2a] flex-shrink-0 mt-0.5">
+                    {Icons.purchase}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-gray-900">Purchase: {purchase.commodity}</p>
+                    <p className="text-xs text-gray-500 mt-0.5">
+                      {purchase.farmer} supplied {purchase.weight} ({purchase.id})
+                    </p>
+                    <p className="text-xs text-gray-400 mt-0.5">{purchase.time}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
 
-      {/* 3. Recent Activity */}
-      <div>
-        <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-4">Recent Activity</h2>
-        <div className="bg-white rounded-xl border border-gray-200 p-5">
-          <div className="flex items-center justify-between mb-5">
-            <h3 className="text-sm font-semibold text-gray-700">Latest IPC Operations</h3>
-            <button onClick={() => router.push("/dashboard/purchasing")} className="text-xs font-semibold text-[#1a5c2a] hover:underline">
-              View Full Logs →
-            </button>
-          </div>
-          <div className="space-y-4">
-            {recentPurchases.map((purchase, i) => (
-              <div key={i} className="flex gap-4 items-start border-b border-gray-50 pb-4 last:border-0 last:pb-0">
-                <div className="w-9 h-9 rounded-lg bg-[#e8f1ea] flex items-center justify-center text-[#1a5c2a] flex-shrink-0 mt-0.5">
-                  {Icons.purchase}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-gray-900">Purchase: {purchase.commodity}</p>
-                  <p className="text-xs text-gray-500 mt-0.5">
-                    {purchase.farmer} supplied {purchase.weight} ({purchase.id})
-                  </p>
-                  <p className="text-xs text-gray-400 mt-0.5">{purchase.time}</p>
-                </div>
-              </div>
-            ))}
-          </div>
         </div>
       </div>
 
