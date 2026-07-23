@@ -61,6 +61,21 @@ Colour tokens (from `globals.css`):
 - `--nasfam-green-dark`: `#134520` — hover/active states
 - `--nasfam-green-light`: `#e8f1ea` — subtle backgrounds
 
+## Admin dashboard — what's implemented
+
+All buttons and actions in the admin dashboard are functional:
+
+| Module | Actions |
+|--------|---------|
+| **Admin Home** | Module card grid navigates to each sub-module |
+| **Users** | Search, Add User (modal + validation), Edit User, Activate/Deactivate; Farmer list with search |
+| **Roles & Permissions** | Create custom role, duplicate, toggle status, delete, reset to defaults |
+| **Warehouse Management** | Search, Add Warehouse, Edit, Activate/Deactivate, toast feedback |
+| **IPC Management** | Search, Add IPC, Edit IPC (3-dot menu), Activate/Deactivate, toast feedback |
+| **Sync Management** | Trigger Manual Sync (animated button + toast), device filter tabs (All/Synced/Failed) |
+| **Audit Logs** | Filter by log type and action, Export Excel (downloads .xls), Print Report (print dialog) |
+| **Settings** | Change Password (with validation + show/hide), toggle notifications, security policies, SMTP config, Save + Reset to Defaults |
+
 ## User preferences
 
 _None recorded yet._

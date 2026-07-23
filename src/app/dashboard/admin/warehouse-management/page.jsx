@@ -20,6 +20,12 @@ export default function WarehouseManagementPage() {
   const [errors, setErrors] = useState({});
   const [search, setSearch] = useState("");
   const [openMenu, setOpenMenu] = useState(null);
+  const [toast, setToast] = useState(null);
+
+  const showToast = (msg, type = "success") => {
+    setToast({ msg, type });
+    setTimeout(() => setToast(null), 3000);
+  };
 
   const validate = () => {
     const e = {};
@@ -50,18 +56,21 @@ export default function WarehouseManagementPage() {
     if (Object.keys(errs).length) { setErrors(errs); return; }
     if (editId) {
       setWarehouses((prev) => prev.map((wh) => wh.id === editId ? { ...wh, ...form } : wh));
+      showToast("Warehouse updated successfully.");
     } else {
       setWarehouses((prev) => [...prev, { id: Date.now(), ...form }]);
+      showToast("Warehouse added successfully.");
     }
     setShowForm(false);
   };
 
   const toggleStatus = (id) => {
     setWarehouses((prev) => prev.map((wh) => wh.id === id ? { ...wh, status: wh.status === "Active" ? "Inactive" : "Active" } : wh));
+    setOpenMenu(null);
   };
 
   const filtered = warehouses.filter((wh) =>
-    `${wh.code} ${wh.name} ${wh.location}`.toLowerCase().includes(search.toLowerCase())
+    `${wh.code} ${wh.name} ${wh.location} ${wh.manager}`.toLowerCase().includes(search.toLowerCase())
   );
 
   const inputClass = (field) =>
@@ -71,6 +80,13 @@ export default function WarehouseManagementPage() {
 
   return (
     <div className="space-y-6">
+      {/* Toast */}
+      {toast && (
+        <div className={`fixed top-6 right-6 z-50 px-5 py-3 rounded-md shadow-lg text-sm font-semibold text-white ${toast.type === "error" ? "bg-red-600" : "bg-gray-900"}`}>
+          {toast.msg}
+        </div>
+      )}
+
       {/* Add/Edit Modal */}
       {showForm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
@@ -115,11 +131,15 @@ export default function WarehouseManagementPage() {
                   {errors.capacity && <p className="text-xs text-red-500 mt-1">{errors.capacity}</p>}
                 </div>
               </div>
+              <div>
+                <label className="block text-xs font-semibold text-gray-600 mb-1">Manager Name</label>
+                <input className={inputClass("manager")} value={form.manager} onChange={(e) => setForm({ ...form, manager: e.target.value })} placeholder="e.g. James Banda" />
+              </div>
               <div className="flex justify-end gap-3 pt-2">
                 <button type="button" onClick={() => setShowForm(false)} className="px-4 py-2 text-sm font-medium text-gray-600 border border-gray-200 rounded-md hover:bg-gray-50 transition-colors">
                   Cancel
                 </button>
-                <button type="submit" className="px-4 py-2 text-sm font-semibold text-white bg-gray-900 rounded-md hover:bg-gray-700 transition-colors">
+                <button type="submit" className="px-4 py-2 text-sm font-semibold text-white bg-[#1a5c2a] rounded-md hover:bg-[#134520] transition-colors">
                   {editId ? "Save Changes" : "Add Warehouse"}
                 </button>
               </div>
@@ -132,21 +152,36 @@ export default function WarehouseManagementPage() {
       <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
         <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
           <h2 className="text-sm font-bold text-gray-900">Warehouse Registry</h2>
-          <button
-            onClick={openAdd}
-            className="flex items-center gap-2 px-4 py-2 bg-[#1a5c2a] text-white text-sm font-semibold rounded-md hover:bg-[#134520] transition-colors"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-            </svg>
-            Warehouse
-          </button>
+          <div className="flex items-center gap-3">
+            {/* Search */}
+            <div className="relative">
+              <svg className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+              <input
+                type="text"
+                placeholder="Search warehouses..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="pl-9 pr-4 py-2 text-sm border border-gray-200 rounded-lg outline-none focus:border-[#1a5c2a] w-52"
+              />
+            </div>
+            <button
+              onClick={openAdd}
+              className="flex items-center gap-2 px-4 py-2 bg-[#1a5c2a] text-white text-sm font-semibold rounded-md hover:bg-[#134520] transition-colors"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+              </svg>
+              Add Warehouse
+            </button>
+          </div>
         </div>
         <div className="overflow-x-auto">
           <table className="w-auto min-w-full text-left text-sm">
             <thead>
               <tr className="border-b border-gray-100">
-                {["Name", "Location", "Capacity", "Manager", "Status", ""].map((h) => (
+                {["Code", "Name", "Location", "Capacity", "Manager", "Status", ""].map((h) => (
                   <th key={h} className="px-4 py-3 text-xs font-semibold text-gray-700">{h}</th>
                 ))}
               </tr>
@@ -154,18 +189,19 @@ export default function WarehouseManagementPage() {
             <tbody>
               {filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-4 py-10 text-center text-gray-400 text-sm">No warehouses found.</td>
+                  <td colSpan={7} className="px-4 py-10 text-center text-gray-400 text-sm">No warehouses found.</td>
                 </tr>
               ) : (
                 filtered.map((wh) => (
                   <tr key={wh.id} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
-                    <td className="px-4 py-3.5 text-sm font-medium text-gray-400">{wh.name}</td>
-                    <td className="px-4 py-3.5 text-xs text-gray-400">{wh.location}</td>
-                    <td className="px-4 py-3.5 text-xs text-gray-400">{wh.capacity}</td>
-                    <td className="px-4 py-3.5 text-xs text-gray-400">{wh.manager || "Unassigned"}</td>
+                    <td className="px-4 py-3.5 font-mono text-xs font-semibold text-gray-700">{wh.code}</td>
+                    <td className="px-4 py-3.5 text-sm font-medium text-gray-800">{wh.name}</td>
+                    <td className="px-4 py-3.5 text-xs text-gray-500">{wh.location}</td>
+                    <td className="px-4 py-3.5 text-xs text-gray-500">{wh.capacity}</td>
+                    <td className="px-4 py-3.5 text-xs text-gray-500">{wh.manager || <span className="text-gray-300">Unassigned</span>}</td>
                     <td className="px-4 py-3.5">
-                      <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-gray-400">
-                        <span className="w-1.5 h-1.5 rounded-full bg-gray-300" />
+                      <span className={`inline-flex items-center gap-1.5 text-xs font-semibold ${wh.status === "Active" ? "text-[#1a5c2a]" : "text-gray-400"}`}>
+                        <span className={`w-1.5 h-1.5 rounded-full ${wh.status === "Active" ? "bg-[#1a5c2a]" : "bg-gray-300"}`} />
                         {wh.status}
                       </span>
                     </td>
@@ -187,7 +223,7 @@ export default function WarehouseManagementPage() {
                             Edit
                           </button>
                           <button
-                            onClick={() => { toggleStatus(wh.id); setOpenMenu(null); }}
+                            onClick={() => toggleStatus(wh.id)}
                             className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
                           >
                             {wh.status === "Active" ? "Deactivate" : "Activate"}
@@ -200,6 +236,9 @@ export default function WarehouseManagementPage() {
               )}
             </tbody>
           </table>
+        </div>
+        <div className="px-5 py-3 border-t border-gray-50 text-xs text-gray-400">
+          {filtered.length} of {warehouses.length} warehouses
         </div>
       </div>
     </div>

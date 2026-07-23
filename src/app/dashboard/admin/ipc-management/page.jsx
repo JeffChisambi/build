@@ -2,53 +2,96 @@
 
 import { useState } from "react";
 
-const mockIPCs = [
+const INITIAL_IPCS = [
   { id: "IPC001", name: "Lilongwe IPC", district: "Lilongwe", manager: "Jane Doe", status: "Active", createdAt: "2024-01-15" },
   { id: "IPC002", name: "Mchinji IPC", district: "Mchinji", manager: "John Smith", status: "Active", createdAt: "2024-01-20" },
   { id: "IPC003", name: "Kasungu IPC", district: "Kasungu", manager: "Peter Banda", status: "Active", createdAt: "2024-02-10" },
   { id: "IPC004", name: "Mzimba IPC", district: "Mzimba", manager: "Grace Phiri", status: "Active", createdAt: "2024-03-05" },
 ];
 
+const emptyForm = { id: "", name: "", district: "", manager: "", status: "Active" };
+
 export default function IPCManagementPage() {
-  const [ipcs, setIpcs] = useState(mockIPCs);
+  const [ipcs, setIpcs] = useState(INITIAL_IPCS);
   const [search, setSearch] = useState("");
   const [showForm, setShowForm] = useState(false);
-  const [form, setForm] = useState({ id: "", name: "", district: "", status: "Active" });
+  const [editingCode, setEditingCode] = useState(null); // original IPC code being edited
+  const [form, setForm] = useState(emptyForm);
   const [errors, setErrors] = useState({});
+  const [openMenu, setOpenMenu] = useState(null);
+  const [toast, setToast] = useState(null);
+
+  const showToast = (msg, type = "success") => {
+    setToast({ msg, type });
+    setTimeout(() => setToast(null), 3000);
+  };
 
   const validate = () => {
     const e = {};
     if (!form.id.trim()) e.id = "IPC code is required";
     if (!form.name.trim()) e.name = "IPC name is required";
     if (!form.district.trim()) e.district = "District is required";
+    // On add, check for duplicate code
+    if (!editingCode && ipcs.some((ipc) => ipc.id === form.id.trim())) {
+      e.id = "IPC code already exists";
+    }
     return e;
   };
 
   const openAdd = () => {
-    setForm({ id: "", name: "", district: "", status: "Active" });
+    setForm(emptyForm);
     setErrors({});
+    setEditingCode(null);
     setShowForm(true);
+  };
+
+  const openEdit = (ipc) => {
+    setForm({ id: ipc.id, name: ipc.name, district: ipc.district, manager: ipc.manager || "", status: ipc.status });
+    setErrors({});
+    setEditingCode(ipc.id);
+    setShowForm(true);
+    setOpenMenu(null);
+  };
+
+  const handleToggleStatus = (ipcId) => {
+    setIpcs((prev) =>
+      prev.map((ipc) =>
+        ipc.id === ipcId ? { ...ipc, status: ipc.status === "Active" ? "Inactive" : "Active" } : ipc
+      )
+    );
+    setOpenMenu(null);
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
     const err = validate();
-    if (Object.keys(err).length) {
-      setErrors(err);
-      return;
-    }
+    if (Object.keys(err).length) { setErrors(err); return; }
 
-    setIpcs((prev) => [
-      ...prev,
-      {
-        id: form.id.trim(),
-        name: form.name.trim(),
-        district: form.district.trim(),
-        manager: "",
-        status: form.status,
-        createdAt: new Date().toISOString().slice(0, 10),
-      },
-    ]);
+    if (editingCode) {
+      // Edit existing
+      setIpcs((prev) =>
+        prev.map((ipc) =>
+          ipc.id === editingCode
+            ? { ...ipc, id: form.id.trim(), name: form.name.trim(), district: form.district.trim(), manager: form.manager.trim(), status: form.status }
+            : ipc
+        )
+      );
+      showToast("IPC updated successfully.");
+    } else {
+      // Add new
+      setIpcs((prev) => [
+        ...prev,
+        {
+          id: form.id.trim(),
+          name: form.name.trim(),
+          district: form.district.trim(),
+          manager: form.manager.trim(),
+          status: form.status,
+          createdAt: new Date().toISOString().slice(0, 10),
+        },
+      ]);
+      showToast("IPC added successfully.");
+    }
     setShowForm(false);
   };
 
@@ -63,6 +106,13 @@ export default function IPCManagementPage() {
 
   return (
     <div className="space-y-6">
+      {/* Toast */}
+      {toast && (
+        <div className={`fixed top-6 right-6 z-50 px-5 py-3 rounded-md shadow-lg text-sm font-semibold text-white ${toast.type === "error" ? "bg-red-600" : "bg-gray-900"}`}>
+          {toast.msg}
+        </div>
+      )}
+
       <div className="flex items-start justify-between">
         <div>
           <p className="text-xs text-gray-400 uppercase tracking-wider font-medium mb-1">Administration</p>
@@ -76,15 +126,16 @@ export default function IPCManagementPage() {
           <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
           </svg>
-          IPC
+          Add IPC
         </button>
       </div>
 
+      {/* Add / Edit Modal */}
       {showForm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-4">
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-              <h2 className="text-base font-bold text-gray-900">Add New IPC</h2>
+              <h2 className="text-base font-bold text-gray-900">{editingCode ? "Edit IPC" : "Add New IPC"}</h2>
               <button onClick={() => setShowForm(false)} className="text-gray-400 hover:text-gray-600 transition-colors">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -95,12 +146,22 @@ export default function IPCManagementPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-semibold text-gray-600 mb-1">IPC Code *</label>
-                  <input className={inputClass("id")} value={form.id} onChange={(e) => setForm({ ...form, id: e.target.value })} placeholder="e.g. IPC005" />
+                  <input
+                    className={inputClass("id")}
+                    value={form.id}
+                    onChange={(e) => setForm({ ...form, id: e.target.value })}
+                    placeholder="e.g. IPC005"
+                    readOnly={!!editingCode}
+                  />
                   {errors.id && <p className="text-xs text-red-500 mt-1">{errors.id}</p>}
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-gray-600 mb-1">Status</label>
-                  <select className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg outline-none focus:border-[#1a5c2a]" value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })}>
+                  <select
+                    className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg outline-none focus:border-[#1a5c2a]"
+                    value={form.status}
+                    onChange={(e) => setForm({ ...form, status: e.target.value })}
+                  >
                     <option>Active</option>
                     <option>Inactive</option>
                   </select>
@@ -116,13 +177,16 @@ export default function IPCManagementPage() {
                 <input className={inputClass("district")} value={form.district} onChange={(e) => setForm({ ...form, district: e.target.value })} placeholder="e.g. Lilongwe" />
                 {errors.district && <p className="text-xs text-red-500 mt-1">{errors.district}</p>}
               </div>
-              <p className="text-sm text-gray-500">IPC managers will be assigned later through user account creation.</p>
+              <div>
+                <label className="block text-xs font-semibold text-gray-600 mb-1">Manager Name</label>
+                <input className={inputClass("manager")} value={form.manager} onChange={(e) => setForm({ ...form, manager: e.target.value })} placeholder="e.g. Jane Banda" />
+              </div>
               <div className="flex justify-end gap-3 pt-2">
                 <button type="button" onClick={() => setShowForm(false)} className="px-4 py-2 text-sm font-medium text-gray-600 border border-gray-200 rounded-md hover:bg-gray-50 transition-colors">
                   Cancel
                 </button>
-                <button type="submit" className="px-4 py-2 text-sm font-semibold text-white bg-gray-900 rounded-md hover:bg-gray-700 transition-colors">
-                  Add IPC
+                <button type="submit" className="px-4 py-2 text-sm font-semibold text-white bg-[#1a5c2a] rounded-md hover:bg-[#134520] transition-colors">
+                  {editingCode ? "Save Changes" : "Add IPC"}
                 </button>
               </div>
             </form>
@@ -166,21 +230,48 @@ export default function IPCManagementPage() {
                     <td className="px-5 py-3.5 font-mono text-xs font-semibold text-gray-700">{ipc.id}</td>
                     <td className="px-5 py-3.5 font-medium text-gray-900">{ipc.name}</td>
                     <td className="px-5 py-3.5 text-gray-600">{ipc.district}</td>
-                    <td className="px-5 py-3.5 text-gray-600">{ipc.manager}</td>
+                    <td className="px-5 py-3.5 text-gray-600">{ipc.manager || <span className="text-gray-300">—</span>}</td>
                     <td className="px-5 py-3.5 text-gray-500 text-xs">{ipc.createdAt}</td>
                     <td className="px-5 py-3.5">
-                      <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold ${ipc.status === "Active" ? "bg-gray-100 text-gray-600" : "bg-gray-50 text-gray-400"}`}>
+                      <span className={`inline-flex items-center gap-1.5 text-xs font-semibold ${ipc.status === "Active" ? "text-[#1a5c2a]" : "text-gray-400"}`}>
+                        <span className={`w-1.5 h-1.5 rounded-full ${ipc.status === "Active" ? "bg-[#1a5c2a]" : "bg-gray-300"}`} />
                         {ipc.status}
                       </span>
                     </td>
-                    <td className="px-5 py-3.5">
-                      <button className="text-xs font-semibold text-gray-700 hover:underline">Edit</button>
+                    <td className="px-5 py-3.5 relative">
+                      <button
+                        onClick={() => setOpenMenu(openMenu === ipc.id ? null : ipc.id)}
+                        className="p-1 rounded hover:bg-gray-100 text-gray-500 transition-colors"
+                      >
+                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                          <circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/>
+                        </svg>
+                      </button>
+                      {openMenu === ipc.id && (
+                        <div className="absolute right-5 top-10 z-20 bg-white border border-gray-100 rounded-lg shadow-lg w-36 overflow-hidden">
+                          <button
+                            onClick={() => openEdit(ipc)}
+                            className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => handleToggleStatus(ipc.id)}
+                            className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                          >
+                            {ipc.status === "Active" ? "Deactivate" : "Activate"}
+                          </button>
+                        </div>
+                      )}
                     </td>
                   </tr>
                 ))
               )}
             </tbody>
           </table>
+        </div>
+        <div className="px-5 py-3 border-t border-gray-50 text-xs text-gray-400">
+          {filtered.length} of {ipcs.length} IPCs
         </div>
       </div>
     </div>

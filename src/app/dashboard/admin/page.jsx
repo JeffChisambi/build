@@ -327,33 +327,6 @@ function PurchasingRevenueChart() {
   );
 }
 
-function StatusAlert({ type, title, message, actionText, onAction }) {
-  const styles = {
-    success: "bg-gray-100 border-gray-200",
-    warning: "bg-gray-100 border-gray-200",
-    info: "bg-gray-100 border-gray-200",
-  };
-
-  return (
-    <div className={`rounded-lg border p-4 ${styles[type]}`}>
-      <div className="flex items-start justify-between">
-        <div>
-          <p className="font-semibold text-gray-900">{title}</p>
-          <p className="text-sm text-gray-600 mt-1">{message}</p>
-        </div>
-        {actionText && (
-          <button
-            onClick={onAction}
-            className="text-sm font-semibold text-gray-700 hover:text-gray-900 bg-white border border-gray-200 px-3 py-1.5 rounded whitespace-nowrap ml-3 transition-colors"
-          >
-            {actionText}
-          </button>
-        )}
-      </div>
-    </div>
-  );
-}
-
 // Main Page
 export default function AdminDashboardPage() {
   const router = useRouter();
@@ -363,6 +336,64 @@ export default function AdminDashboardPage() {
   const totalRoles = SEED_ROLES.length;
   const totalIPCs = mockIPCs.length;
   const devicesSynced = mockSyncDevices.filter(d => d.syncStatus === "Synced").length;
+
+  const modules = [
+    {
+      icon: Icons.users,
+      title: "User Management",
+      description: "Manage system users, farmers, and account access.",
+      href: "/dashboard/admin/users",
+      stats: [
+        { value: totalUsers, label: "Total Users" },
+        { value: activeUsers, label: "Active" },
+      ],
+    },
+    {
+      icon: Icons.roles,
+      title: "Roles & Permissions",
+      description: "Define roles and control access across the platform.",
+      href: "/dashboard/admin/roles",
+      stats: [
+        { value: totalRoles, label: "Roles" },
+      ],
+    },
+    {
+      icon: Icons.warehouse,
+      title: "Warehouse Management",
+      description: "Configure and monitor warehouse locations and capacity.",
+      href: "/dashboard/admin/warehouse-management",
+    },
+    {
+      icon: Icons.ipc,
+      title: "IPC Management",
+      description: "Register and manage IPC master records.",
+      href: "/dashboard/admin/ipc-management",
+      stats: [
+        { value: totalIPCs, label: "IPCs" },
+      ],
+    },
+    {
+      icon: Icons.sync,
+      title: "Sync Management",
+      description: "Monitor mobile device synchronization and data health.",
+      href: "/dashboard/admin/sync-management",
+      stats: [
+        { value: devicesSynced, label: "Devices Synced" },
+      ],
+    },
+    {
+      icon: Icons.audit,
+      title: "Audit Logs",
+      description: "Review system events, user actions, and security alerts.",
+      href: "/dashboard/admin/audit-logs",
+    },
+    {
+      icon: Icons.settings,
+      title: "System Settings",
+      description: "Configure notifications, security policies, and email settings.",
+      href: "/dashboard/admin/settings",
+    },
+  ];
 
   return (
     <div className="p-6 space-y-8 max-w-[1400px] mx-auto">
@@ -397,9 +428,24 @@ export default function AdminDashboardPage() {
           trend="5.12%"
           trendUp={true}
         />
-
       </div>
 
+      {/* ── Admin Modules ── */}
+      <div>
+        <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Administration Modules</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
+          {modules.map((mod) => (
+            <ModuleCard
+              key={mod.href}
+              icon={mod.icon}
+              title={mod.title}
+              description={mod.description}
+              stats={mod.stats}
+              onClick={() => router.push(mod.href)}
+            />
+          ))}
+        </div>
+      </div>
 
       {/* ── Chart + Side Cards ── */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
@@ -436,9 +482,6 @@ export default function AdminDashboardPage() {
           </div>
         </div>
       </div>
-
-
-
 
     </div>
   );
