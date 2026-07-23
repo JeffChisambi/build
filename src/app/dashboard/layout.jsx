@@ -529,7 +529,7 @@ export default function DashboardLayout({ children }) {
                 backgroundColor: theme === "dark" ? "var(--surface-input)" : "var(--surface-input)",
                 color: theme === "dark" ? "#e2e8f0" : "#111827",
               }}
-              className="w-full pl-9 pr-4 py-2 border border-[var(--border-default)] focus:border-[#1a5c2a] focus:ring-0 focus:outline-none rounded-lg text-sm transition-all"
+              className="w-full pl-9 pr-4 py-2 border-0 focus:ring-0 focus:outline-none rounded-lg text-sm transition-all"
             />
           </div>
 
