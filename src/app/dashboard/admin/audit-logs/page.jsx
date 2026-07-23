@@ -1,6 +1,57 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
+
+function formatAction(action) {
+  if (!action || action === "All") return "All Actions";
+  return action
+    .split("_")
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+    .join(" ");
+}
+
+function ActionDropdown({ value, options, onChange }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+
+  // Close on outside click
+  if (typeof window !== "undefined") {
+    // handled via onBlur pattern below
+  }
+
+  return (
+    <div className="relative" ref={ref}>
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        className="flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors min-w-[160px] justify-between"
+      >
+        <span>{formatAction(value)}</span>
+        <svg className={`w-4 h-4 text-gray-400 transition-transform ${open ? "rotate-180" : ""}`} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+      {open && (
+        <div className="absolute right-0 z-20 mt-1 w-52 rounded-xl border border-gray-100 bg-white shadow-lg overflow-hidden">
+          {options.map((opt) => (
+            <button
+              key={opt}
+              type="button"
+              onClick={() => { onChange(opt); setOpen(false); }}
+              className={`w-full text-left px-4 py-2.5 text-sm transition-colors ${
+                value === opt
+                  ? "bg-[#1a5c2a]/8 text-[#1a5c2a] font-semibold"
+                  : "text-gray-700 hover:bg-gray-50"
+              }`}
+            >
+              {formatAction(opt)}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 const Icons = {
   search: (
@@ -155,15 +206,7 @@ export default function AuditLogsPage() {
             />
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <select
-              value={filterAction}
-              onChange={(e) => setFilterAction(e.target.value)}
-              className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 outline-none"
-            >
-              {uniqueActions.map((action) => (
-                <option key={action} value={action}>{action}</option>
-              ))}
-            </select>
+            <ActionDropdown value={filterAction} options={uniqueActions} onChange={setFilterAction} />
             <button onClick={exportAuditLogs} className="rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50">
               Export Excel
             </button>
@@ -193,7 +236,7 @@ export default function AuditLogsPage() {
                       {new Date(log.timestamp).toLocaleString("en-GB", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}
                     </td>
                     <td className="px-5 py-3.5 text-sm font-medium text-gray-400">{log.user}</td>
-                    <td className="px-5 py-3.5 text-xs text-gray-400 font-mono">{log.action}</td>
+                    <td className="px-5 py-3.5 text-xs text-gray-400">{formatAction(log.action)}</td>
                     <td className="px-5 py-3.5 text-xs text-gray-400">{log.module}</td>
                     <td className="px-5 py-3.5">
                       <SeverityBadge severity={log.severity} />
