@@ -233,10 +233,7 @@ const NAV_GROUPS = [
   {
     section: "Analytics",
     items: [
-      { name: "KPI", href: "/dashboard/analytics/kpis", matchPrefix: "/dashboard/analytics/kpis", icon: ALL_NAV_ITEMS.find(i => i.name === 'Analytics')?.icon },
-      { name: "Forecasts", href: "/dashboard/analytics/forecasts", matchPrefix: "/dashboard/analytics/forecasts" },
-      { name: "IPC Comparison", href: "/dashboard/analytics/ipc-comparison", matchPrefix: "/dashboard/analytics/ipc-comparison" },
-      { name: "Production Trends", href: "/dashboard/analytics/production-trends", matchPrefix: "/dashboard/analytics/production-trends" },
+      { name: "Production Trends", href: "/dashboard/analytics/production-trends", matchPrefix: "/dashboard/analytics/production-trends", icon: ALL_NAV_ITEMS.find(i => i.name === 'Analytics')?.icon },
       { name: "Warehouse Performance", href: "/dashboard/analytics/warehouse-performance", matchPrefix: "/dashboard/analytics/warehouse-performance" },
     ],
   },
