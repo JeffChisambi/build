@@ -173,7 +173,7 @@ export default function FarmerProfilesPage() {
   return (
     <div className="p-6 space-y-4">
       {/* Card */}
-      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+      <div className="bg-white rounded-xl border border-gray-200">
 
         {/* Card header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
@@ -196,7 +196,7 @@ export default function FarmerProfilesPage() {
         </div>
 
         {/* Table */}
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto overflow-hidden rounded-b-xl">
           <table className="w-full text-sm text-left">
             <thead>
               <tr className="border-b border-gray-100">
