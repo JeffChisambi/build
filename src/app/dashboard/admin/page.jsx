@@ -430,23 +430,6 @@ export default function AdminDashboardPage() {
         />
       </div>
 
-      {/* ── Admin Modules ── */}
-      <div>
-        <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Administration Modules</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
-          {modules.map((mod) => (
-            <ModuleCard
-              key={mod.href}
-              icon={mod.icon}
-              title={mod.title}
-              description={mod.description}
-              stats={mod.stats}
-              onClick={() => router.push(mod.href)}
-            />
-          ))}
-        </div>
-      </div>
-
       {/* ── Chart + Side Cards ── */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Chart takes 2/3 */}
