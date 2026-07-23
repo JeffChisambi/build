@@ -184,19 +184,24 @@ export default function IPCManagerDashboard({ firstName }) {
               Procurement volume — <span className="font-medium text-gray-600">{p.label}</span>
             </p>
             {(() => {
-              const chartH = 200, barW = 36, gap = 18, paddingL = 64, paddingB = 36, paddingT = 20;
+              const chartH = 200, paddingL = 64, paddingB = 36, paddingT = 20;
+              const viewBoxW = 650;
               const targetData = p.data;
               const maxVal = Math.max(...targetData.map(d => d.value));
-              const totalW = paddingL + targetData.length * (barW + gap) - gap + 20;
+              const n = targetData.length;
+              const available = viewBoxW - paddingL - 10;
+              // same 2:1 barW:gap ratio as admin, scaled to fill available width
+              const barW = Math.floor(available / (n + (n - 1) * 0.5));
+              const gap = Math.floor(barW * 0.5);
               const yLabels = [0, 25, 50, 75, 100];
               return (
                 <div className="w-full">
-                  <svg width="100%" viewBox={`0 0 ${totalW - 20} ${chartH + paddingB + paddingT}`} className="block">
+                  <svg width="100%" viewBox={`0 0 ${viewBoxW} ${chartH + paddingB + paddingT}`} className="block">
                     {yLabels.map((pct) => {
                       const y = paddingT + chartH - (pct / 100) * chartH;
                       return (
                         <g key={pct}>
-                          <line x1={paddingL} x2={totalW - 10} y1={y} y2={y} stroke="#f0f0f0" strokeWidth="1" />
+                          <line x1={paddingL} x2={viewBoxW - 10} y1={y} y2={y} stroke="#f0f0f0" strokeWidth="1" />
                           <text x={paddingL - 8} y={y + 4} textAnchor="end" fontSize="11" fill="#9ca3af">{pct}%</text>
                         </g>
                       );
