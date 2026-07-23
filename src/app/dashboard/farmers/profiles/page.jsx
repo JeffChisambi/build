@@ -1,64 +1,153 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import Link from "next/link";
 import { SEED_FARMERS } from "@/lib/mockFarmers";
 
-function StatusBadge({ status }) {
-  const colors = {
-    "Active": "bg-gray-100 text-gray-600",
-    "Inactive": "bg-gray-50 text-gray-400",
-    "Pending Verification": "bg-yellow-50 text-yellow-700",
-  };
+// ── Initials avatar ──────────────────────────────────────────
+function Avatar({ name }) {
+  const initials = name
+    .split(" ")
+    .map((n) => n[0])
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
   return (
-    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold ${colors[status] || "bg-gray-100 text-gray-600"}`}>
+    <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0">
+      <span className="text-xs font-semibold text-gray-600">{initials}</span>
+    </div>
+  );
+}
+
+// ── Status dot + label ───────────────────────────────────────
+function StatusDot({ status }) {
+  const dot = {
+    Active: "bg-green-500",
+    Inactive: "bg-gray-400",
+    "Pending Verification": "bg-amber-400",
+  }[status] || "bg-gray-400";
+  return (
+    <span className="flex items-center gap-1.5 text-sm text-gray-600 whitespace-nowrap">
+      <span className={`w-2 h-2 rounded-full flex-shrink-0 ${dot}`} />
       {status}
     </span>
   );
 }
 
-function StatCard({ title, value, icon }) {
+// ── Row "⋯" menu ─────────────────────────────────────────────
+function RowMenu({ farmer }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [open]);
+
   return (
-    <div className="bg-white rounded-md border border-gray-200 p-5 transition-shadow\">
-      {icon && (
-        <div className="text-gray-600 mb-4">
-          {icon}
+    <div className="relative" ref={ref}>
+      <button
+        onClick={() => setOpen((p) => !p)}
+        className="p-1.5 rounded-md text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors"
+      >
+        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+          <circle cx="5" cy="12" r="1.5" /><circle cx="12" cy="12" r="1.5" /><circle cx="19" cy="12" r="1.5" />
+        </svg>
+      </button>
+      {open && (
+        <div className="absolute right-0 top-full mt-1 w-36 bg-white border border-gray-200 rounded-lg shadow-lg z-20 py-1">
+          <Link
+            href={`/dashboard/farmers/profiles/${farmer.id}`}
+            className="block px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
+            onClick={() => setOpen(false)}
+          >
+            View profile
+          </Link>
+          <button className="block w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-50">
+            Edit
+          </button>
         </div>
       )}
-      <h3 className="text-2xl font-bold text-gray-900">{value}</h3>
-      <p className="text-sm font-semibold text-gray-700 mt-1">{title}</p>
     </div>
   );
 }
 
+// ── Filter dropdown anchored to "Farmers ∨" ──────────────────
+function FilterDropdown({ filters, onChange, onClear, districts, associations }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+  const hasFilters = Object.values(filters).some((v) => v !== "");
+
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [open]);
+
+  return (
+    <div className="relative" ref={ref}>
+      <button
+        onClick={() => setOpen((p) => !p)}
+        className="flex items-center gap-1.5 text-base font-bold text-gray-900 hover:text-gray-700 transition-colors"
+      >
+        Farmers
+        <svg className={`w-4 h-4 text-gray-500 transition-transform ${open ? "rotate-180" : ""}`} fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+        </svg>
+        {hasFilters && <span className="w-2 h-2 rounded-full bg-[#1a5c2a]" />}
+      </button>
+
+      {open && (
+        <div className="absolute left-0 top-full mt-2 w-64 bg-white border border-gray-200 rounded-xl shadow-lg z-20 p-4 space-y-3">
+          <div>
+            <label className="block text-xs font-semibold text-gray-500 mb-1">District</label>
+            <select
+              value={filters.district}
+              onChange={(e) => onChange("district", e.target.value)}
+              className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-700 outline-none focus:ring-2 focus:ring-gray-100 focus:border-gray-400"
+            >
+              <option value="">All Districts</option>
+              {districts.map((d) => <option key={d} value={d}>{d}</option>)}
+            </select>
+          </div>
+          <div>
+            <label className="block text-xs font-semibold text-gray-500 mb-1">Association</label>
+            <select
+              value={filters.association}
+              onChange={(e) => onChange("association", e.target.value)}
+              className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-700 outline-none focus:ring-2 focus:ring-gray-100 focus:border-gray-400"
+            >
+              <option value="">All Associations</option>
+              {associations.map((a) => <option key={a} value={a}>{a}</option>)}
+            </select>
+          </div>
+          {hasFilters && (
+            <button
+              onClick={() => { onClear(); setOpen(false); }}
+              className="w-full text-xs font-semibold text-red-600 hover:text-red-700 text-left"
+            >
+              Clear filters
+            </button>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Page ─────────────────────────────────────────────────────
 export default function FarmerProfilesPage() {
   const [farmers] = useState(SEED_FARMERS);
-  const [filters, setFilters] = useState({
-    district: "",
-    association: "",
-  });
-  
-  // Pagination State
+  const [filters, setFilters] = useState({ district: "", association: "" });
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
-  // Sorting State
-  const [sortField, setSortField] = useState("registrationDate");
-  const [sortDirection, setSortDirection] = useState("desc");
-
-  // Toggle sorting
-  const handleSort = (field) => {
-    if (sortField === field) {
-      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
-    } else {
-      setSortField(field);
-      setSortDirection("asc");
-    }
-  };
-
   const handleFilterChange = (field, val) => {
-    setFilters(prev => ({ ...prev, [field]: val }));
-    setCurrentPage(1); // Reset to first page
+    setFilters((prev) => ({ ...prev, [field]: val }));
+    setCurrentPage(1);
   };
 
   const clearFilters = () => {
@@ -66,179 +155,90 @@ export default function FarmerProfilesPage() {
     setCurrentPage(1);
   };
 
-  // Derived filtered & sorted data
-  const processedFarmers = useMemo(() => {
-    return farmers
-      .filter((f) => {
-        // Advanced Filters
-        const matchesDistrict = filters.district === "" || f.district === filters.district;
-        const matchesAssociation = filters.association === "" || f.association === filters.association;
+  const processedFarmers = useMemo(() =>
+    farmers.filter((f) => {
+      const matchesDistrict = filters.district === "" || f.district === filters.district;
+      const matchesAssociation = filters.association === "" || f.association === filters.association;
+      return matchesDistrict && matchesAssociation;
+    }),
+    [farmers, filters]
+  );
 
-        return matchesDistrict && matchesAssociation;
-      })
-      .sort((a, b) => {
-        const valA = a[sortField];
-        const valB = b[sortField];
-        if (valA < valB) return sortDirection === "asc" ? -1 : 1;
-        if (valA > valB) return sortDirection === "asc" ? 1 : -1;
-        return 0;
-      });
-  }, [farmers, filters, sortField, sortDirection]);
-
-  // Pagination calculations
   const totalPages = Math.max(1, Math.ceil(processedFarmers.length / itemsPerPage));
   const paginatedFarmers = processedFarmers.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
 
-  // Statistics
-  const stats = useMemo(() => {
-    const total = farmers.length;
-    const active = farmers.filter(f => f.status === "Active").length;
-    const inactive = farmers.filter(f => f.status === "Inactive").length;
-    const pending = farmers.filter(f => f.status === "Pending Verification").length;
-    
-    // Simplistic 'registered this month' calculation
-    const currentMonth = new Date().getMonth();
-    const registeredThisMonth = farmers.filter(f => new Date(f.registrationDate).getMonth() === currentMonth).length;
-    
-    const male = farmers.filter(f => f.gender === "Male").length;
-    const female = farmers.filter(f => f.gender === "Female").length;
-
-    return { total, active, inactive, pending, registeredThisMonth, male, female };
-  }, [farmers]);
-
-  // Extract unique values for filters
-  const districts = [...new Set(farmers.map(f => f.district))];
-  const associations = [...new Set(farmers.map(f => f.association))];
+  const districts = [...new Set(farmers.map((f) => f.district))];
+  const associations = [...new Set(farmers.map((f) => f.association))];
 
   return (
-    <div className="space-y-6 relative pb-10">
-      {/* KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <StatCard title="Total Farmers" value={stats.total} icon={
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-        } />
-        <StatCard title="Active Farmers" value={stats.active} icon={
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-        } />
-        <StatCard title="Inactive Farmers" value={stats.inactive} icon={
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-        } />
-      </div>
+    <div className="p-6 space-y-4">
+      {/* Card */}
+      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
 
-      {/* Main Content Area */}
-      <div className="bg-white rounded-md border border-gray-200 overflow-hidden">
-        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-50">
-          <div>
-            <p className="text-xs text-gray-400">{processedFarmers.length} of {stats.total} farmers</p>
-          </div>
-          <div className="flex items-center gap-2">
-            <select value={filters.district} onChange={(e) => handleFilterChange("district", e.target.value)}
-              className="px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-xs font-medium text-gray-700 focus:ring-2 focus:ring-green-100 focus:border-[#1a5c2a] outline-none">
-              <option value="">All Districts</option>
-              {districts.map(d => <option key={d} value={d}>{d}</option>)}
-            </select>
-            <select value={filters.association} onChange={(e) => handleFilterChange("association", e.target.value)}
-              className="px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-xs font-medium text-gray-700 focus:ring-2 focus:ring-green-100 focus:border-[#1a5c2a] outline-none">
-              <option value="">All Associations</option>
-              {associations.map(a => <option key={a} value={a}>{a}</option>)}
-            </select>
-
-            {Object.values(filters).some(x => x !== "") && (
-               <button onClick={clearFilters} className="px-3 py-1.5 text-xs font-medium text-red-600 bg-red-50 border border-red-100 rounded-lg hover:bg-red-100 transition-colors">
-                  Reset
-               </button>
-            )}
-            <button className="flex items-center gap-1.5 text-xs font-semibold text-gray-500 hover:text-gray-700 px-3 py-1.5 rounded-lg hover:bg-gray-50 transition-colors border border-gray-200">
-               Export CSV
-            </button>
-            <Link href="/dashboard/farmers/registration" className="flex items-center gap-2 px-3 py-1.5 bg-[#1a5c2a] text-white text-xs font-semibold rounded-lg hover:bg-[#134520] transition-colors shadow-sm">
-              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-              </svg>
-              Farmer
-            </Link>
-          </div>
+        {/* Card header */}
+        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+          <FilterDropdown
+            filters={filters}
+            onChange={handleFilterChange}
+            onClear={clearFilters}
+            districts={districts}
+            associations={associations}
+          />
+          <Link
+            href="/dashboard/farmers/registration"
+            className="flex items-center gap-2 px-4 py-2 bg-[#1a5c2a] text-white text-sm font-semibold rounded-lg hover:bg-[#134520] transition-colors"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+            </svg>
+            Farmer
+          </Link>
         </div>
 
         {/* Table */}
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm">
-            <thead className="bg-gray-50 border-b border-gray-100">
-              <tr>
-                <th className="px-4 py-3">
-                  <input type="checkbox" className="w-4 h-4 rounded accent-[#1a5c2a] cursor-pointer" />
-                </th>
-                {[
-                  { label: "Farmer", field: "fullName" },
-                  { label: "Location", field: "district" },
-                  { label: "Status", field: "status" },
-                ].map((col) => (
-                  <th key={col.field} onClick={() => handleSort(col.field)}
-                    className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider whitespace-nowrap cursor-pointer hover:bg-gray-100 transition-colors">
-                    <div className="flex items-center gap-1">
-                      {col.label}
-                      {sortField === col.field && (
-                        <svg className={`w-3.5 h-3.5 text-gray-400 transition-transform ${sortDirection === 'desc' ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M5 15l7-7 7 7" />
-                        </svg>
-                      )}
-                    </div>
-                  </th>
-                ))}
-                <th className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider text-right">Actions</th>
+          <table className="w-full text-sm text-left">
+            <thead>
+              <tr className="border-b border-gray-100">
+                <th className="px-6 py-3 text-xs font-semibold text-gray-500">Name</th>
+                <th className="px-6 py-3 text-xs font-semibold text-gray-500">District</th>
+                <th className="px-6 py-3 text-xs font-semibold text-gray-500">Association</th>
+                <th className="px-6 py-3 text-xs font-semibold text-gray-500">Status</th>
+                <th className="px-6 py-3" />
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-50">
+            <tbody>
               {paginatedFarmers.length === 0 ? (
                 <tr>
-                  <td colSpan={9} className="px-5 py-12 text-center">
-                    <div className="flex flex-col items-center justify-center">
-                       <div className="w-12 h-12 rounded-full bg-gray-50 flex items-center justify-center mb-3">
-                          <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                          </svg>
-                       </div>
-                       <p className="text-sm font-semibold text-gray-900">No farmers found</p>
-                       <p className="text-sm text-gray-400 mt-1">Try adjusting your search or filters.</p>
-                    </div>
+                  <td colSpan={5} className="px-6 py-12 text-center text-sm text-gray-400">
+                    No farmers found matching your filters.
                   </td>
                 </tr>
               ) : paginatedFarmers.map((f) => (
-                <tr key={f.id} className="hover:bg-gray-50/50 transition-colors group">
-                  <td className="px-4 py-3.5">
-                    <input type="checkbox" className="w-4 h-4 rounded accent-[#1a5c2a] cursor-pointer" />
-                  </td>
-                  <td className="px-4 py-3.5">
+                <tr key={f.id} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
+                  {/* Name */}
+                  <td className="px-6 py-3.5">
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0 border border-gray-200">
-                        {f.photoUrl ? (
-                          <img src={f.photoUrl} alt="" className="w-full h-full rounded-full object-cover" />
-                        ) : (
-                          <span className="text-xs font-bold text-gray-600">
-                            {f.fullName.split(" ").map(n => n[0]).slice(0,2).join("")}
-                          </span>
-                        )}
-                      </div>
-                      <div className="min-w-0">
-                        <span className="font-semibold text-gray-900 block truncate">{f.fullName}</span>
-                      </div>
+                      <Avatar name={f.fullName} />
+                      <span className="font-medium text-gray-900 truncate max-w-[160px]">{f.fullName}</span>
                     </div>
                   </td>
-                  <td className="px-4 py-3.5">
-                    <span className="block text-gray-900">{f.village}</span>
-                    <span className="block text-xs text-gray-500">{f.district}</span>
+                  {/* District */}
+                  <td className="px-6 py-3.5 text-gray-600">{f.district}</td>
+                  {/* Association */}
+                  <td className="px-6 py-3.5 text-gray-600 max-w-[180px]">
+                    <span className="block truncate">{f.association}</span>
                   </td>
-                  <td className="px-4 py-3.5">
-                    <StatusBadge status={f.status} />
+                  {/* Status */}
+                  <td className="px-6 py-3.5">
+                    <StatusDot status={f.status} />
                   </td>
-                  <td className="px-4 py-3.5 text-right">
-                    <div className="flex items-center justify-end gap-3">
-                      <Link href={`/dashboard/farmers/profiles/${f.id}`} className="text-xs font-semibold text-[#1a5c2a] hover:underline">View</Link>
-                      <button className="text-xs font-semibold text-gray-500 hover:text-gray-900">Edit</button>
-                    </div>
+                  {/* Menu */}
+                  <td className="px-6 py-3.5 text-right">
+                    <RowMenu farmer={f} />
                   </td>
                 </tr>
               ))}
@@ -247,29 +247,30 @@ export default function FarmerProfilesPage() {
         </div>
 
         {/* Pagination */}
-        <div className="flex items-center justify-between px-5 py-3 border-t border-gray-100 bg-gray-50/50">
-          <p className="text-xs text-gray-500">
-            Showing <span className="font-semibold text-gray-900">{Math.min(processedFarmers.length, (currentPage - 1) * itemsPerPage + 1)}</span> to{" "}
-            <span className="font-semibold text-gray-900">{Math.min(processedFarmers.length, currentPage * itemsPerPage)}</span> of{" "}
-            <span className="font-semibold text-gray-900">{processedFarmers.length}</span> results
-          </p>
-          <div className="flex gap-1">
-            <button 
-              disabled={currentPage === 1}
-              onClick={() => setCurrentPage(p => p - 1)}
-              className="px-3 py-1.5 text-xs font-semibold text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              Previous
-            </button>
-            <button 
-              disabled={currentPage === totalPages || totalPages === 0}
-              onClick={() => setCurrentPage(p => p + 1)}
-              className="px-3 py-1.5 text-xs font-semibold text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              Next
-            </button>
+        {totalPages > 1 && (
+          <div className="flex items-center justify-between px-6 py-3 border-t border-gray-100">
+            <p className="text-xs text-gray-500">
+              {Math.min(processedFarmers.length, (currentPage - 1) * itemsPerPage + 1)}–
+              {Math.min(processedFarmers.length, currentPage * itemsPerPage)} of {processedFarmers.length}
+            </p>
+            <div className="flex gap-1">
+              <button
+                disabled={currentPage === 1}
+                onClick={() => setCurrentPage((p) => p - 1)}
+                className="px-3 py-1.5 text-xs font-semibold text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                Previous
+              </button>
+              <button
+                disabled={currentPage === totalPages}
+                onClick={() => setCurrentPage((p) => p + 1)}
+                className="px-3 py-1.5 text-xs font-semibold text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                Next
+              </button>
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
