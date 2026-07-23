@@ -320,7 +320,7 @@ function NavGroup({ group, pathname, collapsed, badgeMap, allowed, activeGroup, 
         <Link href={item.href} aria-label={item.name} className={[
           'flex items-center gap-3 rounded-lg transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-400',
           collapsed ? 'px-[13px] py-2.5 justify-center' : 'px-3 py-2.5',
-          isActive ? 'bg-gray-200 text-gray-700' : 'text-gray-500 hover:bg-gray-100 hover:text-gray-700'
+          isActive ? 'bg-gray-300 text-gray-700' : 'text-gray-500 hover:bg-gray-200 hover:text-gray-700'
         ].join(' ')}>
           <span className="flex-shrink-0">{item.icon}</span>
           {!collapsed && <span className="text-sm font-medium truncate">{item.name}</span>}
@@ -361,7 +361,7 @@ function NavGroup({ group, pathname, collapsed, badgeMap, allowed, activeGroup, 
               'flex items-center gap-3 rounded-lg transition-all duration-150',
               collapsed ? 'px-[13px] py-2.5 justify-center' : 'px-3 py-2.5',
               (item.exact ? pathname === item.href : pathname === item.href || (item.matchPrefix && pathname.startsWith(item.matchPrefix)))
-                ? 'bg-gray-200 text-gray-700' : 'text-gray-500 hover:bg-gray-100 hover:text-gray-700'
+                ? 'bg-gray-300 text-gray-700' : 'text-gray-500 hover:bg-gray-200 hover:text-gray-700'
             ].join(' ')}>
               {!collapsed && <span className="text-sm font-medium truncate">{item.name}</span>}
               {!collapsed && item.badgeFor && badgeMap[item.badgeFor] > 0 && (
@@ -431,8 +431,8 @@ function NavItem({ item, pathname, collapsed }) {
           "flex items-center gap-3 rounded-lg transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 focus-visible:ring-offset-1 focus-visible:ring-offset-gray-100",
           collapsed ? "px-[13px] py-2.5 justify-center" : "px-3 py-2.5",
           isActive
-            ? "bg-gray-200 text-gray-700"
-            : "text-gray-500 hover:bg-gray-100 hover:text-gray-700",
+            ? "bg-gray-300 text-gray-700"
+            : "text-gray-500 hover:bg-gray-200 hover:text-gray-700",
         ].join(" ")}
       >
         <span

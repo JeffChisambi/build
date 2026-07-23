@@ -169,15 +169,19 @@ html.dark .text-gray-500 { color: var(--text-muted)     !important; }
 html.dark .text-gray-400 { color: var(--text-muted)     !important; }
 
 html.dark .bg-gray-200 {
-  background-color: #2a2a2a !important;
+  background-color: #1e1e1e !important;
 }
 
-html.dark .hover\:bg-gray-100:hover {
-  background-color: #181818 !important;
+html.dark .bg-gray-300 {
+  background-color: #2e2e2e !important;
 }
 
 html.dark .hover\:bg-gray-200:hover {
-  background-color: #2a2a2a !important;
+  background-color: #1e1e1e !important;
+}
+
+html.dark .hover\:bg-gray-300:hover {
+  background-color: #2e2e2e !important;
 }
 
 html.dark .border-gray-50,
