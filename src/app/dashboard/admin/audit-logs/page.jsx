@@ -47,7 +47,6 @@ function SeverityBadge({ severity }) {
 export default function AuditLogsPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterAction, setFilterAction] = useState("All");
-  const [isSearchCollapsed, setIsSearchCollapsed] = useState(false);
 
   const uniqueActions = useMemo(() => ["All", ...new Set(mockAuditLogs.map((log) => log.action))], []);
 
@@ -141,54 +140,36 @@ export default function AuditLogsPage() {
 
   return (
     <div className="p-6 space-y-6 max-w-[1400px] mx-auto">
-      <div className="bg-white rounded-md border border-gray-200 p-4 space-y-4">
-        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-          <div>
-            <h1 className="text-xl font-bold text-gray-900">Audit Logs</h1>
-            <p className="text-sm text-gray-600">Review user activity, system changes, and security events.</p>
+      <div className="bg-white rounded-md border border-gray-200 p-4">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-2 border border-gray-200 rounded-lg px-3 py-2 flex-1 min-w-[200px] max-w-sm">
+            <span className="text-gray-400">{Icons.search}</span>
+            <input
+              type="text"
+              placeholder="Search audit logs"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="flex-1 outline-none text-sm text-gray-700"
+            />
           </div>
           <div className="flex flex-wrap items-center gap-2">
+            <select
+              value={filterAction}
+              onChange={(e) => setFilterAction(e.target.value)}
+              className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 outline-none"
+            >
+              {uniqueActions.map((action) => (
+                <option key={action} value={action}>{action}</option>
+              ))}
+            </select>
             <button onClick={exportAuditLogs} className="rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50">
               Export Excel
             </button>
             <button onClick={printAuditLogs} className="rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50">
               Print Report
             </button>
-            <button onClick={() => setIsSearchCollapsed((prev) => !prev)} className="rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50">
-              {isSearchCollapsed ? "Show Search" : "Hide Search"}
-            </button>
           </div>
         </div>
-
-        {!isSearchCollapsed && (
-          <div className="grid gap-4 lg:grid-cols-[1fr_minmax(240px,320px)]">
-            <div className="flex items-center gap-2 border border-gray-200 rounded-lg px-3 py-2">
-              <span className="text-gray-400">{Icons.search}</span>
-              <input
-                type="text"
-                placeholder="Search audit logs"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="flex-1 outline-none text-sm text-gray-700"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Filter by Action</label>
-              <select
-                value={filterAction}
-                onChange={(e) => setFilterAction(e.target.value)}
-                className="w-full rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm text-gray-700 focus:border-green-600 focus:ring-2 focus:ring-green-100 outline-none"
-              >
-                {uniqueActions.map((action) => (
-                  <option key={action} value={action}>
-                    {action}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-        )}
       </div>
 
       {/* ── Logs Table ── */}
