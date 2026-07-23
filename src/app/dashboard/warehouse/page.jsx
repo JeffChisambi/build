@@ -166,17 +166,6 @@ export default function WarehousePage() {
                 ))}
               </select>
 
-              {/* GRN status filter */}
-              <select
-                value={grnStatusFilter}
-                onChange={e => setGrnStatusFilter(e.target.value)}
-                className="px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-md text-xs font-medium text-gray-700 focus:ring-2 focus:ring-gray-100 focus:border-gray-400 outline-none"
-              >
-                {grnStatuses.map(s => (
-                  <option key={s} value={s}>{s === "All" ? "All GRN Statuses" : s}</option>
-                ))}
-              </select>
-
               <button className="flex items-center gap-1.5 text-sm font-semibold text-gray-500 hover:text-gray-700 px-4 py-2 rounded-md hover:bg-gray-50 transition-colors border border-gray-200">
                 Export CSV
               </button>
