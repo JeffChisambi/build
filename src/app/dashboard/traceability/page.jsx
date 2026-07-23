@@ -161,18 +161,16 @@ export default function TraceabilityPage() {
             <table className="w-full text-sm text-left">
               <thead>
                 <tr className="bg-gray-50 border-b border-gray-100">
-                  <th className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider px-4 py-3">Batch Number</th>
                   <th className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider px-4 py-3">Farmer Source</th>
                   <th className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider px-4 py-3">Commodity</th>
                   <th className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider px-4 py-3">Quantity</th>
                   <th className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider px-4 py-3">Warehouse Depot</th>
-                  <th className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider px-4 py-3 text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">
                 {filteredBatches.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="px-4 py-12 text-center text-sm text-gray-400">
+                    <td colSpan={4} className="px-4 py-12 text-center text-sm text-gray-400">
                       No batches found.
                     </td>
                   </tr>
@@ -180,34 +178,16 @@ export default function TraceabilityPage() {
                   filteredBatches.map(b => (
                     <tr key={b.id} className="hover:bg-gray-50/60 transition-colors">
                       <td className="px-4 py-3">
-                        <p className="text-xs font-mono font-bold text-gray-900">{b.batchNumber}</p>
-                        <p className="text-[11px] text-gray-400">ID: {b.id}</p>
-                      </td>
-                      <td className="px-4 py-3">
                         <p className="text-xs font-semibold text-gray-900">{b.farmerName}</p>
-                        <p className="text-[11px] text-gray-400">{b.village}</p>
                       </td>
                       <td className="px-4 py-3">
                         <p className="text-xs font-semibold text-gray-900">{b.commodity}</p>
-                        <p className="text-[11px] text-gray-400">{b.grade}</p>
                       </td>
                       <td className="px-4 py-3">
                         <p className="text-xs font-semibold text-gray-900">{b.bags} Bags</p>
-                        <p className="text-[11px] text-gray-500">{b.weight.toLocaleString()} kg</p>
                       </td>
                       <td className="px-4 py-3 text-xs text-gray-700 font-medium">
                         {b.warehouseName}
-                      </td>
-                      <td className="px-4 py-3 text-right">
-                        <button
-                          onClick={() => {
-                            setSelectedBatchId(b.id);
-                            setActiveStep("farmer");
-                          }}
-                          className="text-xs font-semibold text-gray-900 hover:underline"
-                        >
-                          Explore Journey
-                        </button>
                       </td>
                     </tr>
                   ))
