@@ -139,17 +139,6 @@ export default function WarehousePage() {
             }
           />
           <StatCard
-            title="Consignments in Storage"
-            value={totalStored}
-            trend="4.21%"
-            trendUp={true}
-            icon={
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-              </svg>
-            }
-          />
-          <StatCard
             title="Pending GRNs"
             value={pendingGRNs}
             trend="2.15%"
