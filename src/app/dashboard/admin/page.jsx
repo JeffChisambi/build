@@ -106,21 +106,65 @@ function MetricWidget({ icon, label, value, trend, trendUp = true }) {
   );
 }
 
-// Purchasing Revenue Chart
-const MONTHLY_DATA = [
-  { month: "Jan", value: 4200000 },
-  { month: "Feb", value: 2800000 },
-  { month: "Mar", value: 5600000 },
-  { month: "Apr", value: 3900000 },
-  { month: "May", value: 7200000 },
-  { month: "Jun", value: 6100000 },
-  { month: "Jul", value: 8400000 },
-  { month: "Aug", value: 7800000 },
-  { month: "Sep", value: 5300000 },
-  { month: "Oct", value: 6700000 },
-  { month: "Nov", value: 9100000 },
-  { month: "Dec", value: 8600000 },
-];
+// Purchasing Revenue Chart — per-year mock data
+const ALL_YEARLY_DATA = {
+  "2024": [
+    { month: "Jan", value: 4200000 },
+    { month: "Feb", value: 2800000 },
+    { month: "Mar", value: 5600000 },
+    { month: "Apr", value: 3900000 },
+    { month: "May", value: 7200000 },
+    { month: "Jun", value: 6100000 },
+    { month: "Jul", value: 8400000 },
+    { month: "Aug", value: 7800000 },
+    { month: "Sep", value: 5300000 },
+    { month: "Oct", value: 6700000 },
+    { month: "Nov", value: 9100000 },
+    { month: "Dec", value: 8600000 },
+  ],
+  "2023": [
+    { month: "Jan", value: 1800000 },
+    { month: "Feb", value: 3500000 },
+    { month: "Mar", value: 2900000 },
+    { month: "Apr", value: 6200000 },
+    { month: "May", value: 5100000 },
+    { month: "Jun", value: 7800000 },
+    { month: "Jul", value: 4600000 },
+    { month: "Aug", value: 6900000 },
+    { month: "Sep", value: 8200000 },
+    { month: "Oct", value: 5700000 },
+    { month: "Nov", value: 7100000 },
+    { month: "Dec", value: 6400000 },
+  ],
+  "2022": [
+    { month: "Jan", value: 3100000 },
+    { month: "Feb", value: 4700000 },
+    { month: "Mar", value: 2200000 },
+    { month: "Apr", value: 5800000 },
+    { month: "May", value: 3400000 },
+    { month: "Jun", value: 4900000 },
+    { month: "Jul", value: 6600000 },
+    { month: "Aug", value: 3800000 },
+    { month: "Sep", value: 7400000 },
+    { month: "Oct", value: 5200000 },
+    { month: "Nov", value: 4100000 },
+    { month: "Dec", value: 5900000 },
+  ],
+  "2021": [
+    { month: "Jan", value: 2600000 },
+    { month: "Feb", value: 1900000 },
+    { month: "Mar", value: 4300000 },
+    { month: "Apr", value: 2100000 },
+    { month: "May", value: 5500000 },
+    { month: "Jun", value: 3200000 },
+    { month: "Jul", value: 4800000 },
+    { month: "Aug", value: 2700000 },
+    { month: "Sep", value: 6100000 },
+    { month: "Oct", value: 3900000 },
+    { month: "Nov", value: 5300000 },
+    { month: "Dec", value: 4400000 },
+  ],
+};
 
 function formatMWK(val) {
   if (val >= 1000000) return `MWK ${(val / 1000000).toFixed(1)}M`;
@@ -132,17 +176,39 @@ function PurchasingRevenueChart() {
   const [hoveredIdx, setHoveredIdx] = React.useState(null);
   const [period, setPeriod] = React.useState("2024");
   const [dropdownOpen, setDropdownOpen] = React.useState(false);
+  const [animatedValues, setAnimatedValues] = React.useState(
+    ALL_YEARLY_DATA["2024"].map(d => d.value)
+  );
+  const animRef = React.useRef(null);
   const periodOptions = ["2024", "2023", "2022", "2021"];
 
-  const maxVal = Math.max(...MONTHLY_DATA.map(d => d.value));
+  // Animate bars from 0 → target whenever period changes
+  React.useEffect(() => {
+    const targets = ALL_YEARLY_DATA[period].map(d => d.value);
+    if (animRef.current) cancelAnimationFrame(animRef.current);
+    setAnimatedValues(new Array(12).fill(0));
+    const duration = 550;
+    const startTime = performance.now();
+    function step(now) {
+      const t = Math.min((now - startTime) / duration, 1);
+      // easeOutCubic
+      const eased = 1 - Math.pow(1 - t, 3);
+      setAnimatedValues(targets.map(v => v * eased));
+      if (t < 1) animRef.current = requestAnimationFrame(step);
+    }
+    animRef.current = requestAnimationFrame(step);
+    return () => { if (animRef.current) cancelAnimationFrame(animRef.current); };
+  }, [period]);
+
+  const targetData = ALL_YEARLY_DATA[period];
+  const maxVal = Math.max(...targetData.map(d => d.value));
   const chartH = 200;
   const barW = 36;
   const gap = 18;
   const paddingL = 64;
   const paddingB = 36;
   const paddingT = 20;
-  const totalW = paddingL + MONTHLY_DATA.length * (barW + gap) - gap + 20;
-
+  const totalW = paddingL + targetData.length * (barW + gap) - gap + 20;
   const yLabels = [0, 25, 50, 75, 100];
 
   return (
@@ -160,8 +226,8 @@ function PurchasingRevenueChart() {
             {period}
             <svg className={`w-4 h-4 transition-transform duration-200 ${dropdownOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" /></svg>
           </button>
-          
-          <div 
+
+          <div
             className={`absolute right-0 mt-1 w-24 bg-white rounded-lg shadow-lg border border-gray-100 overflow-hidden transition-all duration-200 origin-top z-10 ${dropdownOpen ? 'opacity-100 scale-100' : 'opacity-0 scale-95 pointer-events-none'}`}
           >
             {periodOptions.map(opt => (
@@ -197,14 +263,14 @@ function PurchasingRevenueChart() {
           })}
 
           {/* Bars */}
-          {MONTHLY_DATA.map((d, i) => {
-            const barH = (d.value / maxVal) * chartH;
+          {targetData.map((d, i) => {
+            const animVal = animatedValues[i] ?? 0;
+            const barH = Math.max((animVal / maxVal) * chartH, 0);
             const x = paddingL + i * (barW + gap);
             const y = paddingT + chartH - barH;
             const isHovered = hoveredIdx === i;
             const isHighest = d.value === maxVal;
-            const fill = isHovered || isHighest ? "#1a5c2a" : "#e8f5e9";
-            const patternId = `diag-${i}`;
+            const patternId = `diag-${period}-${i}`;
 
             return (
               <g key={d.month}
@@ -223,7 +289,7 @@ function PurchasingRevenueChart() {
                 <rect
                   x={x} y={y} width={barW} height={barH}
                   rx="6" ry="6"
-                  fill={isHovered || isHighest ? `url(#${patternId})` : fill}
+                  fill={isHovered || isHighest ? `url(#${patternId})` : "#e8f5e9"}
                 />
 
                 {/* Tooltip on hover */}
