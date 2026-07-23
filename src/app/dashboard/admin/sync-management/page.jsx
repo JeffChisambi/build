@@ -59,7 +59,7 @@ function SyncStatusBadge({ status }) {
 // Metric Card
 function MetricCard({ label, value, icon, trend, trendUp = true }) {
   return (
-    <div className="bg-white rounded-xl border border-gray-200 p-5 flex flex-col gap-3">
+    <div className="bg-white rounded-xl border border-gray-200 p-5 flex flex-col gap-3 flex-1 min-w-[200px]">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2 text-gray-500">
           {icon}
@@ -141,7 +141,7 @@ export default function SyncManagementPage() {
   return (
     <div className="p-6 space-y-8 max-w-[1400px] mx-auto">
       {/* ── Key Metrics ── */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="flex flex-wrap gap-4">
         <MetricCard 
           label="Total Synced Farmers" 
           value={mockSyncMetrics.totalSyncedFarmers.toLocaleString()} 
