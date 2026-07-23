@@ -28,7 +28,7 @@ export default function WarehouseOfficerDashboard({ firstName }) {
   ];
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500">
+    <div className="p-6 space-y-8 max-w-[1400px] mx-auto">
       {/* ── Page Header ── */}
       <div className="flex items-center justify-between">
         <div>
@@ -42,7 +42,7 @@ export default function WarehouseOfficerDashboard({ firstName }) {
       </div>
 
       {/* ── KPI Grid ── */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {kpis.map((kpi, idx) => (
           <StatCard key={idx} {...kpi} />
         ))}
