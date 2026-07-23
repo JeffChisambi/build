@@ -58,7 +58,6 @@ export default function WarehouseOfficerDashboard({ firstName }) {
                     <th className="px-4 pb-3 text-sm font-medium text-gray-500 font-normal">Origin</th>
                     <th className="px-4 pb-3 text-sm font-medium text-gray-500 font-normal">Commodity</th>
                     <th className="px-4 pb-3 text-sm font-medium text-gray-500 font-normal">Weight</th>
-                    <th className="px-4 pb-3 text-sm font-medium text-gray-500 font-normal">Status</th>
                     <th className="px-4 pb-3 text-sm font-medium text-gray-500 font-normal">Time</th>
                     <th className="px-4 pb-3"></th>
                   </tr>
@@ -70,12 +69,6 @@ export default function WarehouseOfficerDashboard({ firstName }) {
                       <td className="px-4 py-4 text-gray-500">{delivery.origin}</td>
                       <td className="px-4 py-4 text-gray-500">{delivery.commodity}</td>
                       <td className="px-4 py-4 text-gray-900">{delivery.weight}</td>
-                      <td className="px-4 py-4">
-                        <span className="inline-flex items-center gap-1.5 text-sm font-medium text-gray-600">
-                          <span className="w-2 h-2 rounded-full flex-shrink-0 bg-gray-400" />
-                          {delivery.status}
-                        </span>
-                      </td>
                       <td className="px-4 py-4 text-sm text-gray-500">{delivery.time}</td>
                       <td className="px-4 py-4 text-right">
                         <button className="text-gray-400 hover:text-gray-600 transition-colors p-1 rounded" aria-label="More options">
