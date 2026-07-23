@@ -57,7 +57,7 @@ function NotificationBell({ theme }) {
       </button>
 
       <div 
-        className={`absolute left-0 top-full mt-2 w-96 rounded-xl shadow-xl border z-50 overflow-hidden transition-all duration-200 origin-top-left ${open ? 'opacity-100 scale-100' : 'opacity-0 scale-95 pointer-events-none'}`}
+        className={`absolute right-0 top-full mt-2 w-96 rounded-xl shadow-xl border z-50 overflow-hidden transition-all duration-200 origin-top-right ${open ? 'opacity-100 scale-100' : 'opacity-0 scale-95 pointer-events-none'}`}
           style={{
             backgroundColor: theme === "dark" ? "var(--surface-overlay)" : "var(--surface-card)",
             borderColor: theme === "dark" ? "var(--border-default)" : "var(--border-subtle)",
