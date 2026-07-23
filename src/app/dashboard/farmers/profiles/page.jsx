@@ -119,14 +119,6 @@ export default function FarmerProfilesPage() {
 
   return (
     <div className="space-y-6 relative pb-10">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-xl font-bold text-gray-900">Farmers</h1>
-          <p className="text-sm text-gray-500 mt-0.5">Manage registered farmers and view their details.</p>
-        </div>
-      </div>
-
       {/* KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <StatCard title="Total Farmers" value={stats.total} icon={
