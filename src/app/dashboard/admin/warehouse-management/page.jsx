@@ -129,12 +129,12 @@ export default function WarehouseManagementPage() {
       )}
 
       {/* Table */}
-      <div className="bg-white rounded-md border border-gray-200 overflow-hidden">
+      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
         <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
           <h2 className="text-sm font-bold text-gray-900">Warehouse Registry</h2>
           <button
             onClick={openAdd}
-            className="flex items-center gap-2 px-4 py-2 bg-[#1a5c2a] text-white text-sm font-semibold rounded-md hover:bg-[#154d23] transition-colors"
+            className="flex items-center gap-2 px-4 py-2 bg-[#1a5c2a] text-white text-sm font-semibold rounded-md hover:bg-[#134520] transition-colors"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
@@ -143,32 +143,33 @@ export default function WarehouseManagementPage() {
           </button>
         </div>
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm">
-            <thead className="bg-gray-50 border-b border-gray-100">
-              <tr>
+          <table className="w-auto min-w-full text-left text-sm">
+            <thead>
+              <tr className="border-b border-gray-100">
                 {["Name", "Location", "Capacity", "Manager", "Status", ""].map((h) => (
-                  <th key={h} className="px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">{h}</th>
+                  <th key={h} className="px-4 py-3 text-xs font-semibold text-gray-700">{h}</th>
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-50">
+            <tbody>
               {filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="px-5 py-10 text-center text-gray-400 text-sm">No warehouses found.</td>
+                  <td colSpan={6} className="px-4 py-10 text-center text-gray-400 text-sm">No warehouses found.</td>
                 </tr>
               ) : (
                 filtered.map((wh) => (
-                  <tr key={wh.id} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-5 py-3.5 font-medium text-gray-900">{wh.name}</td>
-                    <td className="px-5 py-3.5 text-gray-600">{wh.location}</td>
-                    <td className="px-5 py-3.5 text-gray-600">{wh.capacity}</td>
-                    <td className="px-5 py-3.5 text-gray-600">{wh.manager || "Unassigned"}</td>
-                    <td className="px-5 py-3.5">
-                      <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold ${wh.status === "Active" ? "bg-gray-100 text-gray-600" : "bg-gray-50 text-gray-400"}`}>
+                  <tr key={wh.id} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
+                    <td className="px-4 py-3.5 text-sm font-medium text-gray-400">{wh.name}</td>
+                    <td className="px-4 py-3.5 text-xs text-gray-400">{wh.location}</td>
+                    <td className="px-4 py-3.5 text-xs text-gray-400">{wh.capacity}</td>
+                    <td className="px-4 py-3.5 text-xs text-gray-400">{wh.manager || "Unassigned"}</td>
+                    <td className="px-4 py-3.5">
+                      <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-gray-400">
+                        <span className="w-1.5 h-1.5 rounded-full bg-gray-300" />
                         {wh.status}
                       </span>
                     </td>
-                    <td className="px-5 py-3.5 relative">
+                    <td className="px-4 py-3.5 relative">
                       <button
                         onClick={() => setOpenMenu(openMenu === wh.id ? null : wh.id)}
                         className="p-1 rounded hover:bg-gray-100 text-gray-500 transition-colors"
