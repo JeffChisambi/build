@@ -137,13 +137,6 @@ export default function TraceabilityPage() {
               <p className="text-xs text-gray-400">{filteredBatches.length} traceable batches found</p>
             </div>
             <div className="flex items-center gap-2">
-              <input
-                type="text"
-                placeholder="Search batch, farmer..."
-                value={searchQuery}
-                onChange={e => setSearchQuery(e.target.value)}
-                className="px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-xs font-medium text-gray-700 focus:ring-2 focus:ring-gray-100 focus:border-black outline-none w-48"
-              />
               <select
                 value={commodityFilter}
                 onChange={e => setCommodityFilter(e.target.value)}
