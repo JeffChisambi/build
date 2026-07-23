@@ -2,6 +2,7 @@
 
 import React from "react";
 import { StatCard } from "./Charts";
+import { Icons } from "./Icons";
 import { useRouter } from "next/navigation";
 
 export default function WarehouseOfficerDashboard({ firstName }) {
