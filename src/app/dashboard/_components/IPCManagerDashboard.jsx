@@ -133,24 +133,6 @@ export default function IPCManagerDashboard({ firstName }) {
     },
   ];
 
-  const commodityDistributionData = [
-    { label: "Maize",      value: 8500, displayValue: "8,500 t", color: "bg-[#1a5c2a]" },
-    { label: "Groundnuts", value: 5200, displayValue: "5,200 t", color: "bg-[#2a7a3b]" },
-    { label: "Soybeans",   value: 3100, displayValue: "3,100 t", color: "bg-[#3a9a4e]" },
-    { label: "Rice",       value: 1650, displayValue: "1,650 t", color: "bg-[#e8f1ea]" },
-  ];
-
-  const workflowSteps = [
-    { label: "Farmer Registration",  value: 22, status: "done"    },
-    { label: "Farm Registration",    value: 18, status: "done"    },
-    { label: "Commodity Purchases",  value: 36, status: "active"  },
-    { label: "Warehouse Receipts",   value: 14, status: "done"    },
-    { label: "Inventory Updated",    value: 14, status: "done"    },
-    { label: "Deliveries Completed", value: 9,  status: "pending" },
-    { label: "Traceability Records", value: 9,  status: "pending" },
-    { label: "Reports Generated",    value: 3,  status: "pending" },
-  ];
-
   const recentPurchases = [
     { id: "RCP-8012", farmer: "John Banda",       commodity: "Maize",      weight: "2,500 kg", time: "10:30 AM" },
     { id: "RCP-8013", farmer: "Mary Phiri",        commodity: "Soybeans",   weight: "850 kg",   time: "11:45 AM" },
@@ -214,8 +196,6 @@ export default function IPCManagerDashboard({ firstName }) {
 
         </div>
       </div>
-
-      {/* 4. Quick Actions removed */}
 
     </div>
   );
