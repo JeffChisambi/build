@@ -139,15 +139,6 @@ export default function WarehousePage() {
     >
       <div className="space-y-6 p-6 max-w-7xl mx-auto">
 
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <h1 className="text-xl font-bold text-gray-900">Warehouse Management</h1>
-            <p className="text-sm text-gray-500 mt-0.5">
-              Manage GRNs, stock locations, storage conditions, and dispatch operations.
-            </p>
-          </div>
-        </div>
 
         {/* KPI Cards — warehouse manager view */}
         <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
