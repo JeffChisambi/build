@@ -200,9 +200,9 @@ export default function FarmerProfilesPage() {
           <table className="w-full text-sm text-left">
             <thead>
               <tr className="border-b border-gray-100">
-                <th className="px-6 py-3 text-xs font-semibold text-gray-500">Name</th>
-                <th className="px-6 py-3 text-xs font-semibold text-gray-500">District</th>
-                <th className="px-6 py-3 text-xs font-semibold text-gray-500">Association</th>
+                <th className="px-6 py-3 text-xs font-semibold text-gray-800">Name</th>
+                <th className="px-6 py-3 text-xs font-semibold text-gray-800">District</th>
+                <th className="px-6 py-3 text-xs font-semibold text-gray-800">Association</th>
                 <th className="px-6 py-3" />
               </tr>
             </thead>
