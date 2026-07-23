@@ -33,13 +33,10 @@ export default function UsersPage() {
           <table className="w-full text-left text-sm">
             <thead>
               <tr className="border-b border-gray-100">
-                <th className="px-5 py-3 text-xs font-medium text-gray-400 w-12">Sl</th>
                 <th className="px-4 py-3 text-xs font-medium text-gray-400">Name</th>
-                <th className="px-4 py-3 text-xs font-medium text-gray-400">Member No</th>
                 <th className="px-4 py-3 text-xs font-medium text-gray-400">District</th>
                 <th className="px-4 py-3 text-xs font-medium text-gray-400">Association</th>
                 <th className="px-4 py-3 text-xs font-medium text-gray-400">Status</th>
-                <th className="px-4 py-3 text-xs font-medium text-gray-400">Registered</th>
               </tr>
             </thead>
             <tbody>
@@ -54,11 +51,6 @@ export default function UsersPage() {
                     key={f.id}
                     className="border-b border-gray-50 hover:bg-gray-50 transition-colors"
                   >
-                    {/* SI */}
-                    <td className="px-5 py-3.5 text-xs font-medium text-gray-500">
-                      {String(idx + 1).padStart(2, "0")}
-                    </td>
-
                     {/* Name + avatar */}
                     <td className="px-4 py-3.5">
                       <div className="flex items-center gap-2.5">
@@ -72,9 +64,6 @@ export default function UsersPage() {
                         </span>
                       </div>
                     </td>
-
-                    {/* Member No */}
-                    <td className="px-4 py-3.5 text-xs text-gray-500">{f.memberNo}</td>
 
                     {/* District */}
                     <td className="px-4 py-3.5 text-xs text-gray-500">{f.district}</td>
@@ -92,8 +81,7 @@ export default function UsersPage() {
                       </span>
                     </td>
 
-                    {/* Registered */}
-                    <td className="px-4 py-3.5 text-gray-400 text-xs whitespace-nowrap">{f.registrationDate}</td>
+
                   </tr>
                 );
               })}
