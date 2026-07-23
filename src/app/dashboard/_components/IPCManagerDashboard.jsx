@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { BarChart, HorizontalBarChart, StatCard, ModuleActionCard, PeriodPicker } from "./Charts";
+import { BarChart, StatCard, PeriodPicker } from "./Charts";
 import { Icons } from "./Icons";
 import { useRouter } from "next/navigation";
 import TodayWorkflow from "./TodayWorkflow";
@@ -172,15 +172,6 @@ export default function IPCManagerDashboard({ firstName }) {
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-widest">Analytics &amp; Flow</h2>
           <PeriodPicker value={period} onChange={setPeriod} options={PERIOD_OPTIONS} />
-        </div>
-
-        <div className="mb-4">
-          <TodayWorkflow
-            steps={workflowSteps}
-            currentStage="Commodity Purchases"
-            completion={72}
-            nextAction="Record 14 pending commodity purchases before close of business today"
-          />
         </div>
 
         {/* Chart grid — key={period} remounts charts for fresh animation */}
