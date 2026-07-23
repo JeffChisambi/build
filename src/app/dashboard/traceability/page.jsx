@@ -19,10 +19,7 @@ function StatCard({ title, value, sub, icon }) {
         {icon}
         <p className="text-sm font-semibold text-gray-700">{title}</p>
       </div>
-      <div>
-        <p className="text-xl font-bold text-gray-900">{value}</p>
-        {sub && <p className="text-xs text-gray-500 mt-0.5">{sub}</p>}
-      </div>
+      <p className="text-xl font-bold text-gray-900">{value}</p>
     </div>
   );
 }
@@ -124,13 +121,11 @@ export default function TraceabilityPage() {
           <StatCard
             title="Active Batches"
             value={batches.length}
-            sub="Unique tracked batches"
             icon={<svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 11-6 0 3 3 0 016 0z" /></svg>}
           />
           <StatCard
             title="Registered Bags"
             value="108 bags"
-            sub="QR tag scanned"
             icon={<svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M7 7h10M7 12h10m-8 5h6" /></svg>}
           />
         </div>
