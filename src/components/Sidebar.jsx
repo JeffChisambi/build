@@ -431,14 +431,14 @@ function NavItem({ item, pathname, collapsed }) {
           "flex items-center gap-3 rounded-lg transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 focus-visible:ring-offset-1 focus-visible:ring-offset-gray-100",
           collapsed ? "px-[13px] py-2.5 justify-center" : "px-3 py-2.5",
           isActive
-            ? "bg-[#1a5c2a] text-white"
-            : "text-gray-500 hover:bg-gray-200 hover:text-gray-700",
+            ? "bg-gray-200 text-gray-700"
+            : "text-gray-500 hover:bg-gray-100 hover:text-gray-700",
         ].join(" ")}
       >
         <span
           className={[
             "flex-shrink-0 transition-colors",
-            isActive ? "text-white" : "text-gray-400",
+            isActive ? "text-gray-700" : "text-gray-400",
           ].join(" ")}
         >
           {item.icon}

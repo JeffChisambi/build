@@ -168,6 +168,18 @@ html.dark .text-gray-600 { color: var(--text-secondary) !important; }
 html.dark .text-gray-500 { color: var(--text-muted)     !important; }
 html.dark .text-gray-400 { color: var(--text-muted)     !important; }
 
+html.dark .bg-gray-200 {
+  background-color: #2a2a2a !important;
+}
+
+html.dark .hover\:bg-gray-100:hover {
+  background-color: #181818 !important;
+}
+
+html.dark .hover\:bg-gray-200:hover {
+  background-color: #2a2a2a !important;
+}
+
 html.dark .border-gray-50,
 html.dark .border-gray-100,
 html.dark .border-gray-200 {
