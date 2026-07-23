@@ -191,7 +191,7 @@ export default function AuditLogsPage() {
 
   return (
     <div className="p-6 max-w-[1400px] mx-auto">
-      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+      <div className="bg-white rounded-xl border border-gray-200">
 
         {/* Header */}
         <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-4 border-b border-gray-100">
@@ -217,7 +217,7 @@ export default function AuditLogsPage() {
         </div>
 
         {/* Table */}
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto overflow-hidden rounded-b-xl">
           <table className="w-auto min-w-full text-left text-sm">
             <thead>
               <tr className="border-b border-gray-100">
