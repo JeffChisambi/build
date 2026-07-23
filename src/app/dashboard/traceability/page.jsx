@@ -157,9 +157,9 @@ export default function TraceabilityPage() {
                   <div key={s.id} className="relative flex items-center">
                     <button
                       onClick={() => setActiveStep(s.id)}
-                      className={`w-full text-left p-4 rounded-lg border transition-all ${
+                      className={`w-full text-left p-4 rounded-md border transition-all ${
                         isActive
-                          ? "bg-gray-50 border-black shadow-sm"
+                          ? "bg-gray-50 border-gray-900"
                           : "bg-white border-gray-200 hover:border-gray-300"
                       }`}
                     >
@@ -179,7 +179,7 @@ export default function TraceabilityPage() {
             </div>
 
             {/* Selected Node Details Card */}
-            <div className="bg-gray-50 rounded-lg p-5 border border-gray-100">
+            <div className="border-t border-gray-100 pt-5">
               {activeStep === "farmer" && (
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   <div>
