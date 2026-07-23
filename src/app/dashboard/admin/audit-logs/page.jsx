@@ -139,9 +139,11 @@ export default function AuditLogsPage() {
   };
 
   return (
-    <div className="p-6 space-y-6 max-w-[1400px] mx-auto">
-      <div className="bg-white rounded-md border border-gray-200 p-4">
-        <div className="flex flex-wrap items-center justify-between gap-3">
+    <div className="p-6 max-w-[1400px] mx-auto">
+      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+
+        {/* Header */}
+        <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-4 border-b border-gray-100">
           <div className="flex items-center gap-2 border border-gray-200 rounded-lg px-3 py-2 flex-1 min-w-[200px] max-w-sm">
             <span className="text-gray-400">{Icons.search}</span>
             <input
@@ -170,51 +172,52 @@ export default function AuditLogsPage() {
             </button>
           </div>
         </div>
-      </div>
 
-      {/* ── Logs Table ── */}
-      <div className="bg-white rounded-md border border-gray-200 overflow-hidden">
-        <table className="w-full text-sm">
-          <thead className="bg-gray-50 border-b border-gray-100">
-            <tr>
-              <th className="px-5 py-3 text-left font-semibold text-gray-700">Timestamp</th>
-              <th className="px-5 py-3 text-left font-semibold text-gray-700">User</th>
-              <th className="px-5 py-3 text-left font-semibold text-gray-700">Action</th>
-              <th className="px-5 py-3 text-left font-semibold text-gray-700">Module</th>
-              <th className="px-5 py-3 text-left font-semibold text-gray-700">Details</th>
-              <th className="px-5 py-3 text-left font-semibold text-gray-700">Severity</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredLogs.length > 0 ? (
-              filteredLogs.map((log, idx) => (
-                <tr key={log.id} className={`border-b border-gray-100 hover:bg-gray-50 transition-colors ${idx === filteredLogs.length - 1 ? "border-b-0" : ""}`}>
-                  <td className="px-5 py-3 text-gray-600 text-xs whitespace-nowrap">
-                    {new Date(log.timestamp).toLocaleString()}
-                  </td>
-                  <td className="px-5 py-3 font-semibold text-gray-900">{log.user}</td>
-                  <td className="px-5 py-3 text-gray-600 font-mono text-xs">{log.action}</td>
-                  <td className="px-5 py-3 text-gray-600">{log.module}</td>
-                  <td className="px-5 py-3 text-gray-600 max-w-xs truncate">{log.details}</td>
-                  <td className="px-5 py-3">
-                    <SeverityBadge severity={log.severity} />
+        {/* Table */}
+        <div className="overflow-x-auto">
+          <table className="w-auto min-w-full text-left text-sm">
+            <thead>
+              <tr className="border-b border-gray-100">
+                <th className="px-5 py-3 text-xs font-semibold text-gray-500">Timestamp</th>
+                <th className="px-5 py-3 text-xs font-semibold text-gray-500">User</th>
+                <th className="px-5 py-3 text-xs font-semibold text-gray-500">Action</th>
+                <th className="px-5 py-3 text-xs font-semibold text-gray-500">Module</th>
+                <th className="px-5 py-3 text-xs font-semibold text-gray-500">Details</th>
+                <th className="px-5 py-3 text-xs font-semibold text-gray-500">Severity</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredLogs.length > 0 ? (
+                filteredLogs.map((log, idx) => (
+                  <tr key={log.id} className={`border-b border-gray-50 hover:bg-gray-50 transition-colors ${idx === filteredLogs.length - 1 ? "border-b-0" : ""}`}>
+                    <td className="px-5 py-3.5 text-xs text-gray-400 whitespace-nowrap">
+                      {new Date(log.timestamp).toLocaleString("en-GB", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}
+                    </td>
+                    <td className="px-5 py-3.5 text-sm font-medium text-gray-400">{log.user}</td>
+                    <td className="px-5 py-3.5 text-xs text-gray-400 font-mono">{log.action}</td>
+                    <td className="px-5 py-3.5 text-xs text-gray-400">{log.module}</td>
+                    <td className="px-5 py-3.5 text-xs text-gray-400 max-w-xs truncate">{log.details}</td>
+                    <td className="px-5 py-3.5">
+                      <SeverityBadge severity={log.severity} />
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="6" className="px-5 py-8 text-center text-gray-500 text-sm">
+                    No logs found matching your filters.
                   </td>
                 </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan="6" className="px-5 py-8 text-center text-gray-500 text-sm">
-                  No logs found matching your filters.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+              )}
+            </tbody>
+          </table>
+        </div>
 
-      {/* ── Pagination Info ── */}
-      <div className="text-sm text-gray-600">
-        Showing {filteredLogs.length} of {mockAuditLogs.length} audit logs
+        {/* Footer */}
+        <div className="px-5 py-3 border-t border-gray-100 text-xs text-gray-400">
+          Showing {filteredLogs.length} of {mockAuditLogs.length} audit logs
+        </div>
+
       </div>
     </div>
   );
