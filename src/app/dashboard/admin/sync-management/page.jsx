@@ -43,15 +43,14 @@ const Icons = {
 
 // Sync Status Badge
 function SyncStatusBadge({ status }) {
-  const styles = {
-    "Synced": "bg-green-100 text-green-700",
-    "Pending": "bg-gray-100 text-gray-600",
-    "Failed": "bg-red-100 text-red-700",
-    "In Progress": "bg-gray-100 text-gray-600",
+  const dot = {
+    "Synced": "bg-green-500",
+    "Failed": "bg-red-500",
   };
 
   return (
-    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${styles[status] || "bg-gray-100 text-gray-700"}`}>
+    <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-gray-400">
+      <span className={`w-1.5 h-1.5 rounded-full ${dot[status] || "bg-gray-300"}`} />
       {status}
     </span>
   );
@@ -193,31 +192,33 @@ export default function SyncManagementPage() {
       </div>
 
       {/* ── Sync History ── */}
-      <div>
-        <h2 className="text-lg font-bold text-gray-900 mb-4">Recent Synchronization Activity</h2>
-        <div className="bg-white rounded-md border border-gray-200 overflow-hidden">
-          <table className="w-full text-sm">
-            <thead className="bg-gray-50 border-b border-gray-100">
-              <tr>
-                <th className="px-5 py-3 text-left font-semibold text-gray-700">Officer</th>
-                <th className="px-5 py-3 text-left font-semibold text-gray-700">Record Type</th>
-                <th className="px-5 py-3 text-left font-semibold text-gray-700">Records</th>
-                <th className="px-5 py-3 text-left font-semibold text-gray-700">Device</th>
-                <th className="px-5 py-3 text-left font-semibold text-gray-700">Status</th>
-                <th className="px-5 py-3 text-left font-semibold text-gray-700">Time</th>
+      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+          <h2 className="text-sm font-bold text-gray-900">Recent Synchronization Activity</h2>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-auto min-w-full text-left text-sm">
+            <thead>
+              <tr className="border-b border-gray-100">
+                <th className="px-4 py-3 text-xs font-semibold text-gray-700">Officer</th>
+                <th className="px-4 py-3 text-xs font-semibold text-gray-700">Record Type</th>
+                <th className="px-4 py-3 text-xs font-semibold text-gray-700">Records</th>
+                <th className="px-4 py-3 text-xs font-semibold text-gray-700">Device</th>
+                <th className="px-4 py-3 text-xs font-semibold text-gray-700">Status</th>
+                <th className="px-4 py-3 text-xs font-semibold text-gray-700">Time</th>
               </tr>
             </thead>
             <tbody>
-              {mockSyncHistory.map((record, idx) => (
-                <tr key={record.id} className={`border-b border-gray-100 hover:bg-gray-50 transition-colors ${idx === mockSyncHistory.length - 1 ? "border-b-0" : ""}`}>
-                  <td className="px-5 py-3 font-semibold text-gray-900">{record.officerName}</td>
-                  <td className="px-5 py-3 text-gray-600">{record.recordType}</td>
-                  <td className="px-5 py-3 font-semibold text-gray-900">{record.recordsCount}</td>
-                  <td className="px-5 py-3 text-gray-600 text-xs">{record.device}</td>
-                  <td className="px-5 py-3">
+              {mockSyncHistory.map((record) => (
+                <tr key={record.id} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
+                  <td className="px-4 py-3.5 text-sm font-medium text-gray-400">{record.officerName}</td>
+                  <td className="px-4 py-3.5 text-xs text-gray-400">{record.recordType}</td>
+                  <td className="px-4 py-3.5 text-xs text-gray-400">{record.recordsCount}</td>
+                  <td className="px-4 py-3.5 text-xs text-gray-400">{record.device}</td>
+                  <td className="px-4 py-3.5">
                     <SyncStatusBadge status={record.status} />
                   </td>
-                  <td className="px-5 py-3 text-gray-600 text-xs">
+                  <td className="px-4 py-3.5 text-xs text-gray-400">
                     {new Date(record.timestamp).toLocaleTimeString()}
                   </td>
                 </tr>
