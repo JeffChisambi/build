@@ -148,9 +148,9 @@ export default function WarehouseManagementPage() {
           { label: "Inactive", value: warehouses.filter((w) => w.status === "Inactive").length },
           { label: "Total Capacity", value: "29,000 bags" },
         ].map((s) => (
-          <div key={s.label} className="bg-white rounded-md border border-gray-200 p-4">
-            <p className="text-xs text-gray-500 font-medium">{s.label}</p>
-            <p className="text-2xl font-bold text-gray-900 mt-1">{s.value}</p>
+          <div key={s.label} className="bg-white rounded-xl border border-gray-200 p-5 flex flex-col gap-3">
+            <p className="text-sm font-semibold text-gray-700">{s.label}</p>
+            <p className="text-xl font-bold text-gray-900">{s.value}</p>
           </div>
         ))}
       </div>
