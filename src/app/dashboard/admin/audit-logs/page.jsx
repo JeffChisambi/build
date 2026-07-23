@@ -221,11 +221,11 @@ export default function AuditLogsPage() {
           <table className="w-auto min-w-full text-left text-sm">
             <thead>
               <tr className="border-b border-gray-100">
-                <th className="px-5 py-3 text-xs font-semibold text-gray-500">Timestamp</th>
-                <th className="px-5 py-3 text-xs font-semibold text-gray-500">User</th>
-                <th className="px-5 py-3 text-xs font-semibold text-gray-500">Action</th>
-                <th className="px-5 py-3 text-xs font-semibold text-gray-500">Module</th>
-                <th className="px-5 py-3 text-xs font-semibold text-gray-500">Severity</th>
+                <th className="px-5 py-3 text-xs font-semibold text-gray-700">Timestamp</th>
+                <th className="px-5 py-3 text-xs font-semibold text-gray-700">User</th>
+                <th className="px-5 py-3 text-xs font-semibold text-gray-700">Action</th>
+                <th className="px-5 py-3 text-xs font-semibold text-gray-700">Module</th>
+                <th className="px-5 py-3 text-xs font-semibold text-gray-700">Severity</th>
               </tr>
             </thead>
             <tbody>
