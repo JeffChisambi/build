@@ -153,7 +153,7 @@ export default function TraceabilityPage() {
           <div className="overflow-x-auto">
             <table className="w-full text-sm text-left">
               <thead>
-                <tr className="bg-gray-50 border-b border-gray-100">
+                <tr className="border-b border-gray-100">
                   <th className="text-[11px] font-semibold text-gray-900 uppercase tracking-wider px-4 py-3">Farmer Source</th>
                   <th className="text-[11px] font-semibold text-gray-900 uppercase tracking-wider px-4 py-3">Commodity</th>
                   <th className="text-[11px] font-semibold text-gray-900 uppercase tracking-wider px-4 py-3">Quantity</th>
