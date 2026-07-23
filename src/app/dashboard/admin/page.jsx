@@ -102,7 +102,6 @@ function MetricWidget({ icon, label, value, trend, trendUp = true }) {
         )}
       </div>
       <p className="text-xl font-bold text-gray-900">{value}</p>
-      <p className="text-xs text-gray-400">Compared to last month</p>
     </div>
   );
 }
