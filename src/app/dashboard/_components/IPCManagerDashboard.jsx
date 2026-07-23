@@ -222,16 +222,7 @@ export default function IPCManagerDashboard({ firstName }) {
         </div>
       </div>
 
-      {/* 4. Quick Actions */}
-      <div>
-        <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-4">Quick Actions</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <ModuleActionCard icon={Icons.farmer}    title="Register Farmer"     description="Create a new farmer profile and link their farm data."      onClick={() => router.push("/dashboard/farmers/registration")} />
-          <ModuleActionCard icon={Icons.purchase}  title="Purchase Commodity"  description="Record a new commodity intake from a registered farmer."    onClick={() => router.push("/dashboard/purchasing")} />
-          <ModuleActionCard icon={Icons.warehouse} title="Update Inventory"    description="Manage live stock levels and create tracking batches."       onClick={() => router.push("/dashboard/warehouse")} />
-          <ModuleActionCard icon={Icons.document}  title="Generate Reports"    description="View procurement, logistics, and traceability reports."      onClick={() => router.push("/dashboard/reports")} />
-        </div>
-      </div>
+      {/* 4. Quick Actions removed */}
 
     </div>
   );
