@@ -45,9 +45,9 @@ const Icons = {
 function SyncStatusBadge({ status }) {
   const styles = {
     "Synced": "bg-green-100 text-green-700",
-    "Pending": "bg-amber-100 text-amber-700",
+    "Pending": "bg-gray-100 text-gray-600",
     "Failed": "bg-red-100 text-red-700",
-    "In Progress": "bg-blue-100 text-blue-700",
+    "In Progress": "bg-gray-100 text-gray-600",
   };
 
   return (
