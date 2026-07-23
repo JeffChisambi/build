@@ -216,16 +216,6 @@ export default function SyncManagementPage() {
         ))}
       </div>
 
-      {/* ── Device Grid ── */}
-      <div>
-        <h2 className="text-lg font-bold text-gray-900 mb-4">Mobile Device Status</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filteredDevices.map(device => (
-            <DeviceCard key={device.id} device={device} />
-          ))}
-        </div>
-      </div>
-
       {/* ── Sync History ── */}
       <div>
         <h2 className="text-lg font-bold text-gray-900 mb-4">Recent Synchronization Activity</h2>
