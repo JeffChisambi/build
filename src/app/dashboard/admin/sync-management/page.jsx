@@ -192,24 +192,6 @@ export default function SyncManagementPage() {
         </div>
       </div>
 
-      {/* ── Device Status Filter ── */}
-      <div className="flex items-center gap-2 flex-wrap">
-        <span className="text-sm font-semibold text-gray-700">Filter by Status:</span>
-        {["All", "Synced", "Pending", "In Progress", "Failed"].map(status => (
-          <button
-            key={status}
-            onClick={() => setFilterStatus(status)}
-            className={`px-3 py-1.5 rounded-md text-sm font-semibold transition-colors ${
-              filterStatus === status
-                ? "bg-gray-900 text-white"
-                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-            }`}
-          >
-            {status}
-          </button>
-        ))}
-      </div>
-
       {/* ── Sync History ── */}
       <div>
         <h2 className="text-lg font-bold text-gray-900 mb-4">Recent Synchronization Activity</h2>
