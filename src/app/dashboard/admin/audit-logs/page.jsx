@@ -182,7 +182,6 @@ export default function AuditLogsPage() {
                 <th className="px-5 py-3 text-xs font-semibold text-gray-500">User</th>
                 <th className="px-5 py-3 text-xs font-semibold text-gray-500">Action</th>
                 <th className="px-5 py-3 text-xs font-semibold text-gray-500">Module</th>
-                <th className="px-5 py-3 text-xs font-semibold text-gray-500">Details</th>
                 <th className="px-5 py-3 text-xs font-semibold text-gray-500">Severity</th>
               </tr>
             </thead>
@@ -196,7 +195,6 @@ export default function AuditLogsPage() {
                     <td className="px-5 py-3.5 text-sm font-medium text-gray-400">{log.user}</td>
                     <td className="px-5 py-3.5 text-xs text-gray-400 font-mono">{log.action}</td>
                     <td className="px-5 py-3.5 text-xs text-gray-400">{log.module}</td>
-                    <td className="px-5 py-3.5 text-xs text-gray-400 max-w-xs truncate">{log.details}</td>
                     <td className="px-5 py-3.5">
                       <SeverityBadge severity={log.severity} />
                     </td>
@@ -204,7 +202,7 @@ export default function AuditLogsPage() {
                 ))
               ) : (
                 <tr>
-                  <td colSpan="6" className="px-5 py-8 text-center text-gray-500 text-sm">
+                  <td colSpan="5" className="px-5 py-8 text-center text-gray-500 text-sm">
                     No logs found matching your filters.
                   </td>
                 </tr>
