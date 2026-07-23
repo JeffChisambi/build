@@ -82,10 +82,50 @@ export default function IPCManagerDashboard({ firstName }) {
   const p = PURCHASE_DATA[period];
 
   const kpis = [
-    { title: "Registered Farmers",    value: "4,250",   trend: "+5%",  trendUp: true,  icon: Icons.farmer    },
-    { title: "Today's Purchases",     value: "24.5 t",  trend: "+12%", trendUp: true,  icon: Icons.purchase  },
-    { title: "Warehouse Stock",       value: "850 t",   trend: "-2%",  trendUp: false, icon: Icons.warehouse },
-    { title: "Commodity Value Today", value: "MK 4.2M", trend: "+8%",  trendUp: true,  icon: Icons.data      },
+    {
+      title: "Registered Farmers",
+      value: "4,250",
+      trend: "+5%",
+      trendUp: true,
+      icon: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+        </svg>
+      ),
+    },
+    {
+      title: "Today's Purchases",
+      value: "24.5 t",
+      trend: "+12%",
+      trendUp: true,
+      icon: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+        </svg>
+      ),
+    },
+    {
+      title: "Warehouse Stock",
+      value: "850 t",
+      trend: "-2%",
+      trendUp: false,
+      icon: (
+        <svg className="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M12 3C6.49 3 2 7.49 2 13v6c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2v-6c0-5.51-4.49-10-10-10m4 12H8v-2h8zm-8 4v-2h8v2zm12 0h-2v-6c0-1.1-.9-2-2-2H8c-1.1 0-2 .9-2 2v6H4v-6c0-4.41 3.59-8 8-8s8 3.59 8 8z" />
+        </svg>
+      ),
+    },
+    {
+      title: "Commodity Value Today",
+      value: "MK 4.2M",
+      trend: "+8%",
+      trendUp: true,
+      icon: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        </svg>
+      ),
+    },
   ];
 
   const commodityDistributionData = [
@@ -118,7 +158,7 @@ export default function IPCManagerDashboard({ firstName }) {
     <div className="p-6 space-y-8 max-w-[1400px] mx-auto">
 
       {/* 1. KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {kpis.map((kpi, idx) => <StatCard key={idx} {...kpi} />)}
       </div>
 
