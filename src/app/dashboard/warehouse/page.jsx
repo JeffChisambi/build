@@ -150,10 +150,6 @@ export default function WarehousePage() {
         {/* Main Content Area / Table */}
         <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
           <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
-            <div>
-              <p className="text-sm font-bold text-gray-900">GRN Inventory Register</p>
-              <p className="text-xs text-gray-400 mt-0.5">{filteredRecords.length} records found</p>
-            </div>
             <div className="flex items-center gap-2">
               {/* Warehouse filter */}
               <select
