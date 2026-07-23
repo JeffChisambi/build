@@ -66,21 +66,13 @@ export default function WarehouseOfficerDashboard({ firstName }) {
                 <tbody>
                   {recentDeliveries.map((delivery, i) => (
                     <tr key={i} className="border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors">
-                      <td className="px-4 py-4 font-medium text-[#1a5c2a]">{delivery.id}</td>
+                      <td className="px-4 py-4 font-medium text-gray-900">{delivery.id}</td>
                       <td className="px-4 py-4 text-gray-500">{delivery.origin}</td>
                       <td className="px-4 py-4 text-gray-500">{delivery.commodity}</td>
                       <td className="px-4 py-4 text-gray-900">{delivery.weight}</td>
                       <td className="px-4 py-4">
-                        <span className={`inline-flex items-center gap-1.5 text-sm font-medium ${
-                          delivery.status === "Unloaded" ? "text-green-700" :
-                          delivery.status === "Unloading" ? "text-blue-700" :
-                          "text-amber-700"
-                        }`}>
-                          <span className={`w-2 h-2 rounded-full flex-shrink-0 ${
-                            delivery.status === "Unloaded" ? "bg-green-500" :
-                            delivery.status === "Unloading" ? "bg-blue-500" :
-                            "bg-amber-500"
-                          }`} />
+                        <span className="inline-flex items-center gap-1.5 text-sm font-medium text-gray-600">
+                          <span className="w-2 h-2 rounded-full flex-shrink-0 bg-gray-400" />
                           {delivery.status}
                         </span>
                       </td>
