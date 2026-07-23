@@ -221,7 +221,6 @@ export default function WarehousePage() {
                 <tr className="border-b border-gray-100">
                   <th className="text-xs font-semibold text-gray-700 px-4 py-3">Date</th>
                   <th className="text-xs font-semibold text-gray-700 px-4 py-3">Warehouse</th>
-                  <th className="text-xs font-semibold text-gray-700 px-4 py-3">Bin / Stack / Shelf</th>
                   <th className="text-xs font-semibold text-gray-700 px-4 py-3">Commodity</th>
                   <th className="text-xs font-semibold text-gray-700 px-4 py-3">Accepted (kg)</th>
                   <th className="text-xs font-semibold text-gray-700 px-4 py-3">Stock Status</th>
@@ -230,7 +229,7 @@ export default function WarehousePage() {
               <tbody>
                 {filteredRecords.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="px-4 py-12 text-center text-sm text-gray-400">
+                    <td colSpan={5} className="px-4 py-12 text-center text-sm text-gray-400">
                       No GRN records found matching your filters.
                     </td>
                   </tr>
@@ -245,12 +244,6 @@ export default function WarehousePage() {
                       {/* Warehouse */}
                       <td className="px-4 py-3.5">
                         <p className="text-xs font-semibold text-gray-900">{r.warehouseName}</p>
-                      </td>
-                      {/* Bin / Stack / Shelf */}
-                      <td className="px-4 py-3.5">
-                        <p className="text-xs text-gray-700">Bin <span className="font-semibold">{r.bin}</span></p>
-                        <p className="text-[11px] text-gray-500">Stack {r.stack} · {r.shelf}</p>
-                        <p className="text-[11px] text-gray-400">{r.storageCondition}</p>
                       </td>
                       {/* Commodity */}
                       <td className="px-4 py-3.5">
