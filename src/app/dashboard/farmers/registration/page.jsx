@@ -83,13 +83,6 @@ export default function FarmerRegistrationPage() {
         </div>
       )}
 
-      {/* Header */}
-      <div>
-        <p className="text-xs text-gray-400 uppercase tracking-wider font-medium mb-1">Farmers</p>
-        <h1 className="text-xl font-bold text-gray-900">Farmer Registration</h1>
-        <p className="text-sm text-gray-500 mt-0.5">Register a new farmer into the system using the step-by-step wizard.</p>
-      </div>
-
       {/* Progress Indicator */}
       <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm mb-6">
         <div className="flex items-center justify-between relative">

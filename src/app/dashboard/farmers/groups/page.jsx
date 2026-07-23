@@ -141,12 +141,7 @@ export default function FarmerGroupsPage() {
       )}
 
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <p className="text-xs text-gray-400 uppercase tracking-wider font-medium mb-1">Farmers</p>
-          <h1 className="text-xl font-bold text-gray-900">Farmer Groups</h1>
-          <p className="text-sm text-gray-500 mt-0.5">Manage farmer groups, associations, and clubs.</p>
-        </div>
+      <div className="flex justify-end">
         <button className="flex items-center gap-2 px-4 py-2 bg-[#1a5c2a] text-white text-sm font-semibold rounded-lg hover:bg-[#134520] transition-colors shadow-sm">
           <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />

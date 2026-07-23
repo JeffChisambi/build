@@ -83,12 +83,7 @@ export default function FarmerHistoryPage() {
   return (
     <div className="space-y-6 relative pb-10 max-w-6xl mx-auto">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <p className="text-xs text-gray-400 uppercase tracking-wider font-medium mb-1">Farmers</p>
-          <h1 className="text-xl font-bold text-gray-900">Farmer History</h1>
-          <p className="text-sm text-gray-500 mt-0.5">Chronological log of all farmer-related activities and interactions.</p>
-        </div>
+      <div className="flex justify-end">
         <div className="flex gap-2">
           <button className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 text-sm font-semibold rounded-lg hover:bg-gray-200 transition-colors shadow-sm border border-gray-200">
              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
