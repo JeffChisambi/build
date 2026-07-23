@@ -159,7 +159,7 @@ export default function WarehousePage() {
               <select
                 value={warehouseFilter}
                 onChange={e => setWarehouseFilter(e.target.value)}
-                className="px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-md text-xs font-medium text-gray-700 focus:ring-2 focus:ring-gray-100 focus:border-gray-400 outline-none"
+                className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-md text-sm font-medium text-gray-700 focus:ring-2 focus:ring-gray-100 focus:border-gray-400 outline-none"
               >
                 {warehouses.map(w => (
                   <option key={w} value={w}>{w === "All" ? "All Warehouses" : w}</option>
