@@ -13,7 +13,6 @@ const TABS = [
   { label: "Users", href: "/dashboard/admin/users" },
   { label: "Roles & Permissions", href: "/dashboard/admin/roles" },
   { label: "Warehouse Management", href: "/dashboard/admin/warehouse-management" },
-  { label: "IPC Management", href: "/dashboard/admin/ipc-management" },
   { label: "Sync Management", href: "/dashboard/admin/sync-management" },
 ];
 

@@ -267,12 +267,6 @@ const NAV_GROUPS = [
     ],
   },
   {
-    section: "Admin",
-    items: [
-      { name: "Admin", href: "/dashboard/admin/ipc-management", matchPrefix: "/dashboard/admin/ipc-management", icon: ALL_NAV_ITEMS.find(i => i.name === 'Administration')?.icon },
-    ],
-  },
-  {
     section: "Sync",
     items: [
       { name: "Sync", href: "/dashboard/admin/sync-management", matchPrefix: "/dashboard/admin/sync-management", icon: (
