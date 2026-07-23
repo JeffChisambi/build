@@ -38,41 +38,60 @@ export default function WarehouseOfficerDashboard({ firstName }) {
       </div>
 
       <div className="bg-white rounded-xl border border-gray-200 p-5 flex flex-col h-full">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-sm font-semibold text-gray-700">Recent Deliveries</h3>
-              <button onClick={() => router.push("/dashboard/warehouse")} className="text-xs font-semibold text-green-700 hover:underline">
-                View Register
+            <div className="flex justify-between items-center mb-5">
+              <h3 className="text-base font-bold text-gray-900">Recent Deliveries</h3>
+              <button
+                onClick={() => router.push("/dashboard/warehouse")}
+                className="flex items-center gap-1.5 bg-[#1a5c2a] hover:bg-[#134520] text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                </svg>
+                Register
               </button>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full text-sm text-left">
-                <thead className="text-xs text-gray-500 uppercase bg-gray-50">
-                  <tr>
-                    <th className="px-4 py-3 rounded-tl-lg">ID</th>
-                    <th className="px-4 py-3">Origin</th>
-                    <th className="px-4 py-3">Commodity</th>
-                    <th className="px-4 py-3">Weight</th>
-                    <th className="px-4 py-3">Status</th>
-                    <th className="px-4 py-3 rounded-tr-lg">Time</th>
+                <thead>
+                  <tr className="border-b border-gray-100">
+                    <th className="px-4 pb-3 text-sm font-medium text-gray-500 font-normal">ID</th>
+                    <th className="px-4 pb-3 text-sm font-medium text-gray-500 font-normal">Origin</th>
+                    <th className="px-4 pb-3 text-sm font-medium text-gray-500 font-normal">Commodity</th>
+                    <th className="px-4 pb-3 text-sm font-medium text-gray-500 font-normal">Weight</th>
+                    <th className="px-4 pb-3 text-sm font-medium text-gray-500 font-normal">Status</th>
+                    <th className="px-4 pb-3 text-sm font-medium text-gray-500 font-normal">Time</th>
+                    <th className="px-4 pb-3"></th>
                   </tr>
                 </thead>
                 <tbody>
                   {recentDeliveries.map((delivery, i) => (
-                    <tr key={i} className="border-b last:border-0 hover:bg-gray-50 transition-colors">
-                      <td className="px-4 py-4 font-medium text-gray-900">{delivery.id}</td>
-                      <td className="px-4 py-4 text-gray-600">{delivery.origin}</td>
-                      <td className="px-4 py-4 text-gray-600">{delivery.commodity}</td>
-                      <td className="px-4 py-4 font-bold text-gray-900">{delivery.weight}</td>
+                    <tr key={i} className="border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors">
+                      <td className="px-4 py-4 font-medium text-[#1a5c2a]">{delivery.id}</td>
+                      <td className="px-4 py-4 text-gray-500">{delivery.origin}</td>
+                      <td className="px-4 py-4 text-gray-500">{delivery.commodity}</td>
+                      <td className="px-4 py-4 text-gray-900">{delivery.weight}</td>
                       <td className="px-4 py-4">
-                        <span className={`text-xs font-medium px-2.5 py-0.5 rounded border ${
-                          delivery.status === "Unloaded" ? "bg-green-100 text-green-800 border-green-200" :
-                          delivery.status === "Unloading" ? "bg-blue-100 text-blue-800 border-blue-200" :
-                          "bg-amber-100 text-amber-800 border-amber-200"
+                        <span className={`inline-flex items-center gap-1.5 text-sm font-medium ${
+                          delivery.status === "Unloaded" ? "text-green-700" :
+                          delivery.status === "Unloading" ? "text-blue-700" :
+                          "text-amber-700"
                         }`}>
+                          <span className={`w-2 h-2 rounded-full flex-shrink-0 ${
+                            delivery.status === "Unloaded" ? "bg-green-500" :
+                            delivery.status === "Unloading" ? "bg-blue-500" :
+                            "bg-amber-500"
+                          }`} />
                           {delivery.status}
                         </span>
                       </td>
-                      <td className="px-4 py-4 text-xs text-gray-500">{delivery.time}</td>
+                      <td className="px-4 py-4 text-sm text-gray-500">{delivery.time}</td>
+                      <td className="px-4 py-4 text-right">
+                        <button className="text-gray-400 hover:text-gray-600 transition-colors p-1 rounded" aria-label="More options">
+                          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                            <circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/>
+                          </svg>
+                        </button>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
