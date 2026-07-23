@@ -171,10 +171,50 @@ export default function HeadOfficeDashboard({ firstName }) {
   const d = PERIOD_DATA[period];
 
   const kpis = [
-    { title: "Registered Farmers",           value: "142,500",  trend: "+12%", trendUp: true,  icon: Icons.farmer    },
-    { title: "National Commodity Purchased", value: "45,200 t", trend: "+18%", trendUp: true,  icon: Icons.purchase  },
-    { title: "National Warehouse Stock",     value: "18,450 t", trend: "+4%",  trendUp: true,  icon: Icons.warehouse },
-    { title: "Traceability Coverage",        value: "45,200",   trend: "+18%", trendUp: true,  icon: Icons.clipboard },
+    {
+      title: "Registered Farmers",
+      value: "142,500",
+      trend: "+12%",
+      trendUp: true,
+      icon: (
+        <svg className="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3m-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3m0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5m8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5" />
+        </svg>
+      ),
+    },
+    {
+      title: "National Commodity Purchased",
+      value: "45,200 t",
+      trend: "+18%",
+      trendUp: true,
+      icon: (
+        <svg className="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M20 6h-2.18c.07-.44.18-.88.18-1.34C18 2.54 15.46 0 13.34 0c-.21 0-.5.02-.68.05C11.98.17 11.29.7 10.76 1.4L9 3.5 7.24 1.4C6.71.7 6.02.17 5.34.05 5.16.02 4.87 0 4.66 0 2.54 0 0 2.54 0 4.66c0 .46.11.9.18 1.34H0v13c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2zm-7-4c.89 0 2 1.11 2 2.66 0 .4-.14.77-.28 1.11L12 8.46l-2.72-2.7C9.14 5.43 9 5.06 9 4.66 9 3.11 10.11 2 11 2zm5 16H4V8h4.96l3.04 3 3.04-3H18z" />
+        </svg>
+      ),
+    },
+    {
+      title: "National Warehouse Stock",
+      value: "18,450 t",
+      trend: "+4%",
+      trendUp: true,
+      icon: (
+        <svg className="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M12 3C6.49 3 2 7.49 2 13v6c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2v-6c0-5.51-4.49-10-10-10m4 12H8v-2h8zm-8 4v-2h8v2zm12 0h-2v-6c0-1.1-.9-2-2-2H8c-1.1 0-2 .9-2 2v6H4v-6c0-4.41 3.59-8 8-8s8 3.59 8 8z" />
+        </svg>
+      ),
+    },
+    {
+      title: "Traceability Coverage",
+      value: "45,200",
+      trend: "+18%",
+      trendUp: true,
+      icon: (
+        <svg className="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M21 11h-3V5c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v13c0 1.65 1.35 3 3 3h14c1.65 0 3-1.35 3-3v-6c0-.55-.45-1-1-1M5 19c-.55 0-1-.45-1-1V5h12v13a3 3 0 0 0 .17 1zm15-1c0 .55-.45 1-1 1s-1-.45-1-1v-5h2z" /><path d="M6 7h8v2H6zm0 4h8v2H6zm5 4h3v2h-3z" />
+        </svg>
+      ),
+    },
   ];
 
   const activities = [
