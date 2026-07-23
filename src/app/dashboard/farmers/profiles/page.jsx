@@ -35,8 +35,6 @@ export default function FarmerProfilesPage() {
   const [farmers] = useState(SEED_FARMERS);
   const [filters, setFilters] = useState({
     district: "",
-    gender: "",
-    status: "",
     association: "",
   });
   
@@ -64,7 +62,7 @@ export default function FarmerProfilesPage() {
   };
 
   const clearFilters = () => {
-    setFilters({ district: "", gender: "", status: "", association: "" });
+    setFilters({ district: "", association: "" });
     setCurrentPage(1);
   };
 
@@ -74,11 +72,9 @@ export default function FarmerProfilesPage() {
       .filter((f) => {
         // Advanced Filters
         const matchesDistrict = filters.district === "" || f.district === filters.district;
-        const matchesGender = filters.gender === "" || f.gender === filters.gender;
-        const matchesStatus = filters.status === "" || f.status === filters.status;
         const matchesAssociation = filters.association === "" || f.association === filters.association;
 
-        return matchesDistrict && matchesGender && matchesStatus && matchesAssociation;
+        return matchesDistrict && matchesAssociation;
       })
       .sort((a, b) => {
         const valA = a[sortField];
@@ -149,19 +145,7 @@ export default function FarmerProfilesPage() {
               <option value="">All Associations</option>
               {associations.map(a => <option key={a} value={a}>{a}</option>)}
             </select>
-            <select value={filters.gender} onChange={(e) => handleFilterChange("gender", e.target.value)}
-              className="px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-xs font-medium text-gray-700 focus:ring-2 focus:ring-green-100 focus:border-[#1a5c2a] outline-none">
-              <option value="">All Genders</option>
-              <option value="Male">Male</option>
-              <option value="Female">Female</option>
-            </select>
-            <select value={filters.status} onChange={(e) => handleFilterChange("status", e.target.value)}
-              className="px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-xs font-medium text-gray-700 focus:ring-2 focus:ring-green-100 focus:border-[#1a5c2a] outline-none">
-              <option value="">All Statuses</option>
-              <option value="Active">Active</option>
-              <option value="Inactive">Inactive</option>
-              <option value="Pending Verification">Pending</option>
-            </select>
+
             {Object.values(filters).some(x => x !== "") && (
                <button onClick={clearFilters} className="px-3 py-1.5 text-xs font-medium text-red-600 bg-red-50 border border-red-100 rounded-lg hover:bg-red-100 transition-colors">
                   Reset
