@@ -145,7 +145,7 @@ const ALL_NAV_ITEMS = [
   },
   {
     name: "Analytics",
-    href: "/dashboard/analytics/kpis",
+    href: "/dashboard/analytics",
     matchPrefix: "/dashboard/analytics",
     icon: (
       <svg className="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
@@ -234,8 +234,7 @@ const NAV_GROUPS = [
   {
     section: "Analytics",
     items: [
-      { name: "Production Trends", href: "/dashboard/analytics/production-trends", matchPrefix: "/dashboard/analytics/production-trends", icon: ALL_NAV_ITEMS.find(i => i.name === 'Analytics')?.icon },
-      { name: "Warehouse Performance", href: "/dashboard/analytics/warehouse-performance", matchPrefix: "/dashboard/analytics/warehouse-performance" },
+      { name: "Analytics", href: "/dashboard/analytics", matchPrefix: "/dashboard/analytics", icon: ALL_NAV_ITEMS.find(i => i.name === 'Analytics')?.icon },
     ],
   },
 
