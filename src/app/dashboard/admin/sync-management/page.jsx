@@ -169,7 +169,7 @@ export default function SyncManagementPage() {
             {Icons.cloud}
             <p className="text-sm font-semibold text-gray-700">Last Synchronization</p>
           </div>
-          <p className="text-xl font-bold text-gray-900">
+          <p className="text-sm font-semibold text-gray-600">
             {new Date(mockSyncMetrics.lastSynchronizationTime).toLocaleString("en-GB", {
               day: "numeric", month: "short", year: "numeric",
               hour: "2-digit", minute: "2-digit"
