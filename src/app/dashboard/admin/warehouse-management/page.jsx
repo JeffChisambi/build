@@ -72,11 +72,6 @@ export default function WarehouseManagementPage() {
     <div className="space-y-6">
       {/* Page Header */}
       <div className="flex items-start justify-between">
-        <div>
-          <p className="text-xs text-gray-400 uppercase tracking-wider font-medium mb-1">Administration</p>
-          <h1 className="text-xl font-bold text-gray-900">Warehouse Management</h1>
-          <p className="text-sm text-gray-500 mt-0.5">Create and manage warehouse master records for operational use.</p>
-        </div>
         <button
           onClick={openAdd}
           className="flex items-center gap-2 px-4 py-2 bg-gray-900 text-white text-sm font-semibold rounded-md hover:bg-gray-700 transition-colors"
