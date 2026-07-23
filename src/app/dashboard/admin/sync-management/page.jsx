@@ -57,23 +57,25 @@ function SyncStatusBadge({ status }) {
 }
 
 // Metric Card
-function MetricCard({ label, value, icon, sub, trend }) {
+function MetricCard({ label, value, icon, trend, trendUp = true }) {
   return (
-    <div className="bg-white rounded-md border border-gray-200 p-5 transition-shadow">
-      <div className="flex justify-between items-start mb-3">
-        <div className="p-2.5 bg-gray-100 text-gray-500 rounded-lg">
+    <div className="bg-white rounded-xl border border-gray-200 p-5 flex flex-col gap-3">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2 text-gray-500">
           {icon}
+          <p className="text-sm font-semibold text-gray-700">{label}</p>
         </div>
         {trend && (
           <div className="flex items-center gap-1">
-            {Icons.trendUp}
-            <span className="text-xs font-semibold text-gray-500">{trend}</span>
+            <svg className={`w-3.5 h-3.5 ${trendUp ? 'text-[#1a5c2a]' : 'text-red-500'}`} fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d={trendUp ? "M7 17L17 7M17 7H7M17 7v10" : "M7 7l10 10M17 17H7M17 17V7"} />
+            </svg>
+            <span className={`text-xs font-semibold ${trendUp ? 'text-[#1a5c2a]' : 'text-red-600'}`}>{trend}</span>
           </div>
         )}
       </div>
-      <p className="text-2xl font-bold text-gray-900">{value}</p>
-      <p className="text-sm font-semibold text-gray-700 mt-1">{label}</p>
-      {sub && <p className="text-xs text-gray-500 mt-0.5">{sub}</p>}
+      <p className="text-xl font-bold text-gray-900">{value}</p>
+      <p className="text-xs text-gray-400">Compared to last month</p>
     </div>
   );
 }
