@@ -74,21 +74,16 @@ export default function UsersPage() {
               </svg>
               {isFarmers ? "Add Farmer" : "Add User"}
             </button>
-            <button className="p-1.5 text-gray-400 hover:text-gray-600 transition-colors rounded-md hover:bg-gray-50">
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                <circle cx="12" cy="5" r="1.5" /><circle cx="12" cy="12" r="1.5" /><circle cx="12" cy="19" r="1.5" />
-              </svg>
-            </button>
           </div>
         </div>
 
         <div className="overflow-x-auto">
           {isFarmers ? (
-            <table className="w-full text-left text-sm">
+            <table className="w-auto min-w-full text-left text-sm">
               <thead>
                 <tr className="border-b border-gray-100">
-                  <th className="px-4 py-3 text-xs font-semibold text-gray-700">Name</th>
-                  <th className="px-4 py-3 text-xs font-semibold text-gray-700">District</th>
+                  <th className="px-4 py-3 text-xs font-semibold text-gray-700 w-1/3">Name</th>
+                  <th className="px-4 py-3 text-xs font-semibold text-gray-700 w-1/4">District</th>
                   <th className="px-4 py-3 text-xs font-semibold text-gray-700">Association</th>
                   <th className="px-4 py-3 text-xs font-semibold text-gray-700">Status</th>
                 </tr>
@@ -123,11 +118,11 @@ export default function UsersPage() {
               </tbody>
             </table>
           ) : (
-            <table className="w-full text-left text-sm">
+            <table className="w-auto min-w-full text-left text-sm">
               <thead>
                 <tr className="border-b border-gray-100">
-                  <th className="px-4 py-3 text-xs font-semibold text-gray-700">Name</th>
-                  <th className="px-4 py-3 text-xs font-semibold text-gray-700">Role</th>
+                  <th className="px-4 py-3 text-xs font-semibold text-gray-700 w-1/3">Name</th>
+                  <th className="px-4 py-3 text-xs font-semibold text-gray-700 w-1/4">Role</th>
                   <th className="px-4 py-3 text-xs font-semibold text-gray-700">Assigned IPC</th>
                   <th className="px-4 py-3 text-xs font-semibold text-gray-700">Status</th>
                 </tr>
