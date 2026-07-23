@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import Link from "next/link";
 import WorkspaceLayout from "@/components/WorkspaceLayout";
 import { SEED_PURCHASES } from "@/lib/mockPurchases";
@@ -44,6 +44,18 @@ export default function TraceabilityPage() {
   const [activeStep, setActiveStep] = useState("farmer");
   const [searchQuery, setSearchQuery] = useState("");
   const [commodityFilter, setCommodityFilter] = useState("All");
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
+  useEffect(() => {
+    function handleClickOutside(e) {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setDropdownOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   // Construct batch list
   const batches = useMemo(() => {
@@ -133,13 +145,36 @@ export default function TraceabilityPage() {
         {/* ── Table Card ── */}
         <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
           <div className="flex items-center justify-between px-5 py-4 border-b border-gray-50">
-            <select
-              value={commodityFilter}
-              onChange={e => setCommodityFilter(e.target.value)}
-              className="px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-xs font-medium text-gray-700 focus:ring-2 focus:ring-gray-100 focus:border-black outline-none"
-            >
-              {commodities.map(c => <option key={c} value={c}>{c === "All" ? "All Commodities" : c}</option>)}
-            </select>
+            <div ref={dropdownRef} className="relative">
+              <button
+                onClick={() => setDropdownOpen(o => !o)}
+                className="flex items-center gap-2 px-3 py-1.5 border border-gray-300 rounded-lg text-xs font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors focus:outline-none"
+              >
+                {commodityFilter === "All" ? "All Commodities" : commodityFilter}
+                <svg className="w-3.5 h-3.5 text-gray-500" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              {dropdownOpen && (
+                <div className="absolute left-0 top-full mt-1 z-20 bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden min-w-[160px]">
+                  {commodities.map(c => {
+                    const label = c === "All" ? "All Commodities" : c;
+                    const active = commodityFilter === c;
+                    return (
+                      <button
+                        key={c}
+                        onClick={() => { setCommodityFilter(c); setDropdownOpen(false); }}
+                        className={`w-full text-left px-4 py-2 text-xs font-medium transition-colors ${
+                          active ? "bg-[#1a3a2a] text-white" : "text-gray-700 hover:bg-gray-50"
+                        }`}
+                      >
+                        {label}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
             <button className="flex items-center gap-1.5 text-xs font-semibold text-gray-500 hover:text-gray-700 px-3 py-1.5 rounded-lg hover:bg-gray-50 transition-colors border border-gray-200">
               Export CSV
             </button>
