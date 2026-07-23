@@ -163,34 +163,24 @@ export default function SyncManagementPage() {
       </div>
 
       {/* ── Sync Information ── */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <div className="bg-white rounded-xl p-5 shadow-[0_2px_10px_rgba(0,0,0,0.04)] hover:-translate-y-1 hover:shadow-md transition-all duration-300 flex flex-col h-full border border-gray-50/50">
-          <div className="flex items-start justify-between mb-4">
-            <h3 className="text-xs font-semibold text-gray-500 tracking-wider uppercase">Last Synchronization</h3>
-            <div className="w-8 h-8 rounded-md bg-[#1a5c2e]/10 flex items-center justify-center text-[#1a5c2e] flex-shrink-0">
-              {Icons.cloud}
-            </div>
+      <div className="flex flex-wrap gap-4">
+        <div className="bg-white rounded-xl border border-gray-200 p-5 flex flex-col gap-3 flex-1 min-w-[200px]">
+          <div className="flex items-center gap-2 text-gray-500">
+            {Icons.cloud}
+            <p className="text-sm font-semibold text-gray-700">Last Synchronization</p>
           </div>
-          <p className="text-xl font-extrabold text-gray-900 tracking-tight leading-none">
+          <p className="text-xl font-bold text-gray-900">
             {new Date(mockSyncMetrics.lastSynchronizationTime).toLocaleString()}
           </p>
-          <div className="mt-auto pt-3 border-t border-gray-50">
-            <p className="text-xs text-gray-400 font-medium">Most recent sync event</p>
-          </div>
         </div>
-        <div className="bg-white rounded-xl p-5 shadow-[0_2px_10px_rgba(0,0,0,0.04)] hover:-translate-y-1 hover:shadow-md transition-all duration-300 flex flex-col h-full border border-gray-50/50">
-          <div className="flex items-start justify-between mb-4">
-            <h3 className="text-xs font-semibold text-gray-500 tracking-wider uppercase">Devices Connected</h3>
-            <div className="w-8 h-8 rounded-md bg-[#1a5c2e]/10 flex items-center justify-center text-[#1a5c2e] flex-shrink-0">
-              {Icons.server}
-            </div>
+        <div className="bg-white rounded-xl border border-gray-200 p-5 flex flex-col gap-3 flex-1 min-w-[200px]">
+          <div className="flex items-center gap-2 text-gray-500">
+            {Icons.server}
+            <p className="text-sm font-semibold text-gray-700">Devices Connected</p>
           </div>
-          <p className="text-xl font-extrabold text-gray-900 tracking-tight leading-none">
+          <p className="text-xl font-bold text-gray-900">
             {mockSyncMetrics.devicesOnline} online, {mockSyncMetrics.devicesOffline} offline
           </p>
-          <div className="mt-auto pt-3 border-t border-gray-50">
-            <p className="text-xs text-gray-400 font-medium">Active field device status</p>
-          </div>
         </div>
       </div>
 
