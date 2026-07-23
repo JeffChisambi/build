@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@variant dark (&:where(.dark, .dark *));
+
 /* ─────────────────────────────────────────────
    Design Tokens – Light Mode (default)
    Primary green: #1a5c2a  (NASFAM brand green)
