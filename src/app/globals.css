@@ -94,6 +94,14 @@ html.dark {
 }
 
 /* ─────────────────────────────────────────────
+   Chart section fade-in animation
+   ───────────────────────────────────────────── */
+@keyframes chartFadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0);   }
+}
+
+/* ─────────────────────────────────────────────
    Scrollbar Customization
    ───────────────────────────────────────────── */
 ::-webkit-scrollbar {
