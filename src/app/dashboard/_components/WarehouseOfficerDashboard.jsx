@@ -28,17 +28,6 @@ export default function WarehouseOfficerDashboard({ firstName }) {
 
   return (
     <div className="p-6 space-y-8 max-w-[1400px] mx-auto">
-      {/* ── Page Header ── */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Warehouse Operations</h1>
-          <p className="text-sm text-gray-500 mt-1">Lilongwe Central Depot</p>
-        </div>
-        <div className="text-right hidden sm:block">
-          <p className="text-sm font-semibold text-gray-900">{firstName}</p>
-          <p className="text-xs text-gray-500 mt-0.5">Warehouse Manager</p>
-        </div>
-      </div>
 
       {/* ── KPI Grid ── */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
