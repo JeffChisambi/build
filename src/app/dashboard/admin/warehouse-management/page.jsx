@@ -19,6 +19,7 @@ export default function WarehouseManagementPage() {
   const [form, setForm] = useState(emptyForm);
   const [errors, setErrors] = useState({});
   const [search, setSearch] = useState("");
+  const [openMenu, setOpenMenu] = useState(null);
 
   const validate = () => {
     const e = {};
@@ -158,7 +159,7 @@ export default function WarehouseManagementPage() {
           <table className="w-full text-left text-sm">
             <thead className="bg-gray-50 border-b border-gray-100">
               <tr>
-                {["Code", "Name", "Location", "Capacity", "Manager", "Status", "Actions"].map((h) => (
+                {["Name", "Location", "Capacity", "Manager", "Status", ""].map((h) => (
                   <th key={h} className="px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">{h}</th>
                 ))}
               </tr>
@@ -171,7 +172,6 @@ export default function WarehouseManagementPage() {
               ) : (
                 filtered.map((wh) => (
                   <tr key={wh.id} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-5 py-3.5 font-mono text-xs font-semibold text-gray-700">{wh.code}</td>
                     <td className="px-5 py-3.5 font-medium text-gray-900">{wh.name}</td>
                     <td className="px-5 py-3.5 text-gray-600">{wh.location}</td>
                     <td className="px-5 py-3.5 text-gray-600">{wh.capacity}</td>
@@ -181,14 +181,31 @@ export default function WarehouseManagementPage() {
                         {wh.status}
                       </span>
                     </td>
-                    <td className="px-5 py-3.5">
-                      <div className="flex items-center gap-2">
-                        <button onClick={() => openEdit(wh)} className="text-xs font-semibold text-gray-700 hover:underline">Edit</button>
-                        <span className="text-gray-300">|</span>
-                        <button onClick={() => toggleStatus(wh.id)} className={`text-xs font-semibold hover:underline ${wh.status === "Active" ? "text-gray-500" : "text-gray-900"}`}>
-                          {wh.status === "Active" ? "Deactivate" : "Activate"}
-                        </button>
-                      </div>
+                    <td className="px-5 py-3.5 relative">
+                      <button
+                        onClick={() => setOpenMenu(openMenu === wh.id ? null : wh.id)}
+                        className="p-1 rounded hover:bg-gray-100 text-gray-500 transition-colors"
+                      >
+                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                          <circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/>
+                        </svg>
+                      </button>
+                      {openMenu === wh.id && (
+                        <div className="absolute right-4 top-10 z-20 bg-white border border-gray-100 rounded-lg shadow-lg w-36 overflow-hidden">
+                          <button
+                            onClick={() => { openEdit(wh); setOpenMenu(null); }}
+                            className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => { toggleStatus(wh.id); setOpenMenu(null); }}
+                            className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                          >
+                            {wh.status === "Active" ? "Deactivate" : "Activate"}
+                          </button>
+                        </div>
+                      )}
                     </td>
                   </tr>
                 ))
