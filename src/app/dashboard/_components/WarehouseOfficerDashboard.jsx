@@ -47,10 +47,10 @@ export default function WarehouseOfficerDashboard({ firstName }) {
         ))}
       </div>
 
-      <div className="bg-white rounded-xl border border-gray-200 p-6">
+      <div className="bg-white rounded-xl border border-gray-200 p-5 flex flex-col h-full">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-bold text-gray-900">Recent Deliveries</h2>
-              <button onClick={() => router.push("/dashboard/warehouse")} className="text-sm font-semibold text-nasfam-green hover:underline">
+              <h3 className="text-sm font-semibold text-gray-700">Recent Deliveries</h3>
+              <button onClick={() => router.push("/dashboard/warehouse")} className="text-xs font-semibold text-green-700 hover:underline">
                 View Register
               </button>
             </div>
