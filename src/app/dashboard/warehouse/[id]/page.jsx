@@ -2,9 +2,9 @@
 
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { useMemo } from "react";
+import { useState, useEffect, useCallback } from "react";
 import WorkspaceLayout from "@/components/WorkspaceLayout";
-import { SEED_PURCHASES } from "@/lib/mockPurchases";
+import { warehousesService } from "@/lib/api/warehouses";
 
 const ICON = (
   <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -12,83 +12,66 @@ const ICON = (
   </svg>
 );
 
-function SectionCard({ title, children, action }) {
+function SectionCard({ title, children }) {
   return (
     <div className="bg-white rounded-xl border border-gray-200 overflow-hidden mb-6">
-      <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-        <h2 className="text-sm font-bold text-gray-900 uppercase tracking-wide">{title}</h2>
-        {action && <div>{action}</div>}
-      </div>
-      <div className="p-6">
-        {children}
-      </div>
+      <div className="px-6 py-4 border-b border-gray-100"><h2 className="text-sm font-bold text-gray-900 uppercase tracking-wide">{title}</h2></div>
+      <div className="p-6">{children}</div>
     </div>
   );
 }
 
-function DataRow({ label, value, colSpan = 1 }) {
+function DataRow({ label, value }) {
   return (
-    <div className={`col-span-${colSpan} flex flex-col gap-1`}>
+    <div className="flex flex-col gap-1">
       <span className="text-xs font-semibold text-gray-500">{label}</span>
       <span className="text-sm font-medium text-gray-900">{value || "—"}</span>
     </div>
   );
 }
 
-function StatusBadge({ status }) {
-  const colors = {
-    "Stored": "bg-green-50 text-green-700 border border-green-100",
-    "In Transit": "bg-indigo-50 text-indigo-700 border border-indigo-100",
-    "Dispatched": "bg-amber-50 text-amber-700 border border-amber-100",
-    "Active": "bg-blue-50 text-blue-700 border border-blue-100",
-  };
+function SkeletonPage() {
   return (
-    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${colors[status] || "bg-gray-100 text-gray-600"}`}>
-      {status}
-    </span>
+    <div className="p-6 space-y-6 animate-pulse">
+      <div className="h-6 bg-gray-200 rounded w-48" />
+      <div className="h-32 bg-gray-200 rounded-xl" />
+      <div className="h-48 bg-gray-200 rounded-xl" />
+    </div>
   );
 }
 
 export default function WarehouseDetailPage() {
-  const { id } = useParams();
-  const router = useRouter();
+  const { id }   = useParams();
+  const router   = useRouter();
 
-  const record = useMemo(() => {
-    const purchase = SEED_PURCHASES.find(p => p.id === id);
-    if (!purchase || !purchase.warehouse) return null;
-    return {
-      id: purchase.id,
-      warehouseName: purchase.warehouse.name,
-      warehouseCode: purchase.grn?.warehouseCode || "WH-LLW-001",
-      location: purchase.warehouse.location,
-      commodity: purchase.commodity,
-      grade: purchase.grade,
-      variety: purchase.variety,
-      moistureContent: purchase.moistureContent,
-      bags: purchase.numberOfBags,
-      weight: purchase.totalWeight,
-      bin: purchase.warehouse.bin,
-      stack: purchase.warehouse.stack,
-      shelf: purchase.warehouse.shelf,
-      storageCondition: purchase.warehouse.storageCondition,
-      status: purchase.warehouse.currentStockStatus || "Stored",
-      batchNumber: purchase.batch?.batchNumber || "BCH-2024-XXXX",
-      batchStatus: purchase.batch?.batchStatus || "Active",
-      batchCreationDate: purchase.batch?.batchCreationDate || purchase.purchaseDate,
-      grnNumber: purchase.grn?.grnNumber || "GRN-2024-XXXX",
-      receivingOfficer: purchase.grn?.receivingOfficer || "Officer",
-      receivingDate: purchase.grn?.receivingDate || purchase.purchaseDate,
-      farmerId: purchase.farmerId,
-      farmerName: purchase.farmerName,
-      purchaseDate: purchase.purchaseDate,
-    };
+  const [record, setRecord]   = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError]     = useState(null);
+
+  const fetchRecord = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const { data } = await warehousesService.getRecord(id);
+      setRecord(data ?? null);
+    } catch (err) {
+      setError(err.message ?? "Failed to load record.");
+    } finally {
+      setLoading(false);
+    }
   }, [id]);
 
-  if (!record) {
+  useEffect(() => { fetchRecord(); }, [fetchRecord]);
+
+  if (loading) return <SkeletonPage />;
+
+  if (error || !record) {
     return (
       <div className="flex flex-col items-center justify-center h-[60vh]">
-        <h2 className="text-2xl font-bold text-gray-900">Inventory Record Not Found</h2>
-        <p className="text-gray-500 mt-2">The record ID {id} does not exist in the warehouse system.</p>
+        <h2 className="text-2xl font-bold text-gray-900">
+          {error ? "Error" : "Record Not Found"}
+        </h2>
+        <p className="text-gray-500 mt-2">{error ?? `No warehouse record found for ID ${id}.`}</p>
         <button onClick={() => router.push("/dashboard/warehouse")} className="mt-6 px-4 py-2 bg-[#1a5c2a] text-white rounded-lg hover:bg-[#134520]">
           Back to Warehouse
         </button>
@@ -102,98 +85,72 @@ export default function WarehouseDetailPage() {
       module="Warehouse"
       moduleHref="/dashboard/warehouse"
       title="Warehouse Stock Details"
-      description={`Inventory & batch tracking details for ${record.batchNumber}`}
+      description={`Inventory & batch tracking details for ${record.batchNumber ?? id}`}
       tabs={[]}
-      hideTitleBlock={true}
-      hideHeader={true}
+      hideTitleBlock
+      hideHeader
     >
       <div className="space-y-6 p-6 max-w-5xl mx-auto pb-12">
-        {/* Breadcrumb & Navigation */}
-        <div className="flex items-center gap-2 text-xs font-semibold text-gray-500 mb-2">
-          <Link href="/dashboard/warehouse" className="hover:text-gray-900 transition-colors">Warehouse</Link>
+        {/* Breadcrumb */}
+        <div className="flex items-center gap-2 text-xs font-semibold text-gray-500">
+          <Link href="/dashboard/warehouse" className="hover:text-gray-700 transition-colors">Warehouse</Link>
           <span>/</span>
-          <span className="text-gray-900">{record.batchNumber}</span>
+          <span className="text-gray-700">{record.grnNumber ?? id}</span>
         </div>
 
-        {/* PROFILE/HEADER CARD */}
-        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden flex flex-col md:flex-row relative">
-          <div className="p-8 flex flex-col md:flex-row items-center md:items-start gap-6 flex-1 bg-gradient-to-br from-white to-gray-50/50">
-            <div className="w-16 h-16 rounded-full bg-gray-100 border border-gray-200 shadow-sm flex flex-shrink-0 items-center justify-center text-gray-600">
-              {ICON}
+        {/* Header card */}
+        <div className="bg-white rounded-xl border border-gray-200 px-6 py-5">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <h1 className="text-lg font-bold text-gray-900">{record.warehouseName}</h1>
+              <p className="text-sm text-gray-500 mt-0.5">{record.location}</p>
+              <p className="text-xs text-gray-400 mt-1 font-mono">{record.warehouseCode}</p>
             </div>
-            <div className="text-center md:text-left flex-1">
-              <div className="flex flex-col md:flex-row md:items-center gap-3 mb-2">
-                <h1 className="text-2xl font-bold text-gray-900 tracking-tight">{record.warehouseName}</h1>
-                <StatusBadge status={record.status} />
-              </div>
-              <p className="text-sm font-mono font-medium text-gray-500 mb-2">{record.location}</p>
-              <p className="text-xs text-gray-400">Received on {record.receivingDate} by {record.receivingOfficer}</p>
-            </div>
-          </div>
-          <div className="border-t md:border-t-0 md:border-l border-gray-100 bg-white p-6 flex flex-col justify-center gap-2 md:min-w-[280px]">
-            <button className="w-full flex justify-center items-center gap-2 px-4 py-2 bg-[#1a5c2a] text-white text-sm font-semibold rounded-lg hover:bg-[#134520] transition-colors shadow-sm">
-              Print Inventory Label
-            </button>
-            <button className="w-full flex justify-center items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 text-sm font-semibold rounded-lg hover:bg-gray-200 transition-colors border border-gray-200">
-              Transfer Stock
-            </button>
+            <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold ${record.stockStatus === "Stored" ? "bg-green-50 text-green-700" : "bg-gray-100 text-gray-600"}`}>
+              {record.stockStatus}
+            </span>
           </div>
         </div>
 
-        {/* DETAILS SECTIONS */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <SectionCard title="1. Stock & Commodity Details">
-            <div className="grid grid-cols-2 gap-6">
-              <DataRow label="Commodity" value={record.commodity} />
-              <DataRow label="Variety" value={record.variety} />
-              <DataRow label="Grade" value={record.grade} />
-              <DataRow label="Moisture Content" value={record.moistureContent} />
-              <DataRow label="Total Bags" value={`${record.bags} bags`} />
-              <DataRow label="Total Net Weight" value={`${record.weight} kg`} />
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <SectionCard title="Commodity">
+            <div className="grid grid-cols-2 gap-4">
+              <DataRow label="Commodity"        value={record.commodity} />
+              <DataRow label="Grade"            value={record.grade} />
+              <DataRow label="Number of Bags"   value={record.bags} />
+              <DataRow label="Total Weight"     value={record.weight ? `${record.weight.toLocaleString()} kg` : "—"} />
+              <DataRow label="Storage Location" value={[record.bin, record.stack, record.shelf].filter(Boolean).join(" / ")} />
+              <DataRow label="Condition"        value={record.storageCondition} />
             </div>
           </SectionCard>
 
-          <SectionCard title="2. Storage Location Info">
-            <div className="grid grid-cols-2 gap-6">
-              <DataRow label="Warehouse Code" value={record.warehouseCode} />
-              <DataRow label="Storage Bin" value={record.bin} />
-              <DataRow label="Stack Location" value={record.stack} />
-              <DataRow label="Shelf Level" value={record.shelf} />
-              <DataRow label="Storage Condition" value={record.storageCondition} colSpan={2} />
-            </div>
-          </SectionCard>
-
-          <SectionCard title="3. Batch & GRN Tracking">
-            <div className="grid grid-cols-2 gap-6">
-              <DataRow label="Batch Number" value={record.batchNumber} />
-              <DataRow label="Batch Status" value={record.batchStatus} />
-              <DataRow label="Batch Creation Date" value={record.batchCreationDate} />
-              <DataRow label="GRN Number" value={record.grnNumber} />
+          <SectionCard title="GRN & Batch">
+            <div className="grid grid-cols-2 gap-4">
+              <DataRow label="GRN Number"        value={record.grnNumber} />
+              <DataRow label="GRN Status"        value={record.grnStatus} />
               <DataRow label="Receiving Officer" value={record.receivingOfficer} />
-              <DataRow label="Receiving Date" value={record.receivingDate} />
-            </div>
-          </SectionCard>
-
-          <SectionCard title="4. Source Traceability">
-            <div className="grid grid-cols-2 gap-6">
-              <DataRow label="Farmer ID" value={record.farmerId} />
-              <DataRow label="Farmer Name" value={record.farmerName} />
-              <DataRow label="Purchase Record ID" value={record.id} />
-              <DataRow label="Purchase Date" value={record.purchaseDate} />
-              <div className="col-span-2 mt-2">
-                <Link
-                  href={`/dashboard/farmers/profiles/${record.farmerId}`}
-                  className="inline-flex items-center gap-1 text-xs font-semibold text-[#1a5c2a] hover:underline"
-                >
-                  View Farmer Profile
-                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.853L21 12m0 0l-7.5 7.147M21 12H3" />
-                  </svg>
-                </Link>
-              </div>
+              <DataRow label="Receiving Date"    value={record.receivingDate} />
+              <DataRow label="Batch Number"      value={record.batchNumber} />
+              <DataRow label="Batch Status"      value={record.batchStatus} />
             </div>
           </SectionCard>
         </div>
+
+        {record.farmerName && (
+          <SectionCard title="Farmer">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-bold text-gray-900">{record.farmerName}</p>
+                <p className="text-xs text-gray-500 mt-0.5">Purchase date: {record.purchaseDate}</p>
+              </div>
+              {record.farmerId && (
+                <Link href={`/dashboard/farmers/profiles/${record.farmerId}`} className="px-4 py-2 bg-[#1a5c2a] text-white text-xs font-semibold rounded-lg hover:bg-[#134520] transition-colors">
+                  View Farmer Profile
+                </Link>
+              )}
+            </div>
+          </SectionCard>
+        )}
       </div>
     </WorkspaceLayout>
   );

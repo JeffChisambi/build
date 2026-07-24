@@ -1,17 +1,11 @@
 "use client";
 
-import { useState, useMemo, useRef, useEffect } from "react";
+import { useState, useMemo, useRef, useEffect, useCallback } from "react";
 import Link from "next/link";
-import { SEED_FARMERS } from "@/lib/mockFarmers";
+import { farmersService } from "@/lib/api/farmers";
 
-// ── Initials avatar ──────────────────────────────────────────
 function Avatar({ name }) {
-  const initials = name
-    .split(" ")
-    .map((n) => n[0])
-    .slice(0, 2)
-    .join("")
-    .toUpperCase();
+  const initials = (name ?? "?").split(" ").map((n) => n[0]).slice(0, 2).join("").toUpperCase();
   return (
     <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0">
       <span className="text-xs font-semibold text-gray-600">{initials}</span>
@@ -19,13 +13,8 @@ function Avatar({ name }) {
   );
 }
 
-// ── Status dot + label ───────────────────────────────────────
 function StatusDot({ status }) {
-  const dot = {
-    Active: "bg-green-500",
-    Inactive: "bg-gray-400",
-    "Pending Verification": "bg-amber-400",
-  }[status] || "bg-gray-400";
+  const dot = { Active: "bg-green-500", Inactive: "bg-gray-400", "Pending Verification": "bg-amber-400" }[status] || "bg-gray-400";
   return (
     <span className="flex items-center gap-1.5 text-sm text-gray-600 whitespace-nowrap">
       <span className={`w-2 h-2 rounded-full flex-shrink-0 ${dot}`} />
@@ -34,35 +23,25 @@ function StatusDot({ status }) {
   );
 }
 
-// ── Row "⋯" menu ─────────────────────────────────────────────
 function RowMenu({ farmer }) {
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
-
   useEffect(() => {
     if (!open) return;
     const handler = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
   }, [open]);
-
   return (
     <div className="relative" ref={ref}>
-      <button
-        onClick={() => setOpen((p) => !p)}
-        className="p-1.5 rounded-md text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors"
-      >
+      <button onClick={() => setOpen((p) => !p)} className="p-1.5 rounded-md text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors">
         <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
           <circle cx="5" cy="12" r="1.5" /><circle cx="12" cy="12" r="1.5" /><circle cx="19" cy="12" r="1.5" />
         </svg>
       </button>
       {open && (
         <div className="absolute right-0 top-full mt-1 w-36 bg-white border border-gray-200 rounded-lg shadow-lg z-20 py-1">
-          <Link
-            href={`/dashboard/farmers/profiles/${farmer.id}`}
-            className="block px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
-            onClick={() => setOpen(false)}
-          >
+          <Link href={`/dashboard/farmers/profiles/${farmer.id}`} className="block px-3 py-2 text-sm text-gray-700 hover:bg-gray-50" onClick={() => setOpen(false)}>
             View profile
           </Link>
         </div>
@@ -71,196 +50,160 @@ function RowMenu({ farmer }) {
   );
 }
 
-// ── Filter dropdown anchored to "Farmers ∨" ──────────────────
-function FilterDropdown({ filters, onChange, onClear, districts, associations }) {
-  const [open, setOpen] = useState(false);
-  const ref = useRef(null);
-  const hasFilters = Object.values(filters).some((v) => v !== "");
-
-  useEffect(() => {
-    if (!open) return;
-    const handler = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, [open]);
-
+function SkeletonRow() {
   return (
-    <div className="relative" ref={ref}>
-      <button
-        onClick={() => setOpen((p) => !p)}
-        className="flex items-center gap-1.5 text-base font-bold text-gray-900 hover:text-gray-700 transition-colors"
-      >
-        Farmers
-        <svg className={`w-4 h-4 text-gray-500 transition-transform ${open ? "rotate-180" : ""}`} fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-        </svg>
-        {hasFilters && <span className="w-2 h-2 rounded-full bg-[#1a5c2a]" />}
-      </button>
-
-      {open && (
-        <div className="absolute left-0 top-full mt-2 w-64 bg-white border border-gray-200 rounded-xl shadow-lg z-20 p-4 space-y-3">
-          <div>
-            <label className="block text-xs font-semibold text-gray-500 mb-1">District</label>
-            <select
-              value={filters.district}
-              onChange={(e) => onChange("district", e.target.value)}
-              className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-700 outline-none focus:ring-2 focus:ring-gray-100 focus:border-gray-400"
-            >
-              <option value="">All Districts</option>
-              {districts.map((d) => <option key={d} value={d}>{d}</option>)}
-            </select>
-          </div>
-          <div>
-            <label className="block text-xs font-semibold text-gray-500 mb-1">Association</label>
-            <select
-              value={filters.association}
-              onChange={(e) => onChange("association", e.target.value)}
-              className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-700 outline-none focus:ring-2 focus:ring-gray-100 focus:border-gray-400"
-            >
-              <option value="">All Associations</option>
-              {associations.map((a) => <option key={a} value={a}>{a}</option>)}
-            </select>
-          </div>
-          {hasFilters && (
-            <button
-              onClick={() => { onClear(); setOpen(false); }}
-              className="w-full text-xs font-semibold text-red-600 hover:text-red-700 text-left"
-            >
-              Clear filters
-            </button>
-          )}
-        </div>
-      )}
-    </div>
+    <tr className="border-b border-gray-100 animate-pulse">
+      {Array.from({ length: 7 }).map((_, i) => (
+        <td key={i} className="px-4 py-3"><div className="h-3.5 bg-gray-200 rounded w-3/4" /></td>
+      ))}
+    </tr>
   );
 }
 
-// ── Page ─────────────────────────────────────────────────────
 export default function FarmerProfilesPage() {
-  const [farmers] = useState(SEED_FARMERS);
-  const [filters, setFilters] = useState({ district: "", association: "" });
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
+  const [farmers, setFarmers]   = useState([]);
+  const [loading, setLoading]   = useState(true);
+  const [error, setError]       = useState(null);
+  const [search, setSearch]     = useState("");
+  const [filters, setFilters]   = useState({ district: "", status: "" });
 
-  const handleFilterChange = (field, val) => {
-    setFilters((prev) => ({ ...prev, [field]: val }));
-    setCurrentPage(1);
-  };
+  const fetchFarmers = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const params = { limit: 500 };
+      if (filters.district) params.district = filters.district;
+      if (filters.status)   params.status   = filters.status;
+      const { data } = await farmersService.list(params);
+      setFarmers(data ?? []);
+    } catch (err) {
+      setError(err.message ?? "Failed to load farmers.");
+    } finally {
+      setLoading(false);
+    }
+  }, [filters]);
 
-  const clearFilters = () => {
-    setFilters({ district: "", association: "" });
-    setCurrentPage(1);
-  };
+  useEffect(() => { fetchFarmers(); }, [fetchFarmers]);
 
-  const processedFarmers = useMemo(() =>
+  const districts     = [...new Set(farmers.map((f) => f.district).filter(Boolean))].sort();
+  const associations  = [...new Set(farmers.map((f) => f.association).filter(Boolean))].sort();
+
+  const filtered = useMemo(() =>
     farmers.filter((f) => {
-      const matchesDistrict = filters.district === "" || f.district === filters.district;
-      const matchesAssociation = filters.association === "" || f.association === filters.association;
-      return matchesDistrict && matchesAssociation;
+      const q = search.toLowerCase();
+      return (
+        (!q || `${f.fullName} ${f.memberNo ?? ""} ${f.nationalId ?? ""}`.toLowerCase().includes(q)) &&
+        (!filters.district || f.district === filters.district) &&
+        (!filters.status   || f.status   === filters.status)
+      );
     }),
-    [farmers, filters]
-  );
-
-  const totalPages = Math.max(1, Math.ceil(processedFarmers.length / itemsPerPage));
-  const paginatedFarmers = processedFarmers.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
-
-  const districts = [...new Set(farmers.map((f) => f.district))];
-  const associations = [...new Set(farmers.map((f) => f.association))];
+  [farmers, search, filters]);
 
   return (
-    <div className="p-6 space-y-4">
-      {/* Card */}
-      <div className="bg-white rounded-xl border border-gray-200">
-
-        {/* Card header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-          <FilterDropdown
-            filters={filters}
-            onChange={handleFilterChange}
-            onClear={clearFilters}
-            districts={districts}
-            associations={associations}
-          />
-          <Link
-            href="/dashboard/farmers/registration"
-            className="flex items-center gap-2 px-4 py-2 bg-[#1a5c2a] text-white text-sm font-semibold rounded-lg hover:bg-[#134520] transition-colors"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-            </svg>
-            Farmer
-          </Link>
+    <div className="space-y-6">
+      <div className="flex items-start justify-between">
+        <div>
+          <p className="text-xs text-gray-400 uppercase tracking-wider font-medium mb-1">Farmers</p>
+          <h1 className="text-xl font-bold text-gray-900">Farmer Profiles</h1>
+          <p className="text-sm text-gray-500 mt-0.5">Browse and manage registered farmer records.</p>
         </div>
+        <Link
+          href="/dashboard/farmers/registration"
+          className="flex items-center gap-2 px-4 py-2.5 bg-[#1a5c2a] text-white text-sm font-semibold rounded-lg hover:bg-[#134520] transition-colors"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+          </svg>
+          Register Farmer
+        </Link>
+      </div>
 
-        {/* Table */}
-        <div className="overflow-x-auto overflow-hidden rounded-b-xl">
-          <table className="w-full text-sm text-left">
+      {/* Search + filters */}
+      <div className="flex flex-wrap gap-3">
+        <div className="relative flex-1 min-w-[200px]">
+          <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+          <input
+            type="text"
+            placeholder="Search farmers…"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full pl-9 pr-4 py-2 text-sm border border-gray-200 rounded-lg outline-none focus:border-[#1a5c2a] bg-white"
+          />
+        </div>
+        <select
+          value={filters.district}
+          onChange={(e) => setFilters((f) => ({ ...f, district: e.target.value }))}
+          className="px-3 py-2 text-sm border border-gray-200 rounded-lg outline-none focus:border-[#1a5c2a] bg-white"
+        >
+          <option value="">All Districts</option>
+          {districts.map((d) => <option key={d} value={d}>{d}</option>)}
+        </select>
+        <select
+          value={filters.status}
+          onChange={(e) => setFilters((f) => ({ ...f, status: e.target.value }))}
+          className="px-3 py-2 text-sm border border-gray-200 rounded-lg outline-none focus:border-[#1a5c2a] bg-white"
+        >
+          <option value="">All Statuses</option>
+          {["Active", "Inactive", "Pending Verification"].map((s) => <option key={s} value={s}>{s}</option>)}
+        </select>
+        {(filters.district || filters.status) && (
+          <button onClick={() => setFilters({ district: "", status: "" })} className="px-3 py-2 text-xs font-semibold text-gray-500 hover:text-gray-700 transition-colors">
+            Clear filters
+          </button>
+        )}
+      </div>
+
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-sm text-red-700">
+          {error} — <button onClick={fetchFarmers} className="underline font-semibold">Retry</button>
+        </div>
+      )}
+
+      {/* Table */}
+      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-gray-100">
-                <th className="px-6 py-3 text-xs font-semibold text-gray-800">Name</th>
-                <th className="px-6 py-3 text-xs font-semibold text-gray-800">District</th>
-                <th className="px-6 py-3 text-xs font-semibold text-gray-800">Association</th>
-                <th className="px-6 py-3" />
+              <tr className="border-b border-gray-100 bg-gray-50">
+                {["", "Farmer ID", "Name", "District", "Association", "Crops", "Status", ""].map((h, i) => (
+                  <th key={i} className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">{h}</th>
+                ))}
               </tr>
             </thead>
             <tbody>
-              {paginatedFarmers.length === 0 ? (
+              {loading ? (
+                Array.from({ length: 6 }).map((_, i) => <SkeletonRow key={i} />)
+              ) : filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-6 py-12 text-center text-sm text-gray-400">
-                    No farmers found matching your filters.
+                  <td colSpan={8} className="px-4 py-12 text-center">
+                    <p className="text-sm text-gray-500">{search || filters.district || filters.status ? "No farmers match your filters." : "No farmer records found. Connect a backend to load farmer data."}</p>
                   </td>
                 </tr>
-              ) : paginatedFarmers.map((f) => (
-                <tr key={f.id} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
-                  {/* Name */}
-                  <td className="px-6 py-3.5">
-                    <div className="flex items-center gap-3">
-                      <Avatar name={f.fullName} />
-                      <span className="font-medium text-gray-900 truncate max-w-[160px]">{f.fullName}</span>
-                    </div>
-                  </td>
-                  {/* District */}
-                  <td className="px-6 py-3.5 text-gray-600">{f.district}</td>
-                  {/* Association */}
-                  <td className="px-6 py-3.5 text-gray-600 max-w-[180px]">
-                    <span className="block truncate">{f.association}</span>
-                  </td>
-                  {/* Menu */}
-                  <td className="px-6 py-3.5 text-right">
-                    <RowMenu farmer={f} />
-                  </td>
-                </tr>
-              ))}
+              ) : (
+                filtered.map((f) => (
+                  <tr key={f.id} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
+                    <td className="px-4 py-3"><Avatar name={f.fullName} /></td>
+                    <td className="px-4 py-3 font-mono text-xs text-gray-500">{f.id}</td>
+                    <td className="px-4 py-3">
+                      <p className="font-semibold text-gray-900">{f.fullName}</p>
+                      <p className="text-xs text-gray-400">{f.memberNo}</p>
+                    </td>
+                    <td className="px-4 py-3 text-gray-600">{f.district}</td>
+                    <td className="px-4 py-3 text-gray-500">{f.association || "—"}</td>
+                    <td className="px-4 py-3 text-gray-500">{(f.primaryCrops ?? []).join(", ") || "—"}</td>
+                    <td className="px-4 py-3"><StatusDot status={f.status} /></td>
+                    <td className="px-4 py-3"><RowMenu farmer={f} /></td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
-
-        {/* Pagination */}
-        {totalPages > 1 && (
-          <div className="flex items-center justify-between px-6 py-3 border-t border-gray-100">
-            <p className="text-xs text-gray-500">
-              {Math.min(processedFarmers.length, (currentPage - 1) * itemsPerPage + 1)}–
-              {Math.min(processedFarmers.length, currentPage * itemsPerPage)} of {processedFarmers.length}
-            </p>
-            <div className="flex gap-1">
-              <button
-                disabled={currentPage === 1}
-                onClick={() => setCurrentPage((p) => p - 1)}
-                className="px-3 py-1.5 text-xs font-semibold text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
-              >
-                Previous
-              </button>
-              <button
-                disabled={currentPage === totalPages}
-                onClick={() => setCurrentPage((p) => p + 1)}
-                className="px-3 py-1.5 text-xs font-semibold text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
-              >
-                Next
-              </button>
-            </div>
+        {!loading && filtered.length > 0 && (
+          <div className="px-4 py-3 border-t border-gray-100 text-xs text-gray-500">
+            {filtered.length} {filtered.length !== farmers.length ? `of ${farmers.length} ` : ""}farmers
           </div>
         )}
       </div>

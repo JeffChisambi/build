@@ -1,35 +1,29 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { useRBAC } from "@/auth/rbacContext";
-import { MODULES, ACTIONS } from "@/auth/mockRoles";
-import { SEED_USERS } from "@/auth/mockUsers";
-
-function loadUsers() {
-  if (typeof window === "undefined") return SEED_USERS;
-  try {
-    const stored = localStorage.getItem("nasfam_users");
-    if (stored) return JSON.parse(stored);
-  } catch { /* */ }
-  return SEED_USERS;
-}
+import { MODULES, ACTIONS } from "@/lib/constants";
+import { usersService } from "@/lib/api/users";
 
 // ── Create Custom Role Modal ──────────────────────────────────
 function CreateRoleModal({ onClose, onCreate }) {
   const [name, setName]        = useState("");
   const [description, setDesc] = useState("");
   const [error, setError]      = useState("");
+  const [saving, setSaving]    = useState(false);
 
-  const handleCreate = () => {
+  const handleCreate = async () => {
     if (!name.trim()) { setError("Role name is required."); return; }
     const blankPerms = Object.fromEntries(
       MODULES.map((m) => [m, Object.fromEntries(ACTIONS.map((a) => [a, false]))])
     );
-    const result = onCreate({
+    setSaving(true);
+    const r = await onCreate({
       name: name.trim(), description: description.trim(),
       status: "Active", permissions: blankPerms, responsibilities: [],
     });
-    if (result?.error) setError(result.error);
+    setSaving(false);
+    if (r?.error) setError(r.error);
     else onClose();
   };
 
@@ -48,13 +42,14 @@ function CreateRoleModal({ onClose, onCreate }) {
           {error && <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">{error}</div>}
           <div>
             <label className="block text-xs font-semibold text-gray-600 mb-1.5 uppercase tracking-wide">Role Name *</label>
-            <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Finance Officer"
+            <input type="text" value={name} onChange={(e) => setName(e.target.value)}
+              placeholder="e.g. Finance Officer"
               className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg outline-none focus:border-gray-500 bg-white" />
           </div>
           <div>
             <label className="block text-xs font-semibold text-gray-600 mb-1.5 uppercase tracking-wide">Description</label>
             <textarea value={description} onChange={(e) => setDesc(e.target.value)} rows={3}
-              placeholder="Describe the responsibilities of this role..."
+              placeholder="Describe the responsibilities of this role…"
               className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg outline-none focus:border-gray-500 bg-white resize-none" />
           </div>
           <div>
@@ -63,13 +58,11 @@ function CreateRoleModal({ onClose, onCreate }) {
           </div>
         </div>
         <div className="flex gap-3 px-6 py-4 border-t border-gray-100">
-          <button onClick={onClose}
-            className="flex-1 px-4 py-2.5 text-sm font-semibold text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">
+          <button onClick={onClose} className="flex-1 px-4 py-2.5 text-sm font-semibold text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">
             Cancel
           </button>
-          <button onClick={handleCreate}
-            className="flex-1 px-4 py-2.5 text-sm font-semibold text-white bg-[#1a5c2a] rounded-lg hover:bg-[#134520] transition-colors">
-            Create Role
+          <button onClick={handleCreate} disabled={saving} className="flex-1 px-4 py-2.5 text-sm font-semibold text-white bg-[#1a5c2a] rounded-lg hover:bg-[#134520] transition-colors disabled:opacity-60">
+            {saving ? "Creating…" : "Create Role"}
           </button>
         </div>
       </div>
@@ -77,75 +70,92 @@ function CreateRoleModal({ onClose, onCreate }) {
   );
 }
 
-// ── Main Page ─────────────────────────────────────────────────
 export default function RolesPermissionsPage() {
   const {
     roles, updateRole, createRole, deleteRole,
     toggleRoleStatus, duplicateRole, resetPermissions, getRoleById,
+    loading: rolesLoading,
   } = useRBAC();
 
+  const [userCounts, setUserCounts] = useState({}); // { [roleId]: count }
   const [search, setSearch]         = useState("");
   const [filterType, setFilterType] = useState("All");
-  const [selectedId, setSelectedId] = useState("role-sysadmin");
+  const [selectedId, setSelectedId] = useState(null);
   const [showCreate, setShowCreate] = useState(false);
   const [toast, setToast]           = useState(null);
-  const [users]                     = useState(() => loadUsers());
 
   const showToast = (msg, type = "success") => {
     setToast({ msg, type });
     setTimeout(() => setToast(null), 3000);
   };
 
-  const getDynamicRole = (role) => {
+  // Fetch user counts per role for the "users assigned" badge
+  useEffect(() => {
+    usersService.list({ limit: 500 }).then(({ data }) => {
+      if (!data) return;
+      const counts = {};
+      data.forEach((u) => {
+        counts[u.roleId] = (counts[u.roleId] ?? 0) + 1;
+      });
+      setUserCounts(counts);
+    }).catch(() => { /* non-critical */ });
+  }, []);
+
+  // Auto-select first role after load
+  useEffect(() => {
+    if (!selectedId && roles.length > 0) setSelectedId(roles[0].id);
+  }, [roles, selectedId]);
+
+  const withCount = (role) => {
     if (!role) return null;
-    const count = users.filter((u) => u.roleId === role.id).length;
-    return { ...role, usersAssigned: count };
+    return { ...role, usersAssigned: userCounts[role.id] ?? role.usersAssigned ?? 0 };
   };
 
-  const filteredRoles = useMemo(() => roles.map(getDynamicRole).filter((r) => {
-    const matchSearch = r.name.toLowerCase().includes(search.toLowerCase());
-    const matchType   = filterType === "All" || r.type === filterType;
-    return matchSearch && matchType;
-  }), [roles, search, filterType, users]);
+  const filteredRoles = useMemo(() =>
+    roles
+      .map(withCount)
+      .filter((r) => {
+        const matchSearch = r.name.toLowerCase().includes(search.toLowerCase());
+        const matchType   = filterType === "All" || r.type === filterType;
+        return matchSearch && matchType;
+      }),
+  [roles, search, filterType, userCounts]);
 
-  const selected = getDynamicRole(getRoleById(selectedId));
+  const selected = withCount(getRoleById(selectedId));
 
-  const selectRole = (id) => {
-    setSelectedId(id);
-  };
-
-  const handleToggle = (id) => {
-    const role = getDynamicRole(getRoleById(id));
-    if (role.status === "Active" && role.usersAssigned > 0 &&
+  const handleToggle = async (id) => {
+    const role = withCount(getRoleById(id));
+    if (role?.status === "Active" && role.usersAssigned > 0 &&
       !window.confirm(`${role.name} has ${role.usersAssigned} user(s) assigned. Deactivating will restrict their access. Continue?`))
       return;
-    const result = toggleRoleStatus(id);
-    if (result?.error) showToast(result.error, "error");
+    const r = await toggleRoleStatus(id);
+    if (r?.error) showToast(r.error, "error");
     else showToast("Role status updated.");
   };
 
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
     if (!window.confirm("Delete this custom role? This cannot be undone.")) return;
-    const result = deleteRole(id);
-    if (result?.error) showToast(result.error, "error");
-    else { showToast("Role deleted."); if (selectedId === id) setSelectedId("role-sysadmin"); }
+    const r = await deleteRole(id);
+    if (r?.error) showToast(r.error, "error");
+    else { showToast("Role deleted."); if (selectedId === id) setSelectedId(roles[0]?.id ?? null); }
   };
 
-  const handleDuplicate = (id) => {
-    const copy = duplicateRole(id);
-    showToast(`Duplicated as "${copy.name}".`);
-    selectRole(copy.id);
+  const handleDuplicate = async (id) => {
+    const r = await duplicateRole(id);
+    if (r?.error) { showToast(r.error, "error"); return; }
+    showToast(`Duplicated as "${r.role?.name}".`);
+    setSelectedId(r.role?.id);
   };
 
-  const handleReset = () => {
+  const handleReset = async () => {
     if (!window.confirm("Reset to default permissions? Custom changes will be overwritten.")) return;
-    resetPermissions(selectedId);
-    showToast("Permissions reset to defaults.");
+    const r = await resetPermissions(selectedId);
+    if (r?.error) showToast(r.error, "error");
+    else showToast("Permissions reset to defaults.");
   };
 
   return (
     <div className="space-y-6 relative">
-      {/* Toast */}
       {toast && (
         <div className={`fixed top-6 right-6 z-50 px-5 py-3 rounded-md shadow-lg text-sm font-semibold text-white ${toast.type === "error" ? "bg-red-600" : "bg-gray-900"}`}>
           {toast.msg}
@@ -155,9 +165,9 @@ export default function RolesPermissionsPage() {
       {showCreate && (
         <CreateRoleModal
           onClose={() => setShowCreate(false)}
-          onCreate={(d) => {
-            const r = createRole(d);
-            if (r.success) { showToast(`Role "${r.role.name}" created.`); selectRole(r.role.id); }
+          onCreate={async (d) => {
+            const r = await createRole(d);
+            if (r?.success) { showToast(`Role "${r.role?.name}" created.`); setSelectedId(r.role?.id); }
             return r;
           }}
         />
@@ -167,11 +177,13 @@ export default function RolesPermissionsPage() {
       <div className="flex items-start justify-between">
         <div>
           <p className="text-xs text-gray-400 uppercase tracking-wider font-medium mb-1">Administration</p>
-          <h1 className="text-xl font-bold text-gray-900">Roles &amp; Permissions</h1>
-          <p className="text-sm text-gray-500 mt-0.5">View and manage system roles and their access permissions.</p>
+          <h1 className="text-xl font-bold text-gray-900">Roles & Permissions</h1>
+          <p className="text-sm text-gray-500 mt-0.5">Define and manage role-based access across the platform.</p>
         </div>
-        <button onClick={() => setShowCreate(true)}
-          className="flex items-center gap-2 px-4 py-2 bg-[#1a5c2a] text-white text-sm font-semibold rounded-lg hover:bg-[#134520] transition-colors">
+        <button
+          onClick={() => setShowCreate(true)}
+          className="flex items-center gap-2 px-4 py-2.5 bg-[#1a5c2a] text-white text-sm font-semibold rounded-lg hover:bg-[#134520] transition-colors"
+        >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
           </svg>
@@ -179,146 +191,152 @@ export default function RolesPermissionsPage() {
         </button>
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-5">
-        {/* ── Role List ── */}
-        <div className="xl:col-span-1 bg-white rounded-xl border border-gray-200 overflow-hidden">
-          <div className="p-4 border-b border-gray-100 space-y-3">
-            <div className="relative">
-              <svg className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-              <input type="text" placeholder="Search roles..." value={search} onChange={(e) => setSearch(e.target.value)}
-                className="w-full pl-9 pr-4 py-2 text-sm border border-gray-200 rounded-lg outline-none focus:border-gray-400 bg-white" />
-            </div>
-            <div className="flex gap-2">
-              {["All", "System", "Custom"].map((f) => (
-                <button key={f} onClick={() => setFilterType(f)}
-                  className={`px-3 py-1 rounded-full text-xs font-semibold transition-colors ${
-                    filterType === f ? "bg-[#1a5c2a] text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                  }`}>
-                  {f}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="divide-y divide-gray-50">
-            {filteredRoles.length === 0 ? (
-              <p className="py-12 text-center text-sm text-gray-400">No roles found.</p>
-            ) : filteredRoles.map((role) => (
-              <button key={role.id} onClick={() => selectRole(role.id)}
-                className={`w-full text-left px-4 py-3.5 transition-colors border-l-2 ${
-                  selectedId === role.id
-                    ? "bg-gray-50 border-gray-900"
-                    : "border-transparent hover:bg-gray-50/60"
-                }`}>
-                <div className="flex items-start justify-between gap-2">
-                  <div className="min-w-0">
-                    <p className="text-sm font-semibold text-gray-900 leading-tight">{role.name}</p>
-                    <p className="text-xs text-gray-400 mt-1">{role.platform}</p>
-                  </div>
-                  <div className="flex flex-col items-end gap-1 flex-shrink-0 mt-0.5">
-                    <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full font-medium">{role.type}</span>
-                    <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
-                      role.status === "Active" ? "text-gray-600 bg-gray-100" : "text-gray-400 bg-gray-50"
-                    }`}>{role.status}</span>
-                  </div>
-                </div>
-                {role.usersAssigned > 0 && (
-                  <p className="text-xs text-gray-400 mt-2">
-                    {role.usersAssigned} user{role.usersAssigned !== 1 ? "s" : ""} assigned
-                  </p>
-                )}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Role list */}
+        <div className="lg:col-span-1 space-y-3">
+          <input
+            type="text"
+            placeholder="Search roles…"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg outline-none focus:border-[#1a5c2a]"
+          />
+          <div className="flex gap-2">
+            {["All", "System", "Custom"].map((t) => (
+              <button key={t} onClick={() => setFilterType(t)}
+                className={`flex-1 py-1.5 text-xs font-semibold rounded-lg transition-colors ${filterType === t ? "bg-[#1a5c2a] text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"}`}>
+                {t}
               </button>
             ))}
           </div>
+
+          <div className="space-y-2 max-h-[60vh] overflow-y-auto pr-1">
+            {rolesLoading ? (
+              Array.from({ length: 5 }).map((_, i) => (
+                <div key={i} className="bg-white rounded-xl border border-gray-200 p-4 animate-pulse">
+                  <div className="h-4 bg-gray-200 rounded w-1/2 mb-2" /><div className="h-3 bg-gray-100 rounded w-3/4" />
+                </div>
+              ))
+            ) : filteredRoles.length === 0 ? (
+              <div className="bg-white rounded-xl border border-gray-200 p-6 text-center">
+                <p className="text-sm text-gray-500">No roles found.</p>
+                <p className="text-xs text-gray-400 mt-1">Connect a backend to load roles.</p>
+              </div>
+            ) : (
+              filteredRoles.map((r) => (
+                <button
+                  key={r.id}
+                  onClick={() => setSelectedId(r.id)}
+                  className={`w-full text-left bg-white rounded-xl border p-4 transition-all ${selectedId === r.id ? "border-[#1a5c2a] shadow-sm" : "border-gray-200 hover:border-gray-300"}`}
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <p className="text-sm font-bold text-gray-900">{r.name}</p>
+                      <p className="text-xs text-gray-500 mt-0.5">{r.platform}</p>
+                    </div>
+                    <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold ${r.status === "Active" ? "bg-green-50 text-green-700" : "bg-gray-100 text-gray-500"}`}>
+                      {r.status}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-3 mt-2 text-xs text-gray-400">
+                    <span>{r.type}</span>
+                    <span>·</span>
+                    <span>{r.usersAssigned ?? 0} users</span>
+                  </div>
+                </button>
+              ))
+            )}
+          </div>
         </div>
 
-        {/* ── Detail Panel ── */}
-        {selected ? (
-          <div className="xl:col-span-2 space-y-5">
-            {/* Role Info Card */}
-            <div className="bg-white rounded-xl border border-gray-200 p-6">
-              <div className="flex items-start justify-between mb-4">
+        {/* Role detail */}
+        <div className="lg:col-span-2">
+          {!selected ? (
+            <div className="bg-white rounded-xl border border-gray-200 p-12 text-center">
+              <p className="text-sm text-gray-500">{rolesLoading ? "Loading roles…" : "Select a role to view its permissions."}</p>
+            </div>
+          ) : (
+            <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+              <div className="px-6 py-5 border-b border-gray-100 flex items-start justify-between gap-4">
                 <div>
                   <h2 className="text-base font-bold text-gray-900">{selected.name}</h2>
-                  <p className="text-xs text-gray-400 mt-0.5">
-                    {selected.platform} &middot; {selected.type} Role &middot; Last modified {selected.lastModified}
-                  </p>
+                  <p className="text-sm text-gray-500 mt-1">{selected.description}</p>
                 </div>
-                <div className="text-right">
-                  <p className="text-xs text-gray-400 font-medium">Status</p>
-                  <p className="text-sm font-semibold text-gray-700 mt-0.5">{selected.status}</p>
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  <button onClick={() => handleDuplicate(selected.id)} className="px-3 py-1.5 text-xs font-semibold text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">Duplicate</button>
+                  <button onClick={() => handleToggle(selected.id)} className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors ${selected.status === "Active" ? "text-red-600 bg-red-50 hover:bg-red-100" : "text-green-700 bg-green-50 hover:bg-green-100"}`}>
+                    {selected.status === "Active" ? "Deactivate" : "Activate"}
+                  </button>
+                  {selected.type !== "System" && (
+                    <button onClick={() => handleDelete(selected.id)} className="px-3 py-1.5 text-xs font-semibold text-red-600 bg-red-50 rounded-lg hover:bg-red-100 transition-colors">Delete</button>
+                  )}
                 </div>
               </div>
 
-              <p className="text-sm text-gray-600 leading-relaxed mb-5 pb-5 border-b border-gray-100">
-                {selected.description}
-              </p>
-
-              {selected.responsibilities.length > 0 && (
-                <div className="mb-5">
-                  <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Responsibilities</p>
-                  <ul className="space-y-2">
-                    {selected.responsibilities.map((r, i) => (
-                      <li key={i} className="flex items-start gap-2.5 text-sm text-gray-600">
-                        <svg className="w-3.5 h-3.5 text-gray-400 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                        </svg>
-                        {r}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-
-              <div className="grid grid-cols-3 gap-4 py-4 border-t border-b border-gray-100 mb-5">
-                {selected.usersAssigned > 0 && (
-                  <div>
-                    <p className="text-xs text-gray-400 font-medium">Users Assigned</p>
-                    <p className="text-2xl font-bold text-gray-900 mt-1">{selected.usersAssigned}</p>
+              {selected.permissions ? (
+                <div className="p-6 overflow-x-auto">
+                  <div className="flex items-center justify-between mb-4">
+                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Module Permissions</p>
+                    <button onClick={handleReset} className="text-xs text-[#1a5c2a] font-semibold hover:underline">Reset to Defaults</button>
                   </div>
-                )}
-                <div>
-                  <p className="text-xs text-gray-400 font-medium">Role Type</p>
-                  <p className="text-sm font-semibold text-gray-700 mt-1">{selected.type}</p>
+                  <table className="w-full text-xs">
+                    <thead>
+                      <tr className="border-b border-gray-100">
+                        <th className="text-left py-2 pr-4 text-gray-500 font-semibold w-32">Module</th>
+                        {ACTIONS.map((a) => <th key={a} className="text-center py-2 px-2 text-gray-500 font-semibold">{a}</th>)}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {MODULES.map((mod) => (
+                        <tr key={mod} className="border-b border-gray-50 last:border-0">
+                          <td className="py-2 pr-4 font-medium text-gray-700">{mod}</td>
+                          {ACTIONS.map((action) => {
+                            const checked = selected.permissions[mod]?.[action] ?? false;
+                            return (
+                              <td key={action} className="text-center py-2 px-2">
+                                <input
+                                  type="checkbox"
+                                  checked={checked}
+                                  onChange={(e) => {
+                                    const newPerms = JSON.parse(JSON.stringify(selected.permissions));
+                                    if (!newPerms[mod]) newPerms[mod] = {};
+                                    newPerms[mod][action] = e.target.checked;
+                                    updateRole(selected.id, { permissions: newPerms });
+                                  }}
+                                  className="w-4 h-4 accent-[#1a5c2a] cursor-pointer"
+                                />
+                              </td>
+                            );
+                          })}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
-                <div>
-                  <p className="text-xs text-gray-400 font-medium">Platform</p>
-                  <p className="text-sm font-semibold text-gray-700 mt-1">{selected.platform}</p>
+              ) : selected.mobilePermissions ? (
+                <div className="p-6 space-y-3">
+                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4">Mobile Permissions</p>
+                  {Object.entries(selected.mobilePermissions).map(([perm, val]) => (
+                    <label key={perm} className="flex items-center gap-3 py-2 border-b border-gray-50 last:border-0 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={val}
+                        onChange={(e) => {
+                          const next = { ...selected.mobilePermissions, [perm]: e.target.checked };
+                          updateRole(selected.id, { mobilePermissions: next });
+                        }}
+                        className="w-4 h-4 accent-[#1a5c2a]"
+                      />
+                      <span className="text-sm text-gray-700">{perm}</span>
+                    </label>
+                  ))}
                 </div>
-              </div>
-
-              {/* Actions */}
-              <div className="flex flex-wrap gap-2">
-                {selected.type === "System" && (
-                  <button onClick={handleReset}
-                    className="px-4 py-1.5 text-xs font-semibold text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">
-                    Reset to Defaults
-                  </button>
-                )}
-                <button onClick={() => handleDuplicate(selectedId)}
-                  className="px-4 py-1.5 text-xs font-semibold text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">
-                  Duplicate
-                </button>
-                <button onClick={() => handleToggle(selectedId)}
-                  className="px-4 py-1.5 text-xs font-semibold text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">
-                  {selected.status === "Active" ? "Deactivate" : "Activate"}
-                </button>
-                {selected.type === "Custom" && (
-                  <button onClick={() => handleDelete(selectedId)}
-                    className="px-4 py-1.5 text-xs font-semibold text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">
-                    Delete
-                  </button>
-                )}
-              </div>
+              ) : (
+                <div className="p-12 text-center text-sm text-gray-500">No permissions defined for this role.</div>
+              )}
             </div>
-          </div>
-        ) : (
-          <div className="xl:col-span-2 flex items-center justify-center bg-white rounded-xl border border-gray-200 min-h-[300px]">
-            <p className="text-sm text-gray-400">Select a role to view its details.</p>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </div>
   );
