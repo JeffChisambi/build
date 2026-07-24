@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useMemo, useRef, useEffect } from "react";
+import { useState, useMemo, useRef, useEffect, useCallback } from "react";
 import Link from "next/link";
 import WorkspaceLayout from "@/components/WorkspaceLayout";
-import { SEED_PURCHASES } from "@/lib/mockPurchases";
+import { purchasesService } from "@/lib/api/purchases";
 
 const ICON = (
   <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -11,26 +11,21 @@ const ICON = (
   </svg>
 );
 
-// ── Stat Card ────────────────────────────────────────
-function StatCard({ title, value, sub, icon }) {
+function StatCard({ title, value, icon }) {
   return (
     <div className="bg-white rounded-xl border border-gray-200 p-5 flex flex-col gap-3">
-      <div className="flex items-center gap-2 text-gray-500">
-        {icon}
-        <p className="text-sm font-semibold text-gray-700">{title}</p>
-      </div>
+      <div className="flex items-center gap-2 text-gray-500">{icon}<p className="text-sm font-semibold text-gray-700">{title}</p></div>
       <p className="text-xl font-bold text-gray-900">{value}</p>
     </div>
   );
 }
 
-// ── Status Badge ────────────────────────────────────────
 function StatusBadge({ status }) {
   const colors = {
-    "Verified": "bg-green-50 text-green-700 border border-green-100",
+    Verified: "bg-green-50 text-green-700 border border-green-100",
     "In Progress": "bg-blue-50 text-blue-700 border border-blue-100",
-    "Stored": "bg-indigo-50 text-indigo-700 border border-indigo-100",
-    "Pending": "bg-amber-50 text-amber-700 border border-amber-100",
+    Stored: "bg-indigo-50 text-indigo-700 border border-indigo-100",
+    Pending: "bg-amber-50 text-amber-700 border border-amber-100",
   };
   return (
     <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold ${colors[status] || "bg-gray-50 text-gray-500"}`}>
@@ -40,74 +35,78 @@ function StatusBadge({ status }) {
 }
 
 export default function TraceabilityPage() {
-  const [selectedBatchId, setSelectedBatchId] = useState(SEED_PURCHASES[0]?.id || "");
+  const [batches, setBatches]       = useState([]);
+  const [loading, setLoading]       = useState(true);
+  const [error, setError]           = useState(null);
+  const [selectedBatchId, setSelectedBatchId] = useState(null);
   const [activeStep, setActiveStep] = useState("farmer");
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery]       = useState("");
   const [commodityFilter, setCommodityFilter] = useState("All");
-  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [dropdownOpen, setDropdownOpen]     = useState(false);
   const dropdownRef = useRef(null);
 
   useEffect(() => {
     function handleClickOutside(e) {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
-        setDropdownOpen(false);
-      }
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) setDropdownOpen(false);
     }
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Construct batch list
-  const batches = useMemo(() => {
-    return SEED_PURCHASES.map(p => ({
-      id: p.id,
-      batchNumber: p.batch?.batchNumber || `BCH-2024-${p.id.slice(-4)}`,
-      commodity: p.commodity,
-      grade: p.grade,
-      weight: p.totalWeight,
-      bags: p.numberOfBags,
-      farmerName: p.farmerName,
-      farmerId: p.farmerId,
-      village: p.farmerVillage,
-      district: p.farmerDistrict,
-      buyingCentre: p.buyingCentre,
-      ipc: p.ipc,
-      purchaseDate: p.purchaseDate,
-      purchasingOfficer: p.purchasingOfficer,
-      warehouseName: p.warehouse?.name || "Pending",
-      bin: p.warehouse?.bin || "—",
-      stack: p.warehouse?.stack || "—",
-      grnNumber: p.grn?.grnNumber || "—",
-      status: p.status === "Completed" ? "Verified" : "In Progress",
-    }));
+  const fetchBatches = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const { data } = await purchasesService.list({ limit: 200 });
+      const mapped = (data ?? []).map((p) => ({
+        id: p.id,
+        batchNumber: p.batch?.batchNumber || `BCH-${p.id}`,
+        commodity: p.commodity,
+        grade: p.grade,
+        weight: p.totalWeight,
+        bags: p.numberOfBags,
+        farmerName: p.farmerName,
+        farmerId: p.farmerId,
+        village: p.farmerVillage,
+        district: p.farmerDistrict,
+        buyingCentre: p.buyingCentre,
+        ipc: p.ipc,
+        purchaseDate: p.purchaseDate,
+        purchasingOfficer: p.purchasingOfficer,
+        warehouseName: p.warehouse?.name || "Pending",
+        bin: p.warehouse?.bin || "—",
+        stack: p.warehouse?.stack || "—",
+        grnNumber: p.grn?.grnNumber || "—",
+        status: p.status === "Completed" ? "Verified" : "In Progress",
+      }));
+      setBatches(mapped);
+      if (mapped.length > 0) setSelectedBatchId(mapped[0].id);
+    } catch (err) {
+      setError(err.message ?? "Failed to load traceability data.");
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
-  // Filtered batches
-  const filteredBatches = useMemo(() => {
-    return batches.filter(b => {
-      const matchesSearch = b.batchNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        b.farmerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        b.id.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesCommodity = commodityFilter === "All" || b.commodity === commodityFilter;
-      return matchesSearch && matchesCommodity;
-    });
-  }, [batches, searchQuery, commodityFilter]);
+  useEffect(() => { fetchBatches(); }, [fetchBatches]);
 
-  const selectedBatch = useMemo(() => {
-    return batches.find(b => b.id === selectedBatchId) || batches[0];
-  }, [batches, selectedBatchId]);
+  const commodities = useMemo(() => ["All", ...new Set(batches.map((b) => b.commodity).filter(Boolean))], [batches]);
 
-  // Unique commodities for filter
-  const commodities = useMemo(() => {
-    return ["All", ...Array.from(new Set(batches.map(b => b.commodity)))];
-  }, [batches]);
+  const filteredBatches = useMemo(() =>
+    batches.filter((b) => {
+      const matchSearch = !searchQuery || `${b.batchNumber} ${b.farmerName} ${b.id}`.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchCommodity = commodityFilter === "All" || b.commodity === commodityFilter;
+      return matchSearch && matchCommodity;
+    }),
+  [batches, searchQuery, commodityFilter]);
 
-  // Lineage steps mapping
+  const selectedBatch = useMemo(() => batches.find((b) => b.id === selectedBatchId) ?? batches[0] ?? null, [batches, selectedBatchId]);
+
   const steps = [
-    { id: "farmer", label: "1. Farmer Source", sub: selectedBatch?.farmerName },
-    { id: "collection", label: "2. Collection", sub: selectedBatch?.buyingCentre },
-    { id: "ipc", label: "3. IPC Logistics", sub: selectedBatch?.ipc },
-    { id: "warehouse", label: "4. Warehouse", sub: selectedBatch?.warehouseName },
+    { id: "farmer",     label: "1. Farmer Source",     sub: selectedBatch?.farmerName },
+    { id: "collection", label: "2. Collection",         sub: selectedBatch?.buyingCentre },
+    { id: "grn",        label: "3. Goods Received",     sub: selectedBatch?.grnNumber },
+    { id: "warehouse",  label: "4. Warehouse Storage",  sub: selectedBatch?.warehouseName },
   ];
 
   return (
@@ -115,112 +114,146 @@ export default function TraceabilityPage() {
       icon={ICON}
       module="Traceability"
       moduleHref="/dashboard/traceability"
-      title="Traceability"
-      description="End-to-end grain traceability from field to warehouse and beyond."
+      title="Batch Traceability"
+      description="End-to-end chain of custody for grain batches."
       tabs={[]}
-      hideTitleBlock={true}
-      hideHeader={true}
     >
-      <div className="space-y-6 p-6 max-w-[1400px] mx-auto">
-
-        {/* KPI Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <StatCard
-            title="Tracked Weight"
-            value="5,420 kg"
-            icon={<svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>}
-          />
-          <StatCard
-            title="Active Batches"
-            value={batches.length}
-            icon={<svg className="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24"><path d="M12 22C6.49 22 2 17.51 2 12S6.49 2 12 2s10 4.49 10 10-4.49 10-10 10m0-18c-4.41 0-8 3.59-8 8s3.59 8 8 8 8-3.59 8-8-3.59-8-8-8"></path><path d="M10 16c-.26 0-.51-.1-.71-.29l-3-3L7.7 11.3l2.29 2.29 5.29-5.29 1.41 1.41-6 6c-.2.2-.45.29-.71.29Z"></path></svg>}
-          />
-          <StatCard
-            title="Registered Bags"
-            value="108 bags"
-            icon={<svg className="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24"><path d="M12 22C6.49 22 2 17.51 2 12S6.49 2 12 2s10 4.49 10 10-4.49 10-10 10m0-18c-4.41 0-8 3.59-8 8s3.59 8 8 8 8-3.59 8-8-3.59-8-8-8"></path><path d="M10 16c-.26 0-.51-.1-.71-.29l-3-3L7.7 11.3l2.29 2.29 5.29-5.29 1.41 1.41-6 6c-.2.2-.45.29-.71.29Z"></path></svg>}
-          />
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-sm text-red-700 mx-6 mt-4">
+          {error} — <button onClick={fetchBatches} className="underline font-semibold">Retry</button>
         </div>
+      )}
 
-        {/* ── Table Card ── */}
-        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-          <div className="flex items-center justify-between px-5 py-4 border-b border-gray-50">
-            <div ref={dropdownRef} className="relative">
-              <button
-                onClick={() => setDropdownOpen(o => !o)}
-                className="flex items-center gap-2 px-3 py-1.5 border border-gray-300 rounded-lg text-xs font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors focus:outline-none"
-              >
-                {commodityFilter === "All" ? "All Commodities" : commodityFilter}
-                <svg className="w-3.5 h-3.5 text-gray-500" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
-              {dropdownOpen && (
-                <div className="absolute left-0 top-full mt-1 z-20 bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden min-w-[160px]">
-                  {commodities.map(c => {
-                    const label = c === "All" ? "All Commodities" : c;
-                    const active = commodityFilter === c;
-                    return (
-                      <button
-                        key={c}
-                        onClick={() => { setCommodityFilter(c); setDropdownOpen(false); }}
-                        className={`w-full text-left px-4 py-2 text-xs font-medium transition-colors ${
-                          active ? "bg-[#1a5c2a] text-white" : "text-gray-700 hover:bg-gray-50"
-                        }`}
-                      >
-                        {label}
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
+      {loading ? (
+        <div className="p-6 space-y-4 animate-pulse">
+          <div className="h-6 bg-gray-200 rounded w-64" />
+          <div className="h-48 bg-gray-200 rounded-xl" />
+        </div>
+      ) : batches.length === 0 ? (
+        <div className="flex flex-col items-center justify-center h-64 gap-3">
+          <p className="text-sm text-gray-500">No traceability data found.</p>
+          <p className="text-xs text-gray-400">Connect a backend to stream batch records.</p>
+        </div>
+      ) : (
+        <div className="p-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Batch list */}
+          <div className="space-y-3">
+            <div className="relative">
+              <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+              <input
+                type="text"
+                placeholder="Search batches…"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-9 pr-4 py-2 text-sm border border-gray-200 rounded-lg outline-none focus:border-[#1a5c2a] bg-white"
+              />
             </div>
-            <button className="flex items-center gap-1.5 text-xs font-semibold text-gray-500 hover:text-gray-700 px-3 py-1.5 rounded-lg hover:bg-gray-50 transition-colors border border-gray-200">
-              Export CSV
-            </button>
+            <select value={commodityFilter} onChange={(e) => setCommodityFilter(e.target.value)}
+              className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg outline-none focus:border-[#1a5c2a] bg-white">
+              {commodities.map((c) => <option key={c} value={c}>{c}</option>)}
+            </select>
+
+            <div className="space-y-2 max-h-[60vh] overflow-y-auto">
+              {filteredBatches.map((b) => (
+                <button
+                  key={b.id}
+                  onClick={() => { setSelectedBatchId(b.id); setActiveStep("farmer"); }}
+                  className={`w-full text-left p-3 rounded-xl border transition-all ${selectedBatchId === b.id ? "border-[#1a5c2a] bg-[#e8f1ea]" : "border-gray-200 bg-white hover:border-gray-300"}`}
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <p className="text-xs font-mono font-bold text-gray-700">{b.batchNumber}</p>
+                    <StatusBadge status={b.status} />
+                  </div>
+                  <p className="text-xs text-gray-500 mt-1">{b.farmerName} · {b.commodity}</p>
+                  <p className="text-xs text-gray-400 mt-0.5">{(b.weight ?? 0).toLocaleString()} kg · {b.purchaseDate}</p>
+                </button>
+              ))}
+            </div>
           </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm text-left">
-              <thead>
-                <tr className="border-t border-b border-gray-100">
-                  <th className="text-xs font-semibold text-gray-500 uppercase tracking-wider px-4 py-3">Farmer Source</th>
-                  <th className="text-xs font-semibold text-gray-500 uppercase tracking-wider px-4 py-3">Commodity</th>
-                  <th className="text-xs font-semibold text-gray-500 uppercase tracking-wider px-4 py-3">Quantity</th>
-                  <th className="text-xs font-semibold text-gray-500 uppercase tracking-wider px-4 py-3">Warehouse Depot</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-50">
-                {filteredBatches.length === 0 ? (
-                  <tr>
-                    <td colSpan={4} className="px-4 py-12 text-center text-sm text-gray-400">
-                      No batches found.
-                    </td>
-                  </tr>
-                ) : (
-                  filteredBatches.map(b => (
-                    <tr key={b.id} className="hover:bg-gray-50/60 transition-colors">
-                      <td className="px-4 py-3">
-                        <p className="text-xs font-medium text-gray-500">{b.farmerName}</p>
-                      </td>
-                      <td className="px-4 py-3">
-                        <p className="text-xs font-medium text-gray-500">{b.commodity}</p>
-                      </td>
-                      <td className="px-4 py-3">
-                        <p className="text-xs font-medium text-gray-500">{b.bags} Bags</p>
-                      </td>
-                      <td className="px-4 py-3 text-xs text-gray-500 font-medium">
-                        {b.warehouseName}
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+          {/* Detail panel */}
+          <div className="lg:col-span-2">
+            {!selectedBatch ? (
+              <div className="bg-white rounded-xl border border-gray-200 p-12 text-center">
+                <p className="text-sm text-gray-500">Select a batch to view its traceability chain.</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {/* Stage tabs */}
+                <div className="bg-white rounded-xl border border-gray-200 p-4">
+                  <div className="flex gap-2 flex-wrap">
+                    {steps.map((s) => (
+                      <button
+                        key={s.id}
+                        onClick={() => setActiveStep(s.id)}
+                        className={`flex-1 min-w-[120px] px-3 py-2.5 rounded-lg text-left transition-all ${activeStep === s.id ? "bg-[#1a5c2a] text-white" : "bg-gray-50 text-gray-600 hover:bg-gray-100"}`}
+                      >
+                        <p className="text-xs font-bold">{s.label}</p>
+                        <p className={`text-xs mt-0.5 truncate ${activeStep === s.id ? "text-green-200" : "text-gray-400"}`}>{s.sub || "—"}</p>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Step detail */}
+                <div className="bg-white rounded-xl border border-gray-200 p-6">
+                  {activeStep === "farmer" && (
+                    <div className="space-y-3">
+                      <h3 className="text-sm font-bold text-gray-900 mb-4">Farmer Information</h3>
+                      {[["Name", selectedBatch.farmerName], ["Village", selectedBatch.village], ["District", selectedBatch.district], ["Purchase Date", selectedBatch.purchaseDate], ["Purchasing Officer", selectedBatch.purchasingOfficer]].map(([label, value]) => (
+                        <div key={label} className="flex justify-between py-2 border-b border-gray-50 last:border-0">
+                          <span className="text-xs text-gray-400 font-semibold">{label}</span>
+                          <span className="text-sm font-medium text-gray-900">{value || "—"}</span>
+                        </div>
+                      ))}
+                      {selectedBatch.farmerId && (
+                        <Link href={`/dashboard/farmers/profiles/${selectedBatch.farmerId}`} className="mt-2 inline-flex items-center gap-1.5 text-xs font-semibold text-[#1a5c2a] hover:underline">
+                          View Farmer Profile →
+                        </Link>
+                      )}
+                    </div>
+                  )}
+                  {activeStep === "collection" && (
+                    <div className="space-y-3">
+                      <h3 className="text-sm font-bold text-gray-900 mb-4">Collection Details</h3>
+                      {[["Buying Centre", selectedBatch.buyingCentre], ["IPC", selectedBatch.ipc], ["Commodity", selectedBatch.commodity], ["Grade", selectedBatch.grade], ["Weight", `${(selectedBatch.weight ?? 0).toLocaleString()} kg`], ["Bags", selectedBatch.bags]].map(([label, value]) => (
+                        <div key={label} className="flex justify-between py-2 border-b border-gray-50 last:border-0">
+                          <span className="text-xs text-gray-400 font-semibold">{label}</span>
+                          <span className="text-sm font-medium text-gray-900">{value || "—"}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  {activeStep === "grn" && (
+                    <div className="space-y-3">
+                      <h3 className="text-sm font-bold text-gray-900 mb-4">Goods Received Note</h3>
+                      {[["GRN Number", selectedBatch.grnNumber], ["Batch Number", selectedBatch.batchNumber], ["Status", selectedBatch.status]].map(([label, value]) => (
+                        <div key={label} className="flex justify-between py-2 border-b border-gray-50 last:border-0">
+                          <span className="text-xs text-gray-400 font-semibold">{label}</span>
+                          <span className="text-sm font-medium text-gray-900">{value || "—"}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  {activeStep === "warehouse" && (
+                    <div className="space-y-3">
+                      <h3 className="text-sm font-bold text-gray-900 mb-4">Warehouse Storage</h3>
+                      {[["Warehouse", selectedBatch.warehouseName], ["Bin", selectedBatch.bin], ["Stack", selectedBatch.stack]].map(([label, value]) => (
+                        <div key={label} className="flex justify-between py-2 border-b border-gray-50 last:border-0">
+                          <span className="text-xs text-gray-400 font-semibold">{label}</span>
+                          <span className="text-sm font-medium text-gray-900">{value || "—"}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         </div>
-      </div>
+      )}
     </WorkspaceLayout>
   );
 }
-
