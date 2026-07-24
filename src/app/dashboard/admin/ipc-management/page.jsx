@@ -1,98 +1,120 @@
 "use client";
 
-import { useState } from "react";
-
-const INITIAL_IPCS = [
-  { id: "IPC001", name: "Lilongwe IPC", district: "Lilongwe", manager: "Jane Doe", status: "Active", createdAt: "2024-01-15" },
-  { id: "IPC002", name: "Mchinji IPC", district: "Mchinji", manager: "John Smith", status: "Active", createdAt: "2024-01-20" },
-  { id: "IPC003", name: "Kasungu IPC", district: "Kasungu", manager: "Peter Banda", status: "Active", createdAt: "2024-02-10" },
-  { id: "IPC004", name: "Mzimba IPC", district: "Mzimba", manager: "Grace Phiri", status: "Active", createdAt: "2024-03-05" },
-];
+import { useState, useEffect, useCallback } from "react";
+import { ipcsService } from "@/lib/api/ipcs";
 
 const emptyForm = { id: "", name: "", district: "", manager: "", status: "Active" };
 
+// ── Skeleton ───────────────────────────────────────────────────
+function SkeletonRow() {
+  return (
+    <tr className="border-b border-gray-100 animate-pulse">
+      {Array.from({ length: 5 }).map((_, i) => (
+        <td key={i} className="px-4 py-3"><div className="h-3.5 bg-gray-200 rounded w-3/4" /></td>
+      ))}
+    </tr>
+  );
+}
+
 export default function IPCManagementPage() {
-  const [ipcs, setIpcs] = useState(INITIAL_IPCS);
+  const [ipcs, setIpcs] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [search, setSearch] = useState("");
   const [showForm, setShowForm] = useState(false);
-  const [editingCode, setEditingCode] = useState(null); // original IPC code being edited
+  const [editingId, setEditingId] = useState(null);
   const [form, setForm] = useState(emptyForm);
   const [errors, setErrors] = useState({});
   const [openMenu, setOpenMenu] = useState(null);
   const [toast, setToast] = useState(null);
+  const [saving, setSaving] = useState(false);
 
   const showToast = (msg, type = "success") => {
     setToast({ msg, type });
     setTimeout(() => setToast(null), 3000);
   };
 
+  const fetchIPCs = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const { data } = await ipcsService.list({ search: "" });
+      setIpcs(data ?? []);
+    } catch (err) {
+      setError(err.message ?? "Failed to load IPCs.");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => { fetchIPCs(); }, [fetchIPCs]);
+
   const validate = () => {
     const e = {};
-    if (!form.id.trim()) e.id = "IPC code is required";
     if (!form.name.trim()) e.name = "IPC name is required";
     if (!form.district.trim()) e.district = "District is required";
-    // On add, check for duplicate code
-    if (!editingCode && ipcs.some((ipc) => ipc.id === form.id.trim())) {
-      e.id = "IPC code already exists";
-    }
+    if (!editingId && !form.id.trim()) e.id = "IPC code is required";
     return e;
   };
 
   const openAdd = () => {
     setForm(emptyForm);
     setErrors({});
-    setEditingCode(null);
+    setEditingId(null);
     setShowForm(true);
   };
 
   const openEdit = (ipc) => {
     setForm({ id: ipc.id, name: ipc.name, district: ipc.district, manager: ipc.manager || "", status: ipc.status });
     setErrors({});
-    setEditingCode(ipc.id);
+    setEditingId(ipc.id);
     setShowForm(true);
     setOpenMenu(null);
   };
 
-  const handleToggleStatus = (ipcId) => {
-    setIpcs((prev) =>
-      prev.map((ipc) =>
-        ipc.id === ipcId ? { ...ipc, status: ipc.status === "Active" ? "Inactive" : "Active" } : ipc
-      )
-    );
+  const handleToggleStatus = async (ipcId) => {
+    try {
+      const { data } = await ipcsService.toggleStatus(ipcId);
+      setIpcs((prev) => prev.map((ipc) => (ipc.id === ipcId ? data : ipc)));
+      showToast("IPC status updated.");
+    } catch (err) {
+      showToast(err.message ?? "Failed to update status.", "error");
+    }
     setOpenMenu(null);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const err = validate();
-    if (Object.keys(err).length) { setErrors(err); return; }
-
-    if (editingCode) {
-      // Edit existing
-      setIpcs((prev) =>
-        prev.map((ipc) =>
-          ipc.id === editingCode
-            ? { ...ipc, id: form.id.trim(), name: form.name.trim(), district: form.district.trim(), manager: form.manager.trim(), status: form.status }
-            : ipc
-        )
-      );
-      showToast("IPC updated successfully.");
-    } else {
-      // Add new
-      setIpcs((prev) => [
-        ...prev,
-        {
+    const errs = validate();
+    if (Object.keys(errs).length) { setErrors(errs); return; }
+    setSaving(true);
+    try {
+      if (editingId) {
+        const { data } = await ipcsService.update(editingId, {
+          name: form.name.trim(),
+          district: form.district.trim(),
+          manager: form.manager.trim(),
+          status: form.status,
+        });
+        setIpcs((prev) => prev.map((ipc) => (ipc.id === editingId ? data : ipc)));
+        showToast("IPC updated successfully.");
+      } else {
+        const { data } = await ipcsService.create({
           id: form.id.trim(),
           name: form.name.trim(),
           district: form.district.trim(),
           manager: form.manager.trim(),
           status: form.status,
-          createdAt: new Date().toISOString().slice(0, 10),
-        },
-      ]);
-      showToast("IPC added successfully.");
+        });
+        setIpcs((prev) => [...prev, data]);
+        showToast("IPC added successfully.");
+      }
+      setShowForm(false);
+    } catch (err) {
+      showToast(err.message ?? "Operation failed.", "error");
+    } finally {
+      setSaving(false);
     }
-    setShowForm(false);
   };
 
   const inputClass = (field) =>
@@ -121,7 +143,7 @@ export default function IPCManagementPage() {
         </div>
         <button
           onClick={openAdd}
-          className="flex items-center gap-2 px-4 py-2 bg-[#1a5c2a] text-white text-sm font-semibold rounded-lg hover:bg-[#134520] transition-colors"
+          className="flex items-center gap-2 px-4 py-2.5 bg-[#1a5c2a] text-white text-sm font-semibold rounded-lg hover:bg-[#134520] transition-colors"
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
@@ -130,12 +152,92 @@ export default function IPCManagementPage() {
         </button>
       </div>
 
-      {/* Add / Edit Modal */}
+      {/* Search */}
+      <div className="relative w-full max-w-sm">
+        <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
+        <input
+          type="text"
+          placeholder="Search IPCs…"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="w-full pl-9 pr-4 py-2 text-sm border border-gray-200 rounded-lg outline-none focus:border-[#1a5c2a] bg-white"
+        />
+      </div>
+
+      {/* Error */}
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-sm text-red-700">
+          {error} — <button onClick={fetchIPCs} className="underline font-semibold">Retry</button>
+        </div>
+      )}
+
+      {/* Table */}
+      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b border-gray-100 bg-gray-50">
+              {["IPC Code", "Name", "District", "Manager", "Status", "Actions"].map((h) => (
+                <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">{h}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {loading ? (
+              Array.from({ length: 4 }).map((_, i) => <SkeletonRow key={i} />)
+            ) : filtered.length === 0 ? (
+              <tr>
+                <td colSpan={6} className="px-4 py-12 text-center text-sm text-gray-500">
+                  {search ? "No IPCs match your search." : "No IPCs found. Connect a backend or add your first IPC."}
+                </td>
+              </tr>
+            ) : (
+              filtered.map((ipc) => (
+                <tr key={ipc.id} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
+                  <td className="px-4 py-3 font-mono text-xs text-gray-600">{ipc.id}</td>
+                  <td className="px-4 py-3 font-semibold text-gray-900">{ipc.name}</td>
+                  <td className="px-4 py-3 text-gray-600">{ipc.district}</td>
+                  <td className="px-4 py-3 text-gray-500">{ipc.manager || "—"}</td>
+                  <td className="px-4 py-3">
+                    <span className={`inline-flex items-center gap-1.5 text-xs font-semibold ${ipc.status === "Active" ? "text-[#1a5c2a]" : "text-gray-400"}`}>
+                      <span className={`w-1.5 h-1.5 rounded-full ${ipc.status === "Active" ? "bg-[#1a5c2a]" : "bg-gray-300"}`} />
+                      {ipc.status}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3">
+                    <div className="relative">
+                      <button
+                        onClick={() => setOpenMenu(openMenu === ipc.id ? null : ipc.id)}
+                        className="p-1.5 rounded-md text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors"
+                      >
+                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                          <circle cx="5" cy="12" r="1.5" /><circle cx="12" cy="12" r="1.5" /><circle cx="19" cy="12" r="1.5" />
+                        </svg>
+                      </button>
+                      {openMenu === ipc.id && (
+                        <div className="absolute right-0 top-full mt-1 w-40 bg-white border border-gray-200 rounded-lg shadow-lg z-20 py-1">
+                          <button onClick={() => openEdit(ipc)} className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Edit</button>
+                          <button onClick={() => handleToggleStatus(ipc.id)} className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                            {ipc.status === "Active" ? "Deactivate" : "Activate"}
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Add/Edit Modal */}
       {showForm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-4">
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-              <h2 className="text-base font-bold text-gray-900">{editingCode ? "Edit IPC" : "Add New IPC"}</h2>
+              <h2 className="text-base font-bold text-gray-900">{editingId ? "Edit IPC" : "Add New IPC"}</h2>
               <button onClick={() => setShowForm(false)} className="text-gray-400 hover:text-gray-600 transition-colors">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -143,137 +245,44 @@ export default function IPCManagementPage() {
               </button>
             </div>
             <form onSubmit={handleSubmit} className="px-6 py-5 space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              {!editingId && (
                 <div>
                   <label className="block text-xs font-semibold text-gray-600 mb-1">IPC Code *</label>
-                  <input
-                    className={inputClass("id")}
-                    value={form.id}
-                    onChange={(e) => setForm({ ...form, id: e.target.value })}
-                    placeholder="e.g. IPC005"
-                    readOnly={!!editingCode}
-                  />
+                  <input className={inputClass("id")} value={form.id} onChange={(e) => setForm({ ...form, id: e.target.value })} placeholder="e.g. IPC005" />
                   {errors.id && <p className="text-xs text-red-500 mt-1">{errors.id}</p>}
                 </div>
-                <div>
-                  <label className="block text-xs font-semibold text-gray-600 mb-1">Status</label>
-                  <select
-                    className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg outline-none focus:border-[#1a5c2a]"
-                    value={form.status}
-                    onChange={(e) => setForm({ ...form, status: e.target.value })}
-                  >
-                    <option>Active</option>
-                    <option>Inactive</option>
-                  </select>
-                </div>
-              </div>
+              )}
               <div>
                 <label className="block text-xs font-semibold text-gray-600 mb-1">IPC Name *</label>
-                <input className={inputClass("name")} value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="e.g. Lilongwe IPC" />
+                <input className={inputClass("name")} value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="e.g. Dedza IPC" />
                 {errors.name && <p className="text-xs text-red-500 mt-1">{errors.name}</p>}
               </div>
               <div>
                 <label className="block text-xs font-semibold text-gray-600 mb-1">District *</label>
-                <input className={inputClass("district")} value={form.district} onChange={(e) => setForm({ ...form, district: e.target.value })} placeholder="e.g. Lilongwe" />
+                <input className={inputClass("district")} value={form.district} onChange={(e) => setForm({ ...form, district: e.target.value })} placeholder="e.g. Dedza" />
                 {errors.district && <p className="text-xs text-red-500 mt-1">{errors.district}</p>}
               </div>
               <div>
-                <label className="block text-xs font-semibold text-gray-600 mb-1">Manager Name</label>
-                <input className={inputClass("manager")} value={form.manager} onChange={(e) => setForm({ ...form, manager: e.target.value })} placeholder="e.g. Jane Banda" />
+                <label className="block text-xs font-semibold text-gray-600 mb-1">Manager</label>
+                <input className={inputClass("manager")} value={form.manager} onChange={(e) => setForm({ ...form, manager: e.target.value })} placeholder="Manager name" />
               </div>
-              <div className="flex justify-end gap-3 pt-2">
-                <button type="button" onClick={() => setShowForm(false)} className="px-4 py-2 text-sm font-medium text-gray-600 border border-gray-200 rounded-md hover:bg-gray-50 transition-colors">
-                  Cancel
-                </button>
-                <button type="submit" className="px-4 py-2 text-sm font-semibold text-white bg-[#1a5c2a] rounded-md hover:bg-[#134520] transition-colors">
-                  {editingCode ? "Save Changes" : "Add IPC"}
+              <div>
+                <label className="block text-xs font-semibold text-gray-600 mb-1">Status</label>
+                <select className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg outline-none focus:border-[#1a5c2a]" value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })}>
+                  <option>Active</option>
+                  <option>Inactive</option>
+                </select>
+              </div>
+              <div className="flex gap-3 pt-2">
+                <button type="button" onClick={() => setShowForm(false)} className="flex-1 px-4 py-2.5 text-sm font-semibold text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">Cancel</button>
+                <button type="submit" disabled={saving} className="flex-1 px-4 py-2.5 text-sm font-semibold text-white bg-[#1a5c2a] rounded-lg hover:bg-[#134520] transition-colors disabled:opacity-60">
+                  {saving ? "Saving…" : editingId ? "Save Changes" : "Add IPC"}
                 </button>
               </div>
             </form>
           </div>
         </div>
       )}
-
-      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
-          <h2 className="text-sm font-bold text-gray-900">IPC Master Registry</h2>
-          <div className="relative">
-            <svg className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-            <input
-              type="text"
-              placeholder="Search IPCs..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="pl-9 pr-4 py-2 text-sm border border-gray-200 rounded-lg outline-none focus:border-[#1a5c2a] w-56"
-            />
-          </div>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm">
-            <thead className="bg-gray-50 border-b border-gray-100">
-              <tr>
-                {["IPC Code", "IPC Name", "District", "Manager", "Created Date", "Status", "Actions"].map((h) => (
-                  <th key={h} className="px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-50">
-              {filtered.length === 0 ? (
-                <tr>
-                  <td colSpan={7} className="px-5 py-10 text-center text-gray-400 text-sm">No IPCs found.</td>
-                </tr>
-              ) : (
-                filtered.map((ipc) => (
-                  <tr key={ipc.id} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-5 py-3.5 font-mono text-xs font-semibold text-gray-700">{ipc.id}</td>
-                    <td className="px-5 py-3.5 font-medium text-gray-900">{ipc.name}</td>
-                    <td className="px-5 py-3.5 text-gray-600">{ipc.district}</td>
-                    <td className="px-5 py-3.5 text-gray-600">{ipc.manager || <span className="text-gray-300">—</span>}</td>
-                    <td className="px-5 py-3.5 text-gray-500 text-xs">{ipc.createdAt}</td>
-                    <td className="px-5 py-3.5">
-                      <span className={`inline-flex items-center gap-1.5 text-xs font-semibold ${ipc.status === "Active" ? "text-[#1a5c2a]" : "text-gray-400"}`}>
-                        <span className={`w-1.5 h-1.5 rounded-full ${ipc.status === "Active" ? "bg-[#1a5c2a]" : "bg-gray-300"}`} />
-                        {ipc.status}
-                      </span>
-                    </td>
-                    <td className="px-5 py-3.5 relative">
-                      <button
-                        onClick={() => setOpenMenu(openMenu === ipc.id ? null : ipc.id)}
-                        className="p-1 rounded hover:bg-gray-100 text-gray-500 transition-colors"
-                      >
-                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                          <circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/>
-                        </svg>
-                      </button>
-                      {openMenu === ipc.id && (
-                        <div className="absolute right-5 top-10 z-20 bg-white border border-gray-100 rounded-lg shadow-lg w-36 overflow-hidden">
-                          <button
-                            onClick={() => openEdit(ipc)}
-                            className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                          >
-                            Edit
-                          </button>
-                          <button
-                            onClick={() => handleToggleStatus(ipc.id)}
-                            className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                          >
-                            {ipc.status === "Active" ? "Deactivate" : "Activate"}
-                          </button>
-                        </div>
-                      )}
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-        <div className="px-5 py-3 border-t border-gray-50 text-xs text-gray-400">
-          {filtered.length} of {ipcs.length} IPCs
-        </div>
-      </div>
     </div>
   );
 }

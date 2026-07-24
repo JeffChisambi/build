@@ -1,107 +1,95 @@
 "use client";
 
-import { createContext, useContext, useState, useEffect } from "react";
-import { SEED_ROLES, DEFAULT_PERMISSIONS, MOBILE_PERMISSIONS } from "./mockRoles";
+import { createContext, useContext, useState, useEffect, useCallback } from "react";
+import { rolesService } from "@/lib/api/roles";
 
 const RBACContext = createContext();
 
-const STORAGE_KEY = "nasfam_roles";
-
-function loadRoles() {
-  if (typeof window === "undefined") return SEED_ROLES;
-  try {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) return JSON.parse(stored);
-  } catch {
-    /* ignore */
-  }
-  return SEED_ROLES;
-}
-
 export function RBACProvider({ children }) {
-  const [roles, setRoles] = useState(SEED_ROLES);
+  const [roles, setRoles] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setRoles(loadRoles());
+  const fetchRoles = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const { data } = await rolesService.list();
+      setRoles(data ?? []);
+    } catch (err) {
+      setError(err.message ?? "Failed to load roles.");
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
-  const persist = (updated) => {
-    setRoles(updated);
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
-    } catch {
-      /* ignore */
-    }
-  };
+  useEffect(() => {
+    fetchRoles();
+  }, [fetchRoles]);
 
   const getRoles = () => roles;
 
   const getRoleById = (id) => roles.find((r) => r.id === id) ?? null;
 
-  const updateRole = (id, updates) => {
-    const updated = roles.map((r) =>
-      r.id === id ? { ...r, ...updates, lastModified: new Date().toISOString().split("T")[0] } : r
-    );
-    persist(updated);
-  };
-
-  const createRole = (newRole) => {
-    const duplicate = roles.some(
-      (r) => r.name.trim().toLowerCase() === newRole.name.trim().toLowerCase()
-    );
-    if (duplicate) return { success: false, error: "A role with this name already exists." };
-    const role = {
-      ...newRole,
-      id: `role-custom-${Date.now()}`,
-      type: "Custom",
-      platform: "Web Application",
-      usersAssigned: 0,
-      lastModified: new Date().toISOString().split("T")[0],
-    };
-    persist([...roles, role]);
-    return { success: true, role };
-  };
-
-  const deleteRole = (id) => {
-    const role = getRoleById(id);
-    if (!role) return { success: false, error: "Role not found." };
-    if (role.type === "System") return { success: false, error: "System roles cannot be deleted." };
-    persist(roles.filter((r) => r.id !== id));
-    return { success: true };
-  };
-
-  const toggleRoleStatus = (id) => {
-    const role = getRoleById(id);
-    if (!role) return;
-    if (id === "role-sysadmin" && role.status === "Active") {
-      return { success: false, error: "Cannot deactivate the only System Administrator role." };
+  const updateRole = useCallback(async (id, updates) => {
+    try {
+      const { data } = await rolesService.update(id, updates);
+      setRoles((prev) => prev.map((r) => (r.id === id ? data : r)));
+      return { success: true };
+    } catch (err) {
+      return { success: false, error: err.message };
     }
-    updateRole(id, { status: role.status === "Active" ? "Inactive" : "Active" });
-    return { success: true };
-  };
+  }, []);
 
-  const duplicateRole = (id) => {
-    const source = getRoleById(id);
-    if (!source) return;
-    const copy = {
-      ...source,
-      id: `role-custom-${Date.now()}`,
-      name: `${source.name} (Copy)`,
-      type: "Custom",
-      usersAssigned: 0,
-    };
-    persist([...roles, copy]);
-    return copy;
-  };
-
-  const resetPermissions = (id) => {
-    if (DEFAULT_PERMISSIONS[id]) {
-      updateRole(id, { permissions: DEFAULT_PERMISSIONS[id] });
-    } else if (MOBILE_PERMISSIONS[id]) {
-      updateRole(id, { mobilePermissions: MOBILE_PERMISSIONS[id] });
+  const createRole = useCallback(async (newRole) => {
+    try {
+      const { data } = await rolesService.create(newRole);
+      setRoles((prev) => [...prev, data]);
+      return { success: true, role: data };
+    } catch (err) {
+      return { success: false, error: err.message };
     }
-  };
+  }, []);
+
+  const deleteRole = useCallback(async (id) => {
+    try {
+      await rolesService.remove(id);
+      setRoles((prev) => prev.filter((r) => r.id !== id));
+      return { success: true };
+    } catch (err) {
+      return { success: false, error: err.message };
+    }
+  }, []);
+
+  const toggleRoleStatus = useCallback(async (id) => {
+    try {
+      const { data } = await rolesService.toggleStatus(id);
+      setRoles((prev) => prev.map((r) => (r.id === id ? data : r)));
+      return { success: true };
+    } catch (err) {
+      return { success: false, error: err.message };
+    }
+  }, []);
+
+  const duplicateRole = useCallback(async (id) => {
+    try {
+      const { data } = await rolesService.duplicate(id);
+      setRoles((prev) => [...prev, data]);
+      return { success: true, role: data };
+    } catch (err) {
+      return { success: false, error: err.message };
+    }
+  }, []);
+
+  const resetPermissions = useCallback(async (id) => {
+    try {
+      const { data } = await rolesService.resetPermissions(id);
+      setRoles((prev) => prev.map((r) => (r.id === id ? data : r)));
+      return { success: true };
+    } catch (err) {
+      return { success: false, error: err.message };
+    }
+  }, []);
 
   const hasPermission = (role, module, action) => {
     if (!role?.permissions) return false;
@@ -112,6 +100,9 @@ export function RBACProvider({ children }) {
     <RBACContext.Provider
       value={{
         roles,
+        loading,
+        error,
+        refetch: fetchRoles,
         getRoles,
         getRoleById,
         updateRole,

@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
-import { SEED_FARMERS } from "@/lib/mockFarmers";
-import { SEED_USERS } from "@/auth/mockUsers";
+import { useState, useRef, useEffect, useCallback } from "react";
+import { usersService } from "@/lib/api/users";
+import { farmersService } from "@/lib/api/farmers";
+import { ipcsService } from "@/lib/api/ipcs";
 
 // ── Role options available for assignment ──────────────────────
 const ROLE_OPTIONS = [
@@ -12,27 +13,30 @@ const ROLE_OPTIONS = [
   { id: "role-head-office",       label: "Head Office Manager" },
 ];
 
-const IPC_OPTIONS = [
-  "Lilongwe IPC",
-  "Mchinji IPC",
-  "Kasungu IPC",
-  "Mzimba IPC",
-];
-
 const VIEW_OPTIONS = ["Farmers", "Admin Users"];
 
-// ── Helpers ────────────────────────────────────────────────────
-function loadUsers() {
-  if (typeof window === "undefined") return SEED_USERS;
-  try {
-    const stored = localStorage.getItem("nasfam_users");
-    if (stored) return JSON.parse(stored);
-  } catch { /* */ }
-  return SEED_USERS;
+// ── Skeleton row ───────────────────────────────────────────────
+function SkeletonRow({ cols = 6 }) {
+  return (
+    <tr className="border-b border-gray-100 animate-pulse">
+      {Array.from({ length: cols }).map((_, i) => (
+        <td key={i} className="px-4 py-3">
+          <div className="h-3.5 bg-gray-200 rounded w-3/4" />
+        </td>
+      ))}
+    </tr>
+  );
 }
 
-function saveUsers(users) {
-  try { localStorage.setItem("nasfam_users", JSON.stringify(users)); } catch { /* */ }
+// ── Empty state ────────────────────────────────────────────────
+function EmptyState({ message = "No records found." }) {
+  return (
+    <tr>
+      <td colSpan={8} className="px-4 py-12 text-center">
+        <p className="text-sm text-gray-500">{message}</p>
+      </td>
+    </tr>
+  );
 }
 
 // ── TypeDropdown ───────────────────────────────────────────────
@@ -85,9 +89,13 @@ function TypeDropdown({ value, onChange }) {
 }
 
 // ── Add / Edit User Modal ──────────────────────────────────────
-const EMPTY_USER_FORM = { name: "", email: "", phone: "", roleId: "role-warehouse-officer", role: "Warehouse Officer", assignedIPC: "", status: "Active" };
+const EMPTY_USER_FORM = {
+  name: "", email: "", phone: "",
+  roleId: "role-warehouse-officer", role: "Warehouse Officer",
+  assignedIPC: "", status: "Active",
+};
 
-function UserModal({ user, onClose, onSave }) {
+function UserModal({ user, ipcOptions, onClose, onSave }) {
   const isEdit = !!user?.id;
   const [form, setForm] = useState(
     isEdit
@@ -95,6 +103,7 @@ function UserModal({ user, onClose, onSave }) {
       : EMPTY_USER_FORM
   );
   const [errors, setErrors] = useState({});
+  const [saving, setSaving] = useState(false);
 
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
 
@@ -106,10 +115,12 @@ function UserModal({ user, onClose, onSave }) {
     return e;
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     const errs = validate();
     if (Object.keys(errs).length) { setErrors(errs); return; }
-    onSave({ ...form, id: user?.id });
+    setSaving(true);
+    await onSave({ ...form, id: user?.id });
+    setSaving(false);
     onClose();
   };
 
@@ -131,75 +142,73 @@ function UserModal({ user, onClose, onSave }) {
             </svg>
           </button>
         </div>
-
         <div className="px-6 py-5 space-y-4">
-          <div>
-            <label className="block text-xs font-semibold text-gray-600 mb-1">Full Name *</label>
-            <input className={inputCls("name")} value={form.name} onChange={(e) => set("name", e.target.value)} placeholder="e.g. Jane Banda" />
-            {errors.name && <p className="text-xs text-red-500 mt-1">{errors.name}</p>}
-          </div>
-
-          <div>
-            <label className="block text-xs font-semibold text-gray-600 mb-1">Email Address *</label>
-            <input className={inputCls("email")} value={form.email} onChange={(e) => set("email", e.target.value)} placeholder="e.g. jane@nasfam.org" />
-            {errors.email && <p className="text-xs text-red-500 mt-1">{errors.email}</p>}
-          </div>
-
-          <div>
-            <label className="block text-xs font-semibold text-gray-600 mb-1">Phone Number</label>
-            <input className={inputCls("phone")} value={form.phone} onChange={(e) => set("phone", e.target.value)} placeholder="+265 999 000 000" />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs font-semibold text-gray-600 mb-1">Role *</label>
-              <select
-                className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg outline-none focus:border-[#1a5c2a]"
-                value={form.roleId}
-                onChange={(e) => {
-                  const opt = ROLE_OPTIONS.find((r) => r.id === e.target.value);
-                  set("roleId", e.target.value);
-                  set("role", opt?.label ?? "");
-                }}
-              >
-                {ROLE_OPTIONS.map((r) => (
-                  <option key={r.id} value={r.id}>{r.label}</option>
-                ))}
-              </select>
+          {["name", "email", "phone"].map((field) => (
+            <div key={field}>
+              <label className="block text-xs font-semibold text-gray-600 mb-1 capitalize">{field} {field !== "phone" ? "*" : ""}</label>
+              <input
+                type={field === "email" ? "email" : "text"}
+                value={form[field]}
+                onChange={(e) => set(field, e.target.value)}
+                className={inputCls(field)}
+                placeholder={field === "email" ? "name@nasfam.org" : ""}
+              />
+              {errors[field] && <p className="text-xs text-red-500 mt-1">{errors[field]}</p>}
             </div>
-
-            <div>
-              <label className="block text-xs font-semibold text-gray-600 mb-1">Status</label>
-              <select
-                className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg outline-none focus:border-[#1a5c2a]"
-                value={form.status}
-                onChange={(e) => set("status", e.target.value)}
-              >
-                <option>Active</option>
-                <option>Inactive</option>
-              </select>
-            </div>
+          ))}
+          <div>
+            <label className="block text-xs font-semibold text-gray-600 mb-1">Role *</label>
+            <select
+              value={form.roleId}
+              onChange={(e) => {
+                const r = ROLE_OPTIONS.find(x => x.id === e.target.value);
+                set("roleId", e.target.value);
+                set("role", r?.label || "");
+              }}
+              className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg outline-none focus:border-[#1a5c2a]"
+            >
+              {ROLE_OPTIONS.map((r) => (
+                <option key={r.id} value={r.id}>{r.label}</option>
+              ))}
+            </select>
           </div>
-
           {needsIPC && (
             <div>
               <label className="block text-xs font-semibold text-gray-600 mb-1">Assigned IPC</label>
               <select
-                className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg outline-none focus:border-[#1a5c2a]"
                 value={form.assignedIPC}
                 onChange={(e) => set("assignedIPC", e.target.value)}
+                className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg outline-none focus:border-[#1a5c2a]"
               >
-                <option value="">— None —</option>
-                {IPC_OPTIONS.map((ipc) => <option key={ipc}>{ipc}</option>)}
+                <option value="">Select IPC</option>
+                {ipcOptions.map((ipc) => (
+                  <option key={ipc.id || ipc.name} value={ipc.name}>{ipc.name}</option>
+                ))}
               </select>
             </div>
           )}
+          <div>
+            <label className="block text-xs font-semibold text-gray-600 mb-1">Status</label>
+            <select
+              value={form.status}
+              onChange={(e) => set("status", e.target.value)}
+              className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg outline-none focus:border-[#1a5c2a]"
+            >
+              <option>Active</option>
+              <option>Inactive</option>
+            </select>
+          </div>
         </div>
-
         <div className="flex gap-3 px-6 py-4 border-t border-gray-100">
-          <button onClick={onClose} className="flex-1 px-4 py-2.5 text-sm font-semibold text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">Cancel</button>
-          <button onClick={handleSave} className="flex-1 px-4 py-2.5 text-sm font-semibold text-white bg-[#1a5c2a] rounded-lg hover:bg-[#134520] transition-colors">
-            {isEdit ? "Save Changes" : "Create User"}
+          <button onClick={onClose} className="flex-1 px-4 py-2.5 text-sm font-semibold text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">
+            Cancel
+          </button>
+          <button
+            onClick={handleSave}
+            disabled={saving}
+            className="flex-1 px-4 py-2.5 text-sm font-semibold text-white bg-[#1a5c2a] rounded-lg hover:bg-[#134520] transition-colors disabled:opacity-60"
+          >
+            {saving ? "Saving…" : "Save User"}
           </button>
         </div>
       </div>
@@ -207,70 +216,80 @@ function UserModal({ user, onClose, onSave }) {
   );
 }
 
-// ── Status badge ───────────────────────────────────────────────
-function StatusBadge({ status }) {
-  const isActive = status === "Active";
-  return (
-    <span className={`inline-flex items-center gap-1.5 text-xs font-semibold ${isActive ? "text-[#1a5c2a]" : "text-gray-400"}`}>
-      <span className={`w-1.5 h-1.5 rounded-full ${isActive ? "bg-[#1a5c2a]" : "bg-gray-300"}`} />
-      {status}
-    </span>
-  );
-}
-
 // ── Main Page ─────────────────────────────────────────────────
 export default function UsersPage() {
-  const [view, setView]         = useState("Farmers");
-  const [openMenu, setOpenMenu] = useState(null);
-  const [users, setUsers]       = useState(() => loadUsers());
-  const [search, setSearch]     = useState("");
-  const [modal, setModal]       = useState(null); // null | { mode: "add" | "edit", user?: object }
-  const [toast, setToast]       = useState(null);
-
-  const isFarmers = view === "Farmers";
+  const [view, setView] = useState("Admin Users");
+  const [search, setSearch] = useState("");
+  const [users, setUsers] = useState([]);
+  const [farmers, setFarmers] = useState([]);
+  const [ipcOptions, setIpcOptions] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [modal, setModal] = useState(null); // null | { user? }
+  const [toast, setToast] = useState(null);
 
   const showToast = (msg, type = "success") => {
     setToast({ msg, type });
-    setTimeout(() => setToast(null), 3000);
+    setTimeout(() => setToast(null), 3500);
   };
 
-  const handleSaveUser = (data) => {
-    setUsers((prev) => {
-      let next;
-      if (data.id) {
-        next = prev.map((u) => u.id === data.id ? { ...u, ...data } : u);
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const [usersRes, farmersRes, ipcsRes] = await Promise.all([
+        usersService.list(),
+        farmersService.list({ limit: 200 }),
+        ipcsService.list(),
+      ]);
+      setUsers(usersRes.data ?? []);
+      setFarmers(farmersRes.data ?? []);
+      setIpcOptions(ipcsRes.data ?? []);
+    } catch (err) {
+      setError(err.message ?? "Failed to load data.");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => { fetchData(); }, [fetchData]);
+
+  const handleSaveUser = async (formData) => {
+    try {
+      if (formData.id) {
+        const { data } = await usersService.update(formData.id, formData);
+        setUsers((prev) => prev.map((u) => (u.id === data.id ? data : u)));
         showToast("User updated successfully.");
       } else {
-        const newUser = { ...data, id: `usr-${Date.now()}`, createdAt: new Date().toISOString().slice(0, 10) };
-        next = [...prev, newUser];
+        const { data } = await usersService.create(formData);
+        setUsers((prev) => [...prev, data]);
         showToast("User created successfully.");
       }
-      saveUsers(next);
-      return next;
-    });
+    } catch (err) {
+      showToast(err.message ?? "Operation failed.", "error");
+    }
   };
 
-  const handleDeactivateUser = (userId) => {
-    setUsers((prev) => {
-      const next = prev.map((u) =>
-        u.id === userId ? { ...u, status: u.status === "Active" ? "Inactive" : "Active" } : u
-      );
-      saveUsers(next);
-      return next;
-    });
-    setOpenMenu(null);
+  const handleToggleStatus = async (userId) => {
+    try {
+      const { data } = await usersService.toggleStatus(userId);
+      setUsers((prev) => prev.map((u) => (u.id === data.id ? data : u)));
+      showToast("User status updated.");
+    } catch (err) {
+      showToast(err.message ?? "Failed to update status.", "error");
+    }
   };
-
-  const filteredFarmers = SEED_FARMERS.filter((f) =>
-    search ? `${f.fullName} ${f.district} ${f.association}`.toLowerCase().includes(search.toLowerCase()) : true
-  );
 
   const filteredUsers = users.filter((u) =>
-    search ? `${u.name} ${u.email} ${u.role}`.toLowerCase().includes(search.toLowerCase()) : true
+    `${u.name} ${u.email} ${u.role} ${u.assignedIPC ?? ""}`.toLowerCase().includes(search.toLowerCase())
+  );
+
+  const filteredFarmers = farmers.filter((f) =>
+    `${f.fullName} ${f.memberNo ?? ""} ${f.district ?? ""}`.toLowerCase().includes(search.toLowerCase())
   );
 
   return (
-    <div className="space-y-6 relative">
+    <div className="space-y-6">
       {/* Toast */}
       {toast && (
         <div className={`fixed top-6 right-6 z-50 px-5 py-3 rounded-md shadow-lg text-sm font-semibold text-white ${toast.type === "error" ? "bg-red-600" : "bg-gray-900"}`}>
@@ -278,179 +297,149 @@ export default function UsersPage() {
         </div>
       )}
 
-      {/* Modal */}
       {modal && (
         <UserModal
           user={modal.user}
+          ipcOptions={ipcOptions}
           onClose={() => setModal(null)}
           onSave={handleSaveUser}
         />
       )}
 
-      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-        {/* Card header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
-          <div className="flex items-center gap-4">
-            <TypeDropdown value={view} onChange={(v) => { setView(v); setSearch(""); setOpenMenu(null); }} />
-          </div>
-          <div className="flex items-center gap-3">
-            {/* Search */}
-            <div className="relative">
-              <svg className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-              <input
-                type="text"
-                placeholder={`Search ${isFarmers ? "farmers" : "users"}…`}
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="pl-9 pr-4 py-1.5 text-sm border border-gray-200 rounded-lg outline-none focus:border-gray-400 w-48"
-              />
-            </div>
-
-            {!isFarmers && (
-              <button
-                onClick={() => setModal({ mode: "add" })}
-                className="flex items-center gap-2 px-4 py-2 bg-[#1a5c2a] text-white text-sm font-semibold rounded-md hover:bg-[#134520] transition-colors"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-                </svg>
-                Add User
-              </button>
-            )}
-          </div>
+      {/* Header */}
+      <div className="flex items-start justify-between">
+        <div>
+          <p className="text-xs text-gray-400 uppercase tracking-wider font-medium mb-1">Administration</p>
+          <h1 className="flex items-center gap-2 text-xl font-bold text-gray-900">
+            <TypeDropdown value={view} onChange={setView} />
+          </h1>
+          <p className="text-sm text-gray-500 mt-0.5">
+            {view === "Admin Users" ? "Manage web application user accounts and access." : "View registered farmers in the system."}
+          </p>
         </div>
+        {view === "Admin Users" && (
+          <button
+            onClick={() => setModal({})}
+            className="flex items-center gap-2 px-4 py-2.5 bg-[#1a5c2a] text-white text-sm font-semibold rounded-lg hover:bg-[#134520] transition-colors"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+            </svg>
+            Add User
+          </button>
+        )}
+      </div>
 
+      {/* Search */}
+      <div className="relative w-full max-w-sm">
+        <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
+        <input
+          type="text"
+          placeholder={`Search ${view.toLowerCase()}…`}
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="w-full pl-9 pr-4 py-2 text-sm border border-gray-200 rounded-lg outline-none focus:border-[#1a5c2a] bg-white"
+        />
+      </div>
+
+      {/* Error state */}
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-sm text-red-700 flex items-center gap-2">
+          <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          {error} — <button onClick={fetchData} className="underline font-semibold">Retry</button>
+        </div>
+      )}
+
+      {/* Table */}
+      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
         <div className="overflow-x-auto">
-          {isFarmers ? (
-            <table className="w-auto min-w-full text-left text-sm">
+          {view === "Admin Users" ? (
+            <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-gray-100">
-                  <th className="px-4 py-3 text-xs font-semibold text-gray-700 w-1/3">Name</th>
-                  <th className="px-4 py-3 text-xs font-semibold text-gray-700 w-1/4">District</th>
-                  <th className="px-4 py-3 text-xs font-semibold text-gray-700">Association</th>
-                  <th className="px-4 py-3 text-xs font-semibold text-gray-700">Status</th>
-                  <th className="px-4 py-3 text-xs font-semibold text-gray-700"></th>
+                <tr className="border-b border-gray-100 bg-gray-50">
+                  {["Name", "Email", "Role", "Assigned IPC", "Status", "Created", "Actions"].map((h) => (
+                    <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">{h}</th>
+                  ))}
                 </tr>
               </thead>
               <tbody>
-                {filteredFarmers.length === 0 ? (
-                  <tr><td colSpan={5} className="px-4 py-10 text-center text-sm text-gray-400">No farmers found.</td></tr>
-                ) : filteredFarmers.map((f) => (
-                  <tr key={f.id} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
-                    <td className="px-4 py-3.5">
-                      <div className="flex items-center gap-2.5">
-                        <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0 border border-gray-200">
-                          <span className="text-xs font-bold text-gray-400">
-                            {f.fullName.split(" ").map((n) => n[0]).slice(0, 2).join("")}
-                          </span>
-                        </div>
-                        <span className="text-sm font-medium text-gray-700">{f.fullName}</span>
-                      </div>
-                    </td>
-                    <td className="px-4 py-3.5 text-xs text-gray-500">{f.district}</td>
-                    <td className="px-4 py-3.5 text-xs text-gray-500 max-w-[180px] truncate" title={f.association}>
-                      {f.association}
-                    </td>
-                    <td className="px-4 py-3.5">
-                      <StatusBadge status={f.status} />
-                    </td>
-                    <td className="px-4 py-3.5 relative">
-                      <button
-                        onClick={() => setOpenMenu(openMenu === `f-${f.id}` ? null : `f-${f.id}`)}
-                        className="p-1 rounded hover:bg-gray-100 text-gray-500 transition-colors"
-                      >
-                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                          <circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/>
-                        </svg>
-                      </button>
-                      {openMenu === `f-${f.id}` && (
-                        <div className="absolute right-4 top-10 z-20 bg-white border border-gray-100 rounded-lg shadow-lg w-36 overflow-hidden">
-                          <button className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors" onClick={() => setOpenMenu(null)}>View Details</button>
-                        </div>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          ) : (
-            <table className="w-auto min-w-full text-left text-sm">
-              <thead>
-                <tr className="border-b border-gray-100">
-                  <th className="px-4 py-3 text-xs font-semibold text-gray-700 w-1/3">Name</th>
-                  <th className="px-4 py-3 text-xs font-semibold text-gray-700">Role</th>
-                  <th className="px-4 py-3 text-xs font-semibold text-gray-700">Assigned IPC</th>
-                  <th className="px-4 py-3 text-xs font-semibold text-gray-700">Status</th>
-                  <th className="px-4 py-3 text-xs font-semibold text-gray-700"></th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredUsers.length === 0 ? (
-                  <tr><td colSpan={5} className="px-4 py-10 text-center text-sm text-gray-400">No users found.</td></tr>
-                ) : filteredUsers.map((u) => (
-                  <tr key={u.id} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
-                    <td className="px-4 py-3.5">
-                      <div className="flex items-center gap-2.5">
-                        <div className="w-8 h-8 rounded-full bg-[#e8f1ea] flex items-center justify-center flex-shrink-0 border border-[#c6dbc9]">
-                          <span className="text-xs font-bold text-[#1a5c2a]">
-                            {u.name.split(" ").map((n) => n[0]).slice(0, 2).join("")}
-                          </span>
-                        </div>
-                        <div>
-                          <p className="text-sm font-medium text-gray-800">{u.name}</p>
-                          <p className="text-xs text-gray-400">{u.email}</p>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-4 py-3.5 text-xs text-gray-500">{u.role}</td>
-                    <td className="px-4 py-3.5 text-xs text-gray-500">
-                      {u.assignedIPC || <span className="text-gray-300">—</span>}
-                    </td>
-                    <td className="px-4 py-3.5">
-                      <StatusBadge status={u.status} />
-                    </td>
-                    <td className="px-4 py-3.5 relative">
-                      <button
-                        onClick={() => setOpenMenu(openMenu === `u-${u.id}` ? null : `u-${u.id}`)}
-                        className="p-1 rounded hover:bg-gray-100 text-gray-500 transition-colors"
-                      >
-                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                          <circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/>
-                        </svg>
-                      </button>
-                      {openMenu === `u-${u.id}` && (
-                        <div className="absolute right-4 top-10 z-20 bg-white border border-gray-100 rounded-lg shadow-lg w-40 overflow-hidden">
+                {loading ? (
+                  Array.from({ length: 5 }).map((_, i) => <SkeletonRow key={i} cols={7} />)
+                ) : filteredUsers.length === 0 ? (
+                  <EmptyState message={search ? "No users match your search." : "No users found. Connect a backend to load user data."} />
+                ) : (
+                  filteredUsers.map((u) => (
+                    <tr key={u.id} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
+                      <td className="px-4 py-3 font-semibold text-gray-900">{u.name}</td>
+                      <td className="px-4 py-3 text-gray-600">{u.email}</td>
+                      <td className="px-4 py-3 text-gray-600">{u.role}</td>
+                      <td className="px-4 py-3 text-gray-500">{u.assignedIPC || "—"}</td>
+                      <td className="px-4 py-3">
+                        <span className={`inline-flex items-center gap-1.5 text-xs font-semibold ${u.status === "Active" ? "text-[#1a5c2a]" : "text-gray-400"}`}>
+                          <span className={`w-1.5 h-1.5 rounded-full ${u.status === "Active" ? "bg-[#1a5c2a]" : "bg-gray-300"}`} />
+                          {u.status}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-gray-500">{u.createdAt?.split("T")[0] ?? "—"}</td>
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-2">
                           <button
-                            onClick={() => { setModal({ mode: "edit", user: u }); setOpenMenu(null); }}
-                            className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                            onClick={() => setModal({ user: u })}
+                            className="text-xs font-semibold text-gray-600 hover:text-gray-900 transition-colors"
                           >
                             Edit
                           </button>
-                          {u.id !== "usr-001" && (
-                            <button
-                              onClick={() => handleDeactivateUser(u.id)}
-                              className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                            >
-                              {u.status === "Active" ? "Deactivate" : "Activate"}
-                            </button>
-                          )}
+                          <button
+                            onClick={() => handleToggleStatus(u.id)}
+                            className={`text-xs font-semibold ${u.status === "Active" ? "text-red-500 hover:text-red-700" : "text-[#1a5c2a] hover:text-[#134520]"} transition-colors`}
+                          >
+                            {u.status === "Active" ? "Deactivate" : "Activate"}
+                          </button>
                         </div>
-                      )}
-                    </td>
-                  </tr>
-                ))}
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          ) : (
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-gray-100 bg-gray-50">
+                  {["Farmer ID", "Name", "Gender", "District", "Association", "Status"].map((h) => (
+                    <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {loading ? (
+                  Array.from({ length: 5 }).map((_, i) => <SkeletonRow key={i} cols={6} />)
+                ) : filteredFarmers.length === 0 ? (
+                  <EmptyState message={search ? "No farmers match your search." : "No farmer records found. Connect a backend to load farmer data."} />
+                ) : (
+                  filteredFarmers.map((f) => (
+                    <tr key={f.id} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
+                      <td className="px-4 py-3 font-mono text-xs text-gray-600">{f.id}</td>
+                      <td className="px-4 py-3 font-semibold text-gray-900">{f.fullName}</td>
+                      <td className="px-4 py-3 text-gray-600">{f.gender}</td>
+                      <td className="px-4 py-3 text-gray-600">{f.district}</td>
+                      <td className="px-4 py-3 text-gray-500">{f.association || "—"}</td>
+                      <td className="px-4 py-3">
+                        <span className={`inline-flex items-center gap-1.5 text-xs font-semibold ${f.status === "Active" ? "text-[#1a5c2a]" : "text-gray-400"}`}>
+                          <span className={`w-1.5 h-1.5 rounded-full ${f.status === "Active" ? "bg-[#1a5c2a]" : "bg-gray-300"}`} />
+                          {f.status}
+                        </span>
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           )}
-        </div>
-
-        {/* Footer count */}
-        <div className="px-5 py-3 border-t border-gray-50 text-xs text-gray-400">
-          {isFarmers
-            ? `Showing ${filteredFarmers.length} of ${SEED_FARMERS.length} farmers`
-            : `Showing ${filteredUsers.length} of ${users.length} users`}
         </div>
       </div>
     </div>

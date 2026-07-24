@@ -1,7 +1,7 @@
 "use client";
 
-import { createContext, useContext, useState, useEffect } from "react";
-import { mockUsers } from "./mockUsers";
+import { createContext, useContext, useState, useEffect, useCallback } from "react";
+import { authService } from "@/lib/api/auth";
 
 const AuthContext = createContext();
 
@@ -9,54 +9,61 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // Re-hydrate session from the server on mount (reads the httpOnly cookie via /me).
   useEffect(() => {
-    const loadUser = () => {
-      const storedUser = localStorage.getItem("nasfam_user");
-      if (storedUser) {
-        setUser(JSON.parse(storedUser));
-      }
-      setLoading(false);
-    };
-    loadUser();
+    authService
+      .me()
+      .then(({ user }) => setUser(user))
+      .catch(() => setUser(null))
+      .finally(() => setLoading(false));
   }, []);
 
-  const login = (email, password) => {
-    const foundUser = mockUsers.find(
-      (u) => u.email === email && u.password === password
-    );
-    if (foundUser) {
-      const { password: _password, ...userWithoutPassword } = foundUser;
-      const authenticatedUser = { ...userWithoutPassword, authenticated: true };
-      setUser(authenticatedUser);
-      localStorage.setItem("nasfam_user", JSON.stringify(authenticatedUser));
-      return { success: true, user: authenticatedUser };
+  /**
+   * Login — credentials are sent to /api/v1/auth/login.
+   * Returns { success, user?, error? }
+   */
+  const login = useCallback(async (email, password) => {
+    try {
+      const { user } = await authService.login(email, password);
+      setUser(user);
+      return { success: true, user };
+    } catch (err) {
+      return {
+        success: false,
+        error:
+          err.status === 503
+            ? err.data?.hint ?? "Authentication backend is not configured. Contact your system administrator."
+            : err.message ?? "Invalid email or password.",
+      };
     }
-    return { success: false, error: "Invalid email or password" };
-  };
+  }, []);
 
-  const logout = () => {
-    setUser(null);
-    localStorage.removeItem("nasfam_user");
-  };
+  /**
+   * Logout — clears the httpOnly cookie via /api/v1/auth/logout.
+   */
+  const logout = useCallback(async () => {
+    try {
+      await authService.logout();
+    } finally {
+      setUser(null);
+    }
+  }, []);
 
-  const updateUser = (updates) => {
-    setUser((currentUser) => {
-      const nextUser = { ...(currentUser || {}), ...updates };
-      localStorage.setItem("nasfam_user", JSON.stringify(nextUser));
-
-      if (updates.password) {
-        const persistedUser = mockUsers.find((entry) => entry.id === nextUser.id || entry.email === nextUser.email);
-        if (persistedUser) {
-          persistedUser.password = updates.password;
-        }
-      }
-
-      return nextUser;
-    });
-  };
+  /**
+   * Change password via /api/v1/auth/change-password.
+   * Returns { success, error? }
+   */
+  const changePassword = useCallback(async (currentPassword, newPassword) => {
+    try {
+      await authService.changePassword(currentPassword, newPassword);
+      return { success: true };
+    } catch (err) {
+      return { success: false, error: err.message ?? "Password change failed." };
+    }
+  }, []);
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, updateUser, loading }}>
+    <AuthContext.Provider value={{ user, login, logout, changePassword, loading }}>
       {children}
     </AuthContext.Provider>
   );
